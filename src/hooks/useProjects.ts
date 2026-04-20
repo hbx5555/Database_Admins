@@ -101,13 +101,12 @@ export function useProjects(): UseProjectsReturn {
   }, [sourceRows])
 
   const removeRow = useCallback(async (id: string) => {
-    // sourceRows captured at call time to snapshot `previous` for rollback — same pattern as editRow.
-    const previous = sourceRows.find(r => r.id === id)
+    const snapshot = sourceRows
     setSourceRows(prev => prev.filter(r => r.id !== id))
     try {
       await deleteProject(id)
     } catch (e) {
-      if (previous) setSourceRows(prev => [previous, ...prev])
+      setSourceRows(snapshot)
       setError(e instanceof Error ? e.message : 'Failed to delete project')
     }
   }, [sourceRows])
