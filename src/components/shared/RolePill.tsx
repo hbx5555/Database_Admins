@@ -6,7 +6,7 @@ interface RolePillProps {
 }
 
 export function RolePill({ status }: RolePillProps) {
-  if (!status) return <span style={{ color: 'var(--foreground-secondary)', fontSize: 13 }}>—</span>
+  if (!status) return <span style={{ color: 'var(--foreground-secondary)', fontSize: 'var(--font-size-sm)' }}>—</span>
   const { bg, text } = STATUS_COLORS[status]
   return (
     <span style={{

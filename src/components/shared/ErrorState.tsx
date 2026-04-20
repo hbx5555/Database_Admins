@@ -16,7 +16,7 @@ export function ErrorState({ message, onRetry }: ErrorStateProps) {
       fontFamily: 'var(--font-body)',
       fontSize: 13,
     }}>
-      <span className="material-symbols-outlined" style={{ fontSize: 24, color: '#dc3545' }}>error</span>
+      <span className="material-symbols-outlined" style={{ fontSize: 24, color: 'var(--color-error)' }}>error</span>
       <span>{message}</span>
       <button
         onClick={onRetry}

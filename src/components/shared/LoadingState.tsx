@@ -14,7 +14,6 @@ export function LoadingState() {
         progress_activity
       </span>
       Loading projects…
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   )
 }
