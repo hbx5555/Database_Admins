@@ -189,6 +189,7 @@ export function ProjectsGrid({ rows, onRowChange }: ProjectsGridProps) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-end',
+            width: '100%',
             height: '100%',
             fontFamily: 'var(--font-captions)',
             fontSize: 13,
