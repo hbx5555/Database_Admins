@@ -20,17 +20,17 @@ Build a React + TypeScript frontend for non-technical customers to manage CRM da
 
 Focus on one table only: **`projects`**. Ignore multi-table navigation icons and routing — those come in a later stage.
 
-### Visible columns (from design screenshot)
+### Actual `projects` table columns (Supabase)
 
-| Column         | Width  | Notes                        |
-|----------------|--------|------------------------------|
-| Checkbox       | 48px   | Row selection                |
-| Project Name   | 200px  | Primary field, foreground-primary color |
-| First Name     | 120px  | Contact first name           |
-| Role           | 120px  | Single-select pill           |
-| Email          | 200px  | Clickable mailto             |
-| Phone          | 150px  | Display only                 |
-| WhatsApp Thread| fill   | Clickable link, accent-secondary color |
+| DB Column             | Label          | Width  | Notes                                      |
+|-----------------------|----------------|--------|--------------------------------------------|
+| (checkbox)            | —              | 48px   | Row selection                              |
+| `project_name`        | Project Name   | 200px  | Primary field, foreground-primary color    |
+| `project_topic`       | Topic          | 160px  | Free text                                  |
+| `project_status`      | Status         | 120px  | Enum pill: New / Started / Done            |
+| `project_start_date`  | Start Date     | 120px  | ISO date string                            |
+| `project_delivery_date` | Delivery Date | 130px | ISO date string                            |
+| `project_budget`      | Budget         | 110px  | Numeric, right-aligned                     |
 
 ---
 
