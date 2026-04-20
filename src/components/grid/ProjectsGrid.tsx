@@ -86,14 +86,68 @@ export function ProjectsGrid({ rows, onRowChange }: ProjectsGridProps) {
       }),
     },
     {
-      ...(keyColumn('project_start_date', textColumn) as unknown as ProjectColumn),
       title: COLUMN_LABELS.project_start_date,
       minWidth: 120,
+      keepFocus: true,
+      component: ({ rowData, setRowData, focus }) => {
+        if (focus) {
+          return (
+            <input
+              autoFocus
+              type="date"
+              value={rowData.project_start_date ?? ''}
+              onChange={e => setRowData({ ...rowData, project_start_date: e.target.value || null })}
+              style={{
+                width: '100%', height: '100%', border: 'none', outline: 'none',
+                background: 'transparent', fontFamily: 'var(--font-body)',
+                fontSize: 13, color: 'var(--foreground-primary)', padding: '0 8px',
+                cursor: 'pointer',
+              }}
+            />
+          )
+        }
+        return (
+          <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%',
+            fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--foreground-secondary)' }}>
+            {rowData.project_start_date ?? '—'}
+          </div>
+        )
+      },
+      deleteValue: ({ rowData }) => ({ ...rowData, project_start_date: null }),
+      copyValue: ({ rowData }) => rowData.project_start_date ?? '',
+      pasteValue: ({ rowData, value }) => ({ ...rowData, project_start_date: value || null }),
     },
     {
-      ...(keyColumn('project_delivery_date', textColumn) as unknown as ProjectColumn),
       title: COLUMN_LABELS.project_delivery_date,
       minWidth: 130,
+      keepFocus: true,
+      component: ({ rowData, setRowData, focus }) => {
+        if (focus) {
+          return (
+            <input
+              autoFocus
+              type="date"
+              value={rowData.project_delivery_date ?? ''}
+              onChange={e => setRowData({ ...rowData, project_delivery_date: e.target.value || null })}
+              style={{
+                width: '100%', height: '100%', border: 'none', outline: 'none',
+                background: 'transparent', fontFamily: 'var(--font-body)',
+                fontSize: 13, color: 'var(--foreground-primary)', padding: '0 8px',
+                cursor: 'pointer',
+              }}
+            />
+          )
+        }
+        return (
+          <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%',
+            fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--foreground-secondary)' }}>
+            {rowData.project_delivery_date ?? '—'}
+          </div>
+        )
+      },
+      deleteValue: ({ rowData }) => ({ ...rowData, project_delivery_date: null }),
+      copyValue: ({ rowData }) => rowData.project_delivery_date ?? '',
+      pasteValue: ({ rowData, value }) => ({ ...rowData, project_delivery_date: value || null }),
     },
     {
       title: COLUMN_LABELS.project_budget,
