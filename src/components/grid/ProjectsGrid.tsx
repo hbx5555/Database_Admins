@@ -1,6 +1,6 @@
 import { DataSheetGrid, textColumn, keyColumn } from 'react-datasheet-grid'
 import type { Column } from 'react-datasheet-grid'
-import type { Project, ProjectUpdate, ProjectStatus } from '../../types/project'
+import type { Project, ProjectUpdate } from '../../types/project'
 import { COLUMN_LABELS } from '../../types/project'
 import { RolePill } from '../shared/RolePill'
 
@@ -39,7 +39,7 @@ export function ProjectsGrid({ rows, onRowChange }: ProjectsGridProps) {
       minWidth: 120,
       component: ({ rowData }) => (
         <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%' }}>
-          <RolePill status={rowData.project_status as ProjectStatus | null} />
+          <RolePill status={rowData.project_status} />
         </div>
       ),
       disableKeys: true,
@@ -83,7 +83,7 @@ export function ProjectsGrid({ rows, onRowChange }: ProjectsGridProps) {
       if (op.type !== 'UPDATE') continue
       for (let i = op.fromRowIndex; i < op.toRowIndex; i++) {
         const updated = newRows[i]
-        const original = rows[i]
+        const original = rows.find(r => r.id === updated.id)
         if (!original) continue
         const changes: ProjectUpdate = {}
         if (updated.project_name !== original.project_name) changes.project_name = updated.project_name
@@ -101,7 +101,7 @@ export function ProjectsGrid({ rows, onRowChange }: ProjectsGridProps) {
         .dsg-container { font-family: var(--font-body); font-size: 13px; border: none !important; }
         .dsg-header-cell { background: var(--surface-primary) !important; font-size: 12px; font-weight: 600; color: var(--foreground-primary); font-family: var(--font-body); }
         .dsg-row:hover .dsg-cell { background: var(--row-hover) !important; }
-        .dsg-cell[class*="disabled"] { background: var(--surface-primary) !important; cursor: default; }
+        .dsg-cell-disabled { background: var(--surface-primary) !important; cursor: default; }
       `}</style>
       <DataSheetGrid<Project>
         value={rows}
