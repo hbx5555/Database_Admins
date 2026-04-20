@@ -16,7 +16,7 @@ export function SubItemsPanel({ totalCount, onAddItem }: SubItemsPanelProps) {
     <div style={{
       width: 200,
       minHeight: '100vh',
-      background: 'var(--surface-primary)',
+      background: 'var(--surface-panel)',
       borderRight: '1px solid var(--border-color)',
       display: 'flex',
       flexDirection: 'column',
@@ -32,12 +32,12 @@ export function SubItemsPanel({ totalCount, onAddItem }: SubItemsPanelProps) {
         </div>
       </div>
 
-      <div style={{ padding: '4px 16px 8px' }}>
+      <div style={{ padding: '4px 8px 8px' }}>
         <button
           onClick={onAddItem}
           aria-label="Add new item"
           style={{
-            width: 175,
+            width: '100%',
             height: 34,
             borderRadius: 'var(--radius-round)',
             background: 'var(--accent-primary)',
