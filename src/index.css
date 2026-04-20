@@ -1,0 +1,44 @@
+:root {
+  --surface-primary: #F5F3EE;
+  --surface-secondary: #C8DBBC;
+  --white: #FFFFFF;
+  --row-hover: #EBE9E3;
+
+  --foreground-primary: #1B3A28;
+  --foreground-secondary: #4A6B52;
+  --foreground-inverse: #FFFFFF;
+
+  --accent-primary: #2D5E3A;
+  --accent-secondary: #4A8C5E;
+
+  --border-color: #D4D2CC;
+
+  --font-headings: 'Funnel Sans', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-captions: 'Geist', sans-serif;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 12px;
+  --radius-round: 16px;
+  --radius-pill: 999px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--foreground-primary);
+  background: var(--surface-primary);
+  min-width: 1044px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.material-symbols-outlined {
+  font-size: 20px;
+  user-select: none;
+}
