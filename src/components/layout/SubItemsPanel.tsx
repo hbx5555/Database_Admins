@@ -16,7 +16,7 @@ export function SubItemsPanel({ totalCount, onAddItem }: SubItemsPanelProps) {
     <div style={{
       width: 200,
       minHeight: '100vh',
-      background: '#fffbf1',
+      background: 'var(--surface-primary)',
       borderRight: '1px solid var(--border-color)',
       display: 'flex',
       flexDirection: 'column',
@@ -35,6 +35,7 @@ export function SubItemsPanel({ totalCount, onAddItem }: SubItemsPanelProps) {
       <div style={{ padding: '4px 16px 8px' }}>
         <button
           onClick={onAddItem}
+          aria-label="Add new item"
           style={{
             width: 175,
             height: 34,
@@ -62,6 +63,8 @@ export function SubItemsPanel({ totalCount, onAddItem }: SubItemsPanelProps) {
         {FILTER_VIEWS.map(view => (
           <button
             key={view.label}
+            aria-label={view.label}
+            aria-current={view.active ? 'true' : undefined}
             style={{
               display: 'flex',
               alignItems: 'center',

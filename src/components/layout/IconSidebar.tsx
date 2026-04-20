@@ -1,8 +1,8 @@
 const NAV_ICONS = [
   { name: 'task_alt', label: 'Tasks', active: false },
   { name: 'folder', label: 'Projects', active: true },
-  { name: 'leaderboard', label: 'Leads', active: false },
   { name: 'person', label: 'Contacts', active: false },
+  { name: 'leaderboard', label: 'Leads', active: false },
   { name: 'label', label: 'Statuses', active: false },
 ]
 
@@ -60,16 +60,15 @@ export function IconSidebar() {
         >
           <span className="material-symbols-outlined" style={{ color: 'rgba(255,255,255,0.6)', fontSize: 24 }}>settings</span>
         </button>
-        <div
-          role="button"
+        <button
           aria-label="User profile"
-          tabIndex={0}
           style={{
             width: 32,
             height: 32,
             borderRadius: 'var(--radius-round)',
             background: 'var(--accent-secondary)',
             color: 'white',
+            border: 'none',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -80,7 +79,7 @@ export function IconSidebar() {
           }}
         >
           HD
-        </div>
+        </button>
       </div>
     </div>
   )
