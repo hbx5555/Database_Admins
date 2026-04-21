@@ -25,6 +25,7 @@ const ResizeHandle = memo(function ResizeHandle({ columnKey, onStartResize, curr
   return (
     <div
       onMouseDown={e => {
+        e.preventDefault()
         e.stopPropagation()
         onStartResize(columnKey, e.clientX, currentWidth)
       }}
