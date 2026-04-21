@@ -1,4 +1,4 @@
-import { useCallback, useMemo, memo } from 'react'
+import { useCallback, useMemo, memo, useRef } from 'react'
 import { DataSheetGrid, textColumn, keyColumn } from 'react-datasheet-grid'
 import type { Column } from 'react-datasheet-grid'
 import type { Project, ProjectUpdate, ProjectStatus } from '../../types/project'
@@ -17,17 +17,31 @@ type Operation = {
 
 interface ResizeHandleProps {
   columnKey: string
-  onStartResize: (key: string, startX: number, startWidth: number) => void
+  onUpdateWidth: (key: string, width: number) => void
+  onPersistWidths: () => void
   currentWidth: number
 }
 
-const ResizeHandle = memo(function ResizeHandle({ columnKey, onStartResize, currentWidth }: ResizeHandleProps) {
+const ResizeHandle = memo(function ResizeHandle({ columnKey, onUpdateWidth, onPersistWidths, currentWidth }: ResizeHandleProps) {
+  // dragRef captures the start position; useRef persists it across re-renders during drag
+  const dragRef = useRef<{ startX: number; startWidth: number } | null>(null)
+
   return (
     <div
-      onMouseDown={e => {
+      onPointerDown={e => {
         e.preventDefault()
         e.stopPropagation()
-        onStartResize(columnKey, e.clientX, currentWidth)
+        dragRef.current = { startX: e.clientX, startWidth: currentWidth }
+        // Pointer capture routes all subsequent pointer events here even outside the element
+        e.currentTarget.setPointerCapture(e.pointerId)
+      }}
+      onPointerMove={e => {
+        if (!dragRef.current) return
+        onUpdateWidth(columnKey, dragRef.current.startWidth + (e.clientX - dragRef.current.startX))
+      }}
+      onPointerUp={() => {
+        dragRef.current = null
+        onPersistWidths()
       }}
       style={{
         position: 'absolute',
@@ -38,6 +52,7 @@ const ResizeHandle = memo(function ResizeHandle({ columnKey, onStartResize, curr
         cursor: 'col-resize',
         background: 'transparent',
         zIndex: 1,
+        touchAction: 'none',
       }}
       onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'var(--border-color)' }}
       onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
@@ -55,16 +70,16 @@ interface ProjectsGridProps {
 type ProjectColumn = Partial<Column<Project, unknown, string>>
 
 export function ProjectsGrid({ rows, onRowChange }: ProjectsGridProps) {
-  const { columnWidths, startResize } = useColumnResize()
+  const { columnWidths, updateWidth, persistWidths } = useColumnResize()
 
   const colTitle = useCallback((key: string, label: string) => (
     <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%', height: '100%' }}>
       <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingLeft: 10, paddingRight: 8 }}>
         {label}
       </span>
-      <ResizeHandle columnKey={key} onStartResize={startResize} currentWidth={columnWidths[key]} />
+      <ResizeHandle columnKey={key} onUpdateWidth={updateWidth} onPersistWidths={persistWidths} currentWidth={columnWidths[key]} />
     </div>
-  ), [columnWidths, startResize])
+  ), [columnWidths, updateWidth, persistWidths])
 
   // keyColumn infers T[K] as string|null for nullable fields, which conflicts
   // with textColumn's string-only CellComponent. Double-cast via unknown.

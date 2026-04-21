@@ -1,10 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useColumnResize, DEFAULT_COLUMN_WIDTHS, LS_KEY } from '../src/hooks/useColumnResize'
 
 beforeEach(() => {
   localStorage.clear()
-  vi.restoreAllMocks()
 })
 
 describe('useColumnResize — initialization', () => {
@@ -27,58 +26,41 @@ describe('useColumnResize — initialization', () => {
   })
 })
 
-describe('useColumnResize — drag', () => {
-  it('clamps width to 60px minimum during drag', () => {
+describe('useColumnResize — updateWidth', () => {
+  it('clamps width to 60px minimum', () => {
     const { result } = renderHook(() => useColumnResize())
-
-    act(() => {
-      result.current.startResize('project_name', 500, 200)
-    })
-
-    act(() => {
-      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 200 }))
-    })
-
+    act(() => { result.current.updateWidth('project_name', 30) })
     expect(result.current.columnWidths.project_name).toBe(60)
   })
 
-  it('increases width when dragged right', () => {
+  it('updates width to the provided value when above minimum', () => {
     const { result } = renderHook(() => useColumnResize())
-
-    act(() => {
-      result.current.startResize('project_name', 500, 200)
-    })
-
-    act(() => {
-      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 550 }))
-    })
-
+    act(() => { result.current.updateWidth('project_name', 250) })
     expect(result.current.columnWidths.project_name).toBe(250)
   })
 
-  it('persists widths to localStorage on mouseup', () => {
+  it('does not affect other column widths', () => {
     const { result } = renderHook(() => useColumnResize())
+    act(() => { result.current.updateWidth('project_name', 250) })
+    expect(result.current.columnWidths.project_topic).toBe(DEFAULT_COLUMN_WIDTHS.project_topic)
+  })
+})
 
-    act(() => {
-      result.current.startResize('project_name', 500, 200)
-    })
-    act(() => {
-      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 560 }))
-    })
-    act(() => {
-      window.dispatchEvent(new MouseEvent('mouseup'))
-    })
-
+describe('useColumnResize — persistWidths', () => {
+  it('saves current widths to localStorage', () => {
+    const { result } = renderHook(() => useColumnResize())
+    act(() => { result.current.updateWidth('project_name', 260) })
+    act(() => { result.current.persistWidths() })
     const stored = JSON.parse(localStorage.getItem(LS_KEY)!)
     expect(stored.project_name).toBe(260)
   })
 
-  it('removes window listeners on unmount during drag', () => {
-    const removeSpy = vi.spyOn(window, 'removeEventListener')
-    const { result, unmount } = renderHook(() => useColumnResize())
-    act(() => { result.current.startResize('project_name', 500, 200) })
-    unmount()
-    expect(removeSpy).toHaveBeenCalledWith('mousemove', expect.any(Function))
-    expect(removeSpy).toHaveBeenCalledWith('mouseup', expect.any(Function))
+  it('persists all column widths, not just the changed one', () => {
+    const { result } = renderHook(() => useColumnResize())
+    act(() => { result.current.updateWidth('project_name', 260) })
+    act(() => { result.current.persistWidths() })
+    const stored = JSON.parse(localStorage.getItem(LS_KEY)!)
+    expect(stored.project_topic).toBe(DEFAULT_COLUMN_WIDTHS.project_topic)
+    expect(stored.project_status).toBe(DEFAULT_COLUMN_WIDTHS.project_status)
   })
 })
