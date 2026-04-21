@@ -58,7 +58,7 @@ export function ProjectsGrid({ rows, onRowChange }: ProjectsGridProps) {
 
   const colTitle = useCallback((key: string, label: string) => (
     <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%', height: '100%' }}>
-      <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: 8 }}>
+      <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingLeft: 10, paddingRight: 8 }}>
         {label}
       </span>
       <ResizeHandle columnKey={key} onStartResize={startResize} currentWidth={columnWidths[key]} />
@@ -273,7 +273,8 @@ export function ProjectsGrid({ rows, onRowChange }: ProjectsGridProps) {
     <div style={{ flex: 1, overflow: 'auto' }}>
       <style>{`
         .dsg-container { font-family: var(--font-body); font-size: 13px; border: none !important; }
-        .dsg-header-cell { background: var(--surface-primary) !important; font-size: 12px; font-weight: 600; color: var(--foreground-primary); font-family: var(--font-body); }
+        .dsg-cell-header { background: var(--surface-primary) !important; font-size: 12px; font-weight: 600; color: var(--foreground-primary); font-family: var(--font-body); }
+        .dsg-cell-header-container { width: 100%; height: 100%; padding: 0; display: flex; align-items: center; line-height: normal; overflow: visible; }
         .dsg-row:hover .dsg-cell { background: var(--row-hover) !important; }
       `}</style>
       <DataSheetGrid<Project>
