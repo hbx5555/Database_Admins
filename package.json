@@ -8,8 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test": "NODE_OPTIONS='--localstorage-file=/tmp/vitest-ls.json' vitest",
+    "test:ui": "NODE_OPTIONS='--localstorage-file=/tmp/vitest-ls.json' vitest --ui"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.104.0",
