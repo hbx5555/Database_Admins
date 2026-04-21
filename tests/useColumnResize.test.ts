@@ -1,8 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
-import { useColumnResize, DEFAULT_COLUMN_WIDTHS } from '../src/hooks/useColumnResize'
-
-const LS_KEY = 'db-admins-column-widths'
+import { useColumnResize, DEFAULT_COLUMN_WIDTHS, LS_KEY } from '../src/hooks/useColumnResize'
 
 beforeEach(() => {
   localStorage.clear()
@@ -73,5 +71,14 @@ describe('useColumnResize — drag', () => {
 
     const stored = JSON.parse(localStorage.getItem(LS_KEY)!)
     expect(stored.project_name).toBe(260)
+  })
+
+  it('removes window listeners on unmount during drag', () => {
+    const removeSpy = vi.spyOn(window, 'removeEventListener')
+    const { result, unmount } = renderHook(() => useColumnResize())
+    act(() => { result.current.startResize('project_name', 500, 200) })
+    unmount()
+    expect(removeSpy).toHaveBeenCalledWith('mousemove', expect.any(Function))
+    expect(removeSpy).toHaveBeenCalledWith('mouseup', expect.any(Function))
   })
 })

@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 
-const LS_KEY = 'db-admins-column-widths'
+export const LS_KEY = 'db-admins-column-widths'
 const MIN_WIDTH = 60
 
 export const DEFAULT_COLUMN_WIDTHS: Record<string, number> = {
@@ -16,7 +16,14 @@ function loadFromStorage(): Record<string, number> {
   try {
     const raw = localStorage.getItem(LS_KEY)
     if (!raw) return { ...DEFAULT_COLUMN_WIDTHS }
-    return { ...DEFAULT_COLUMN_WIDTHS, ...JSON.parse(raw) }
+    const parsed = JSON.parse(raw)
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+      return { ...DEFAULT_COLUMN_WIDTHS }
+    }
+    const safe = Object.fromEntries(
+      Object.entries(parsed).filter(([, v]) => typeof v === 'number')
+    ) as Record<string, number>
+    return { ...DEFAULT_COLUMN_WIDTHS, ...safe }
   } catch {
     return { ...DEFAULT_COLUMN_WIDTHS }
   }
@@ -31,27 +38,50 @@ export function useColumnResize(): UseColumnResizeReturn {
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>(loadFromStorage)
 
   const dragState = useRef<{ key: string; startX: number; startWidth: number } | null>(null)
+  const listenersRef = useRef<{ move: (e: MouseEvent) => void; up: () => void } | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (listenersRef.current) {
+        window.removeEventListener('mousemove', listenersRef.current.move)
+        window.removeEventListener('mouseup', listenersRef.current.up)
+        listenersRef.current = null
+      }
+    }
+  }, [])
 
   const startResize = useCallback((columnKey: string, startX: number, startWidth: number) => {
+    if (listenersRef.current) {
+      window.removeEventListener('mousemove', listenersRef.current.move)
+      window.removeEventListener('mouseup', listenersRef.current.up)
+      listenersRef.current = null
+    }
+
     dragState.current = { key: columnKey, startX, startWidth }
+    let latestWidths: Record<string, number> | null = null
 
     const onMouseMove = (e: MouseEvent) => {
       if (!dragState.current) return
       const { key, startX: sx, startWidth: sw } = dragState.current
       const newWidth = Math.max(MIN_WIDTH, sw + (e.clientX - sx))
-      setColumnWidths(prev => ({ ...prev, [key]: newWidth }))
+      setColumnWidths(prev => {
+        const next = { ...prev, [key]: newWidth }
+        latestWidths = next
+        return next
+      })
     }
 
     const onMouseUp = () => {
       window.removeEventListener('mousemove', onMouseMove)
       window.removeEventListener('mouseup', onMouseUp)
-      setColumnWidths(prev => {
-        localStorage.setItem(LS_KEY, JSON.stringify(prev))
-        return prev
-      })
+      listenersRef.current = null
       dragState.current = null
+      if (latestWidths) {
+        localStorage.setItem(LS_KEY, JSON.stringify(latestWidths))
+      }
     }
 
+    listenersRef.current = { move: onMouseMove, up: onMouseUp }
     window.addEventListener('mousemove', onMouseMove)
     window.addEventListener('mouseup', onMouseUp)
   }, [])
