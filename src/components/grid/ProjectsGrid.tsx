@@ -3,6 +3,7 @@ import type { Column } from 'react-datasheet-grid'
 import type { Project, ProjectUpdate, ProjectStatus } from '../../types/project'
 import { COLUMN_LABELS } from '../../types/project'
 import { RolePill } from '../shared/RolePill'
+import { useColumnResize } from '../../hooks/useColumnResize'
 
 const STATUS_OPTIONS: ProjectStatus[] = ['New', 'Started', 'Done']
 
@@ -11,6 +12,35 @@ type Operation = {
   type: 'UPDATE' | 'DELETE' | 'CREATE'
   fromRowIndex: number
   toRowIndex: number
+}
+
+interface ResizeHandleProps {
+  columnKey: string
+  onStartResize: (key: string, startX: number, startWidth: number) => void
+  currentWidth: number
+}
+
+function ResizeHandle({ columnKey, onStartResize, currentWidth }: ResizeHandleProps) {
+  return (
+    <div
+      onMouseDown={e => {
+        e.stopPropagation()
+        onStartResize(columnKey, e.clientX, currentWidth)
+      }}
+      style={{
+        position: 'absolute',
+        right: 0,
+        top: 0,
+        width: 4,
+        height: '100%',
+        cursor: 'col-resize',
+        background: 'transparent',
+        zIndex: 1,
+      }}
+      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'var(--border-color)' }}
+      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
+    />
+  )
 }
 
 interface ProjectsGridProps {
@@ -23,22 +53,33 @@ interface ProjectsGridProps {
 type ProjectColumn = Partial<Column<Project, unknown, string>>
 
 export function ProjectsGrid({ rows, onRowChange }: ProjectsGridProps) {
+  const { columnWidths, startResize } = useColumnResize()
+
+  const colTitle = (key: string, label: string) => (
+    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%', height: '100%' }}>
+      <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: 8 }}>
+        {label}
+      </span>
+      <ResizeHandle columnKey={key} onStartResize={startResize} currentWidth={columnWidths[key]} />
+    </div>
+  )
+
   // keyColumn infers T[K] as string|null for nullable fields, which conflicts
   // with textColumn's string-only CellComponent. Double-cast via unknown.
   const columns: ProjectColumn[] = [
     {
       ...(keyColumn('project_name', textColumn) as unknown as ProjectColumn),
-      title: COLUMN_LABELS.project_name,
-      minWidth: 200,
+      title: colTitle('project_name', COLUMN_LABELS.project_name),
+      basis: columnWidths.project_name, grow: 0, shrink: 0, minWidth: 60,
     },
     {
       ...(keyColumn('project_topic', textColumn) as unknown as ProjectColumn),
-      title: COLUMN_LABELS.project_topic,
-      minWidth: 160,
+      title: colTitle('project_topic', COLUMN_LABELS.project_topic),
+      basis: columnWidths.project_topic, grow: 0, shrink: 0, minWidth: 60,
     },
     {
-      title: COLUMN_LABELS.project_status,
-      minWidth: 120,
+      title: colTitle('project_status', COLUMN_LABELS.project_status),
+      basis: columnWidths.project_status, grow: 0, shrink: 0, minWidth: 60,
       // keepFocus prevents the grid from stealing focus when the <select> opens
       keepFocus: true,
       component: ({ rowData, setRowData, focus }) => {
@@ -86,8 +127,8 @@ export function ProjectsGrid({ rows, onRowChange }: ProjectsGridProps) {
       }),
     },
     {
-      title: COLUMN_LABELS.project_start_date,
-      minWidth: 120,
+      title: colTitle('project_start_date', COLUMN_LABELS.project_start_date),
+      basis: columnWidths.project_start_date, grow: 0, shrink: 0, minWidth: 60,
       keepFocus: true,
       component: ({ rowData, setRowData, focus }) => {
         if (focus) {
@@ -118,8 +159,8 @@ export function ProjectsGrid({ rows, onRowChange }: ProjectsGridProps) {
       pasteValue: ({ rowData, value }) => ({ ...rowData, project_start_date: value || null }),
     },
     {
-      title: COLUMN_LABELS.project_delivery_date,
-      minWidth: 130,
+      title: colTitle('project_delivery_date', COLUMN_LABELS.project_delivery_date),
+      basis: columnWidths.project_delivery_date, grow: 0, shrink: 0, minWidth: 60,
       keepFocus: true,
       component: ({ rowData, setRowData, focus }) => {
         if (focus) {
@@ -150,8 +191,8 @@ export function ProjectsGrid({ rows, onRowChange }: ProjectsGridProps) {
       pasteValue: ({ rowData, value }) => ({ ...rowData, project_delivery_date: value || null }),
     },
     {
-      title: COLUMN_LABELS.project_budget,
-      minWidth: 110,
+      title: colTitle('project_budget', COLUMN_LABELS.project_budget),
+      basis: columnWidths.project_budget, grow: 0, shrink: 0, minWidth: 60,
       component: ({ rowData, setRowData, focus }) => {
         if (focus) {
           return (
