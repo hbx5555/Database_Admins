@@ -30,6 +30,8 @@ export default function App() {
     setPage,
     editRow,
     addRow,
+    activeStatusFilter,
+    setStatusFilter,
   } = useProjects()
 
   const handleAddItem = () => {
@@ -41,7 +43,12 @@ export default function App() {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', minWidth: 1044 }}>
       <IconSidebar />
-      <SubItemsPanel totalCount={sourceRows.length} onAddItem={handleAddItem} />
+      <SubItemsPanel
+          totalCount={sourceRows.length}
+          onAddItem={handleAddItem}
+          activeStatusFilter={activeStatusFilter}
+          onStatusChange={setStatusFilter}
+        />
       <MainContent>
         <div style={{
           flex: 1,
