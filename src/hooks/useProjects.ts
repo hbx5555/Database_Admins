@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { fetchProjects, createProject, updateProject, deleteProject } from '../lib/projectsApi'
-import { applyFilters, applySorts, paginateRows } from '../lib/transforms'
-import type { Project, ProjectInsert, ProjectUpdate, ViewConfig, PaginationState } from '../types/project'
+import { applyFilters, applySorts, paginateRows, applyStatusFilter } from '../lib/transforms'
+import type { Project, ProjectInsert, ProjectUpdate, ViewConfig, PaginationState, ProjectStatus } from '../types/project'
 import { DEFAULT_VIEW_CONFIG, DEFAULT_PAGINATION } from '../types/project'
 
 interface UseProjectsReturn {
@@ -15,6 +15,8 @@ interface UseProjectsReturn {
   setSelectedRowId: (id: string | null) => void
   setViewConfig: (config: ViewConfig) => void
   setPage: (page: number) => void
+  activeStatusFilter: ProjectStatus | null
+  setStatusFilter: (status: ProjectStatus | null) => void
   refresh: () => Promise<void>
   addRow: (row: ProjectInsert) => Promise<void>
   editRow: (id: string, changes: ProjectUpdate) => Promise<void>
@@ -28,6 +30,7 @@ export function useProjects(): UseProjectsReturn {
   const [viewConfig, setViewConfig] = useState<ViewConfig>(DEFAULT_VIEW_CONFIG)
   const [pagination, setPagination] = useState<PaginationState>(DEFAULT_PAGINATION)
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null)
+  const [activeStatusFilter, setActiveStatusFilter] = useState<ProjectStatus | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -66,6 +69,11 @@ export function useProjects(): UseProjectsReturn {
 
   const setPage = useCallback((page: number) => {
     setPagination(p => ({ ...p, page }))
+  }, [])
+
+  const setStatusFilter = useCallback((status: ProjectStatus | null) => {
+    setActiveStatusFilter(status)
+    setViewConfig(vc => ({ ...vc, filters: applyStatusFilter(vc.filters, status) }))
   }, [])
 
   const addRow = useCallback(async (row: ProjectInsert) => {
@@ -122,6 +130,8 @@ export function useProjects(): UseProjectsReturn {
     setSelectedRowId,
     setViewConfig,
     setPage,
+    activeStatusFilter,
+    setStatusFilter,
     refresh: load,
     addRow,
     editRow,
