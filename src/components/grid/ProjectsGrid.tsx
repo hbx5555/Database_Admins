@@ -1,10 +1,10 @@
-import { useCallback, useMemo, memo, useRef } from 'react'
+import { useCallback, useMemo, memo, useRef, useState } from 'react'
 import { DataSheetGrid, textColumn, keyColumn } from 'react-datasheet-grid'
 import type { Column } from 'react-datasheet-grid'
 import type { Project, ProjectUpdate, ProjectStatus } from '../../types/project'
 import { COLUMN_LABELS } from '../../types/project'
 import { RolePill } from '../shared/RolePill'
-import { useColumnResize } from '../../hooks/useColumnResize'
+import { useColumnResize, MIN_WIDTH } from '../../hooks/useColumnResize'
 
 const STATUS_OPTIONS: ProjectStatus[] = ['New', 'Started', 'Done']
 
@@ -17,46 +17,71 @@ type Operation = {
 
 interface ResizeHandleProps {
   columnKey: string
-  onUpdateWidth: (key: string, width: number) => void
-  onPersistWidths: () => void
+  onFinalizeWidth: (key: string, width: number) => void
   currentWidth: number
 }
 
-const ResizeHandle = memo(function ResizeHandle({ columnKey, onUpdateWidth, onPersistWidths, currentWidth }: ResizeHandleProps) {
-  // dragRef captures the start position; useRef persists it across re-renders during drag
+const ResizeHandle = memo(function ResizeHandle({ columnKey, onFinalizeWidth, currentWidth }: ResizeHandleProps) {
   const dragRef = useRef<{ startX: number; startWidth: number } | null>(null)
+  // lineRef points to the full-height indicator line — updated via direct DOM to avoid per-pixel re-renders
+  const lineRef = useRef<HTMLDivElement>(null)
 
   return (
-    <div
-      onPointerDown={e => {
-        e.preventDefault()
-        e.stopPropagation()
-        dragRef.current = { startX: e.clientX, startWidth: currentWidth }
-        // Pointer capture routes all subsequent pointer events here even outside the element
-        e.currentTarget.setPointerCapture(e.pointerId)
-      }}
-      onPointerMove={e => {
-        if (!dragRef.current) return
-        onUpdateWidth(columnKey, dragRef.current.startWidth + (e.clientX - dragRef.current.startX))
-      }}
-      onPointerUp={() => {
-        dragRef.current = null
-        onPersistWidths()
-      }}
-      style={{
-        position: 'absolute',
-        right: 0,
-        top: 0,
-        width: 4,
-        height: '100%',
-        cursor: 'col-resize',
-        background: 'transparent',
-        zIndex: 1,
-        touchAction: 'none',
-      }}
-      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'var(--border-color)' }}
-      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
-    />
+    <>
+      <div
+        ref={lineRef}
+        style={{
+          position: 'fixed',
+          display: 'none',
+          top: 0,
+          left: 0,
+          width: 2,
+          height: '100vh',
+          background: 'var(--accent-primary)',
+          pointerEvents: 'none',
+          zIndex: 9999,
+        }}
+      />
+      <div
+        onPointerDown={e => {
+          e.preventDefault()
+          e.stopPropagation()
+          dragRef.current = { startX: e.clientX, startWidth: currentWidth }
+          e.currentTarget.setPointerCapture(e.pointerId)
+          if (lineRef.current) {
+            lineRef.current.style.left = `${e.clientX}px`
+            lineRef.current.style.display = 'block'
+          }
+        }}
+        onPointerMove={e => {
+          if (!dragRef.current || !lineRef.current) return
+          const newWidth = dragRef.current.startWidth + (e.clientX - dragRef.current.startX)
+          if (newWidth >= MIN_WIDTH) {
+            lineRef.current.style.left = `${e.clientX}px`
+          }
+        }}
+        onPointerUp={e => {
+          if (!dragRef.current) return
+          const newWidth = dragRef.current.startWidth + (e.clientX - dragRef.current.startX)
+          dragRef.current = null
+          if (lineRef.current) lineRef.current.style.display = 'none'
+          onFinalizeWidth(columnKey, newWidth)
+        }}
+        style={{
+          position: 'absolute',
+          right: 0,
+          top: 0,
+          width: 4,
+          height: '100%',
+          cursor: 'col-resize',
+          background: 'transparent',
+          zIndex: 1,
+          touchAction: 'none',
+        }}
+        onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'var(--border-color)' }}
+        onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
+      />
+    </>
   )
 })
 
@@ -70,16 +95,24 @@ interface ProjectsGridProps {
 type ProjectColumn = Partial<Column<Project, unknown, string>>
 
 export function ProjectsGrid({ rows, onRowChange }: ProjectsGridProps) {
-  const { columnWidths, updateWidth, persistWidths } = useColumnResize()
+  const { columnWidths, finalizeWidth } = useColumnResize()
+  // Incrementing this forces DataSheetGrid to remount, which reinitialises
+  // TanStack Virtual's measurement cache with the new column basis values.
+  const [resizeVersion, setResizeVersion] = useState(0)
+
+  const handleFinalizeWidth = useCallback((key: string, width: number) => {
+    finalizeWidth(key, width)
+    setResizeVersion(v => v + 1)
+  }, [finalizeWidth])
 
   const colTitle = useCallback((key: string, label: string) => (
     <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%', height: '100%' }}>
       <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingLeft: 10, paddingRight: 8 }}>
         {label}
       </span>
-      <ResizeHandle columnKey={key} onUpdateWidth={updateWidth} onPersistWidths={persistWidths} currentWidth={columnWidths[key]} />
+      <ResizeHandle columnKey={key} onFinalizeWidth={handleFinalizeWidth} currentWidth={columnWidths[key]} />
     </div>
-  ), [columnWidths, updateWidth, persistWidths])
+  ), [columnWidths, handleFinalizeWidth])
 
   // keyColumn infers T[K] as string|null for nullable fields, which conflicts
   // with textColumn's string-only CellComponent. Double-cast via unknown.
@@ -294,6 +327,7 @@ export function ProjectsGrid({ rows, onRowChange }: ProjectsGridProps) {
         .dsg-row:hover .dsg-cell { background: var(--row-hover) !important; }
       `}</style>
       <DataSheetGrid<Project>
+        key={resizeVersion}
         value={rows}
         onChange={handleChange}
         columns={columns}

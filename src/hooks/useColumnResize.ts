@@ -31,24 +31,21 @@ function loadFromStorage(): Record<string, number> {
 
 interface UseColumnResizeReturn {
   columnWidths: Record<string, number>
-  updateWidth: (key: string, width: number) => void
-  persistWidths: () => void
+  finalizeWidth: (key: string, width: number) => void
 }
 
 export function useColumnResize(): UseColumnResizeReturn {
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>(loadFromStorage)
 
-  // Ref tracks latest widths so persistWidths can read them without being a dependency
+  // widthsRef lets finalizeWidth read latest widths synchronously without stale closure
   const widthsRef = useRef(columnWidths)
   useEffect(() => { widthsRef.current = columnWidths }, [columnWidths])
 
-  const updateWidth = useCallback((key: string, width: number) => {
-    setColumnWidths(prev => ({ ...prev, [key]: Math.max(MIN_WIDTH, width) }))
+  const finalizeWidth = useCallback((key: string, width: number) => {
+    const next = { ...widthsRef.current, [key]: Math.max(MIN_WIDTH, width) }
+    localStorage.setItem(LS_KEY, JSON.stringify(next))
+    setColumnWidths(next)
   }, [])
 
-  const persistWidths = useCallback(() => {
-    localStorage.setItem(LS_KEY, JSON.stringify(widthsRef.current))
-  }, [])
-
-  return { columnWidths, updateWidth, persistWidths }
+  return { columnWidths, finalizeWidth }
 }

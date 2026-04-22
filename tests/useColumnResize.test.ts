@@ -26,39 +26,35 @@ describe('useColumnResize — initialization', () => {
   })
 })
 
-describe('useColumnResize — updateWidth', () => {
+describe('useColumnResize — finalizeWidth', () => {
   it('clamps width to 60px minimum', () => {
     const { result } = renderHook(() => useColumnResize())
-    act(() => { result.current.updateWidth('project_name', 30) })
+    act(() => { result.current.finalizeWidth('project_name', 30) })
     expect(result.current.columnWidths.project_name).toBe(60)
   })
 
   it('updates width to the provided value when above minimum', () => {
     const { result } = renderHook(() => useColumnResize())
-    act(() => { result.current.updateWidth('project_name', 250) })
+    act(() => { result.current.finalizeWidth('project_name', 250) })
     expect(result.current.columnWidths.project_name).toBe(250)
   })
 
   it('does not affect other column widths', () => {
     const { result } = renderHook(() => useColumnResize())
-    act(() => { result.current.updateWidth('project_name', 250) })
+    act(() => { result.current.finalizeWidth('project_name', 250) })
     expect(result.current.columnWidths.project_topic).toBe(DEFAULT_COLUMN_WIDTHS.project_topic)
   })
-})
 
-describe('useColumnResize — persistWidths', () => {
-  it('saves current widths to localStorage', () => {
+  it('persists the new width to localStorage immediately', () => {
     const { result } = renderHook(() => useColumnResize())
-    act(() => { result.current.updateWidth('project_name', 260) })
-    act(() => { result.current.persistWidths() })
+    act(() => { result.current.finalizeWidth('project_name', 260) })
     const stored = JSON.parse(localStorage.getItem(LS_KEY)!)
     expect(stored.project_name).toBe(260)
   })
 
   it('persists all column widths, not just the changed one', () => {
     const { result } = renderHook(() => useColumnResize())
-    act(() => { result.current.updateWidth('project_name', 260) })
-    act(() => { result.current.persistWidths() })
+    act(() => { result.current.finalizeWidth('project_name', 260) })
     const stored = JSON.parse(localStorage.getItem(LS_KEY)!)
     expect(stored.project_topic).toBe(DEFAULT_COLUMN_WIDTHS.project_topic)
     expect(stored.project_status).toBe(DEFAULT_COLUMN_WIDTHS.project_status)
