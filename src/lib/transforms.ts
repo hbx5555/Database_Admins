@@ -1,4 +1,4 @@
-import type { Project, FilterSpec, SortSpec } from '../types/project'
+import type { Project, FilterSpec, SortSpec, ProjectStatus } from '../types/project'
 
 export function applyFilters(rows: Project[], filters: FilterSpec[]): Project[] {
   if (filters.length === 0) return rows
@@ -27,4 +27,10 @@ export function applySorts(rows: Project[], sorts: SortSpec[]): Project[] {
 export function paginateRows(rows: Project[], page: number, pageSize: number): Project[] {
   const start = (page - 1) * pageSize
   return rows.slice(start, start + pageSize)
+}
+
+export function applyStatusFilter(filters: FilterSpec[], status: ProjectStatus | null): FilterSpec[] {
+  const without = filters.filter(f => f.field !== 'project_status')
+  if (status === null) return without
+  return [...without, { field: 'project_status', value: status }]
 }

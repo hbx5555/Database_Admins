@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { applyFilters, applySorts, paginateRows } from '../src/lib/transforms'
-import type { Project } from '../src/types/project'
+import { applyFilters, applySorts, paginateRows, applyStatusFilter } from '../src/lib/transforms'
+import type { Project, ProjectStatus } from '../src/types/project'
 
 const makeProject = (overrides: Partial<Project>): Project => ({
   id: 'test-id',
@@ -87,5 +87,44 @@ describe('paginateRows', () => {
     const rows = Array.from({ length: 25 }, (_, i) => makeProject({ id: String(i) }))
     const result = paginateRows(rows, 3, 10)
     expect(result).toHaveLength(5)
+  })
+})
+
+describe('applyStatusFilter', () => {
+  it('returns empty filters when status is null and no existing filters', () => {
+    expect(applyStatusFilter([], null)).toEqual([])
+  })
+
+  it('removes project_status filter when status is null', () => {
+    const filters = [{ field: 'project_status' as keyof Project, value: 'New' }]
+    expect(applyStatusFilter(filters, null)).toEqual([])
+  })
+
+  it('adds project_status filter when status is set', () => {
+    const result = applyStatusFilter([], 'Started')
+    expect(result).toEqual([{ field: 'project_status', value: 'Started' }])
+  })
+
+  it('replaces existing project_status filter when status changes', () => {
+    const filters = [{ field: 'project_status' as keyof Project, value: 'New' }]
+    const result = applyStatusFilter(filters, 'Done')
+    expect(result).toEqual([{ field: 'project_status', value: 'Done' }])
+  })
+
+  it('preserves other filters when adding status filter', () => {
+    const filters = [{ field: 'project_name' as keyof Project, value: 'test' }]
+    const result = applyStatusFilter(filters, 'New')
+    expect(result).toHaveLength(2)
+    expect(result[0]).toEqual({ field: 'project_name', value: 'test' })
+    expect(result[1]).toEqual({ field: 'project_status', value: 'New' })
+  })
+
+  it('preserves other filters when clearing status filter', () => {
+    const filters = [
+      { field: 'project_name' as keyof Project, value: 'test' },
+      { field: 'project_status' as keyof Project, value: 'New' },
+    ]
+    const result = applyStatusFilter(filters, null)
+    expect(result).toEqual([{ field: 'project_name', value: 'test' }])
   })
 })
