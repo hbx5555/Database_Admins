@@ -1,17 +1,33 @@
-const FILTER_VIEWS = [
-  { label: 'All', icon: 'inbox', active: true },
-  { label: 'New', icon: 'send', active: false },
-  { label: 'Urgent', icon: 'drafts', active: false },
-  { label: 'Starred', icon: 'star', active: false },
-  { label: 'Archived', icon: 'archive', active: false },
-]
+import { STATUS_OPTIONS, type ProjectStatus } from '../../types/project'
 
 interface SubItemsPanelProps {
   totalCount: number
   onAddItem: () => void
+  activeStatusFilter: ProjectStatus | null
+  onStatusChange: (status: ProjectStatus | null) => void
 }
 
-export function SubItemsPanel({ totalCount, onAddItem }: SubItemsPanelProps) {
+function filterButtonStyle(active: boolean) {
+  return {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '8px 12px',
+    borderRadius: active ? 'var(--radius-round)' : 'var(--radius-sm)',
+    background: active ? 'var(--surface-secondary)' : 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    color: active ? 'var(--foreground-primary)' : 'var(--foreground-secondary)',
+    fontFamily: 'var(--font-body)',
+    fontSize: 13,
+    fontWeight: active ? 600 : 400,
+    textAlign: 'left' as const,
+    width: '100%',
+  }
+}
+
+export function SubItemsPanel({ totalCount, onAddItem, activeStatusFilter, onStatusChange }: SubItemsPanelProps) {
+  const isAll = activeStatusFilter === null
+
   return (
     <div style={{
       width: 200,
@@ -60,32 +76,29 @@ export function SubItemsPanel({ totalCount, onAddItem }: SubItemsPanelProps) {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '0 8px' }}>
-        {FILTER_VIEWS.map(view => (
-          <button
-            key={view.label}
-            aria-label={view.label}
-            aria-current={view.active ? 'true' : undefined}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '8px 12px',
-              borderRadius: view.active ? 'var(--radius-round)' : 'var(--radius-sm)',
-              background: view.active ? 'var(--surface-secondary)' : 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              color: view.active ? 'var(--foreground-primary)' : 'var(--foreground-secondary)',
-              fontFamily: 'var(--font-body)',
-              fontSize: 13,
-              fontWeight: view.active ? 600 : 400,
-              textAlign: 'left',
-              width: '100%',
-            }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>{view.icon}</span>
-            {view.label}
-          </button>
-        ))}
+        <button
+          aria-label="All"
+          aria-current={isAll ? 'true' : undefined}
+          onClick={() => onStatusChange(null)}
+          style={filterButtonStyle(isAll)}
+        >
+          All
+        </button>
+
+        {STATUS_OPTIONS.map(status => {
+          const active = activeStatusFilter === status
+          return (
+            <button
+              key={status}
+              aria-label={status}
+              aria-current={active ? 'true' : undefined}
+              onClick={() => onStatusChange(status)}
+              style={filterButtonStyle(active)}
+            >
+              {status}
+            </button>
+          )
+        })}
       </div>
     </div>
   )
