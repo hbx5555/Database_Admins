@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { applyFilters, applySorts, paginateRows, applyStatusFilter } from '../src/lib/transforms'
-import type { Project, ProjectStatus } from '../src/types/project'
+import type { Project } from '../src/types/project'
 
 const makeProject = (overrides: Partial<Project>): Project => ({
   id: 'test-id',
