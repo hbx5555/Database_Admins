@@ -78,7 +78,7 @@ export function SubItemsPanel({ totalCount, onAddItem, activeStatusFilter, onSta
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '0 8px' }}>
         <button
           aria-label="All"
-          aria-current={isAll ? 'true' : undefined}
+          aria-current={isAll ? 'page' : undefined}
           onClick={() => onStatusChange(null)}
           style={filterButtonStyle(isAll)}
         >
@@ -91,7 +91,7 @@ export function SubItemsPanel({ totalCount, onAddItem, activeStatusFilter, onSta
             <button
               key={status}
               aria-label={status}
-              aria-current={active ? 'true' : undefined}
+              aria-current={active ? 'page' : undefined}
               onClick={() => onStatusChange(status)}
               style={filterButtonStyle(active)}
             >
