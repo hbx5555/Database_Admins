@@ -1,4 +1,5 @@
 export type ProjectStatus = 'New' | 'Started' | 'Done'
+export const STATUS_OPTIONS: ProjectStatus[] = ['New', 'Started', 'Done']
 
 export interface Project {
   id: string
