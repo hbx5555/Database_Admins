@@ -1,10 +1,11 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { GridToolbar } from '../src/components/grid/GridToolbar'
 
 const base = { onRefresh: vi.fn(), onSelectAll: vi.fn(), onClearAll: vi.fn() }
 
 describe('GridToolbar checkbox', () => {
+  beforeEach(() => vi.clearAllMocks())
   it('is unchecked and not indeterminate when selectedCount is 0', () => {
     render(<GridToolbar {...base} selectedCount={0} totalCount={5} />)
     const cb = screen.getByRole('checkbox') as HTMLInputElement

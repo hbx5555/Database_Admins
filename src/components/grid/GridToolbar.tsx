@@ -40,6 +40,7 @@ export function GridToolbar({ onRefresh, selectedCount, totalCount, onSelectAll,
       <input
         ref={checkboxRef}
         type="checkbox"
+        aria-label="Select all rows"
         checked={isAllSelected}
         onChange={handleChange}
         style={{ width: 20, height: 20, borderRadius: 3, cursor: 'pointer', accentColor: 'var(--accent-primary)' }}
