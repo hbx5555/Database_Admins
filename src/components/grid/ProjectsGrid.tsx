@@ -83,13 +83,14 @@ interface ProjectsGridProps {
   onRowChange: (id: string, changes: ProjectUpdate) => void
   selectedIds: Set<string>
   onToggleRow: (id: string) => void
+  onEditRow: (id: string) => void
 }
 
 // DSG Column<T, C, PasteValue> — C is the internal column-data shape; we use
 // unknown here because keyColumn's ColumnData type is not publicly exported.
 type ProjectColumn = Partial<Column<ProjectRow, unknown, string>>
 
-export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow }: ProjectsGridProps) {
+export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEditRow }: ProjectsGridProps) {
   const { columnWidths, finalizeWidth } = useColumnResize()
   // Incrementing this forces DataSheetGrid to remount, which reinitialises
   // TanStack Virtual's measurement cache with the new column basis values.
@@ -344,8 +345,20 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow }: Pr
     }
   }
 
+  const wrapperRef = useRef<HTMLDivElement>(null)
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    if (!(e.target as HTMLElement).closest('.dsg-cell-gutter')) return
+    const wrapper = wrapperRef.current
+    if (!wrapper) return
+    const rowIndex = Math.floor(
+      (e.clientY - wrapper.getBoundingClientRect().top + wrapper.scrollTop - 40) / 40
+    )
+    if (rowIndex >= 0 && rowIndex < rows.length) onEditRow(rows[rowIndex].id)
+  }
+
   return (
-    <div style={{ flex: 1, overflow: 'auto' }}>
+    <div ref={wrapperRef} onDoubleClick={handleDoubleClick} style={{ flex: 1, overflow: 'auto' }}>
       <style>{`
         .dsg-container { font-family: var(--font-body); font-size: 13px; border: none !important; }
         .dsg-cell-header { background: var(--surface-primary) !important; font-size: 12px; font-weight: 600; color: var(--foreground-primary); font-family: var(--font-body); }

@@ -74,6 +74,11 @@ export default function App() {
     }
   }
 
+  const handleEditRow = useCallback((id: string) => {
+    const row = displayRows.find(r => r.id === id)
+    if (row) setEditingRow(row)
+  }, [displayRows])
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh', minWidth: 1044 }}>
       <IconSidebar onTogglePanel={handleTogglePanel} />
@@ -124,6 +129,7 @@ export default function App() {
               onRowChange={editRow}
               selectedIds={selectedIds}
               onToggleRow={toggleRowSelection}
+              onEditRow={handleEditRow}
             />
           )}
 
