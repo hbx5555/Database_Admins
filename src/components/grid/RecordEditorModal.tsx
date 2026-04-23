@@ -51,8 +51,6 @@ export function RecordEditorModal({ row, onSave, onClose }: RecordEditorModalPro
   const [draft, setDraft] = useState<Project>({ ...row })
   const [focused, setFocused] = useState<string | null>(null)
 
-  const isDirty = JSON.stringify(draft) !== JSON.stringify(row)
-
   const set = <K extends keyof Project>(key: K, val: Project[K]) =>
     setDraft(d => ({ ...d, [key]: val }))
 
@@ -217,39 +215,31 @@ export function RecordEditorModal({ row, onSave, onClose }: RecordEditorModalPro
                 style={{
                   padding: '8px 20px',
                   borderRadius: 'var(--radius-md)',
-                  background: isDirty ? 'var(--accent-primary)' : 'var(--foreground-secondary)',
+                  background: 'var(--accent-primary)',
                   border: 'none',
-                  cursor: isDirty ? 'pointer' : 'default',
+                  cursor: 'pointer',
                   fontSize: 13, fontWeight: 600,
                   fontFamily: 'var(--font-body)',
                   color: 'var(--foreground-inverse)',
-                  opacity: isDirty ? 1 : 0.6,
                 }}
               >
                 Save Changes
               </button>
-              {isDirty && (
-                <button
-                  onClick={() => setDraft({ ...row })}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: 'var(--radius-md)',
-                    background: 'transparent',
-                    color: 'var(--foreground-secondary)',
-                    border: '1.5px solid var(--border-color)',
-                    cursor: 'pointer',
-                    fontSize: 13, fontWeight: 500,
-                    fontFamily: 'var(--font-body)',
-                  }}
-                >
-                  Discard
-                </button>
-              )}
-              {!isDirty && (
-                <span style={{ fontSize: 12, color: 'var(--foreground-secondary)', fontStyle: 'italic' }}>
-                  No unsaved changes
-                </span>
-              )}
+              <button
+                onClick={onClose}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: 'var(--radius-md)',
+                  background: 'transparent',
+                  color: 'var(--foreground-secondary)',
+                  border: '1.5px solid var(--border-color)',
+                  cursor: 'pointer',
+                  fontSize: 13, fontWeight: 500,
+                  fontFamily: 'var(--font-body)',
+                }}
+              >
+                Cancel
+              </button>
             </div>
           </div>
 

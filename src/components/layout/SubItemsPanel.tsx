@@ -69,8 +69,8 @@ export function SubItemsPanel({ totalCount, onAddItem, activeStatusFilter, onSta
             boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
           }}
         >
-          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add</span>
-          Add Item
+          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit</span>
+          Edit Item
         </button>
       </div>
 

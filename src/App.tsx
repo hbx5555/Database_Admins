@@ -89,7 +89,7 @@ export default function App() {
       >
         <SubItemsPanel
           totalCount={sourceRows.length}
-          onAddItem={handleAddItem}
+          onAddItem={handleFabClick}
           activeStatusFilter={activeStatusFilter}
           onStatusChange={setStatusFilter}
         />
@@ -127,34 +127,29 @@ export default function App() {
             />
           )}
 
-          {/* FAB: no selection → add new record; selection → edit first selected */}
+          {/* FAB: always adds a new record */}
           <button
-            onClick={handleFabClick}
-            title={selectedIds.size > 0 ? 'Edit selected record' : 'Add record'}
+            onClick={handleAddItem}
+            title="Add record"
             style={{
               position: 'absolute',
               bottom: 64,
               left: 42,
+              width: 44,
               height: 44,
-              padding: '0 20px 0 14px',
-              borderRadius: 'var(--radius-pill)',
+              borderRadius: '50%',
               background: 'var(--accent-primary)',
               color: 'var(--foreground-inverse)',
               border: 'none',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: 8,
+              justifyContent: 'center',
               boxShadow: '0 3px 10px rgba(0,0,0,0.22)',
               zIndex: 10,
-              fontFamily: 'var(--font-body)',
-              fontSize: 13,
-              fontWeight: 600,
-              whiteSpace: 'nowrap',
             }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>edit</span>
-            Edit Item
+            <span className="material-symbols-outlined" style={{ fontSize: 22 }}>add</span>
           </button>
 
           <GridStatusBar pagination={pagination} onPageChange={setPage} />
