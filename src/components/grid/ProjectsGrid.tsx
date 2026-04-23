@@ -78,13 +78,15 @@ const ResizeHandle = memo(function ResizeHandle({ columnKey, onFinalizeWidth, cu
 interface ProjectsGridProps {
   rows: Project[]
   onRowChange: (id: string, changes: ProjectUpdate) => void
+  selectedIds: Set<string>
+  onToggleRow: (id: string) => void
 }
 
 // DSG Column<T, C, PasteValue> — C is the internal column-data shape; we use
 // unknown here because keyColumn's ColumnData type is not publicly exported.
 type ProjectColumn = Partial<Column<Project, unknown, string>>
 
-export function ProjectsGrid({ rows, onRowChange }: ProjectsGridProps) {
+export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow }: ProjectsGridProps) {
   const { columnWidths, finalizeWidth } = useColumnResize()
   // Incrementing this forces DataSheetGrid to remount, which reinitialises
   // TanStack Virtual's measurement cache with the new column basis values.
@@ -107,6 +109,21 @@ export function ProjectsGrid({ rows, onRowChange }: ProjectsGridProps) {
   // keyColumn infers T[K] as string|null for nullable fields, which conflicts
   // with textColumn's string-only CellComponent. Double-cast via unknown.
   const columns: ProjectColumn[] = useMemo(() => [
+    {
+      basis: 48, grow: 0, shrink: 0,
+      disableKeys: true,
+      title: <div style={{ width: 48 }} />,
+      component: ({ rowData }: { rowData: Project }) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+          <input
+            type="checkbox"
+            checked={selectedIds.has(rowData.id)}
+            onChange={() => onToggleRow(rowData.id)}
+            style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--accent-primary)' }}
+          />
+        </div>
+      ),
+    },
     {
       ...(keyColumn('project_name', textColumn) as unknown as ProjectColumn),
       title: colTitle('project_name', COLUMN_LABELS.project_name),
@@ -287,7 +304,7 @@ export function ProjectsGrid({ rows, onRowChange }: ProjectsGridProps) {
         project_budget: value !== '' ? parseFloat(value) : null,
       }),
     },
-  ], [columnWidths, colTitle])
+  ], [columnWidths, colTitle, selectedIds, onToggleRow])
 
   const handleChange = (newRows: Project[], operations: Operation[]) => {
     for (const op of operations) {
