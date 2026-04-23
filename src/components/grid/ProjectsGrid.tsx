@@ -117,7 +117,13 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow }: Pr
       component: ({ rowData }: { rowData: Project }) => (
         <div
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', cursor: 'pointer' }}
-          onClick={() => onToggleRow(rowData.id)}
+          onMouseDown={(e) => {
+            // DSG calls event.preventDefault() on mousedown for clicks inside the grid,
+            // which prevents click events from firing. Intercept here at the React root
+            // level and stop the native event before it reaches DSG's document listener.
+            e.nativeEvent.stopImmediatePropagation()
+            onToggleRow(rowData.id)
+          }}
         >
           <input
             type="checkbox"
