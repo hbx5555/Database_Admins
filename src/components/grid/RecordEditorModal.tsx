@@ -120,6 +120,8 @@ export function RecordEditorModal({ row, onSave, onClose }: RecordEditorModalPro
         {/* Form */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', background: 'var(--white)' }}>
 
+          <div style={{ height: 26 }} />
+
           {/* Field rows */}
           <FieldRow label={COLUMN_LABELS.project_name} fieldKey="project_name" focused={focused} bold>
             <input
