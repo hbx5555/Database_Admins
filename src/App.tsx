@@ -123,7 +123,7 @@ export default function App() {
             style={{
               position: 'absolute',
               bottom: 56,
-              left: 40,
+              left: 12,
               width: 44,
               height: 44,
               borderRadius: '50%',
