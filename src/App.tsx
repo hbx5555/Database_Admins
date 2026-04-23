@@ -35,6 +35,10 @@ export default function App() {
     removeRows,
     activeStatusFilter,
     setStatusFilter,
+    searchQuery,
+    setSearchQuery,
+    sorts,
+    setSortField,
   } = useProjects()
 
   const [panelOpen, setPanelOpen] = useState(true)
@@ -118,6 +122,8 @@ export default function App() {
             onSelectAll={selectAll}
             onClearAll={clearSelection}
             onDeleteSelected={deleteSelected}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
           />
 
           {loading && <LoadingState />}
@@ -130,6 +136,8 @@ export default function App() {
               selectedIds={selectedIds}
               onToggleRow={toggleRowSelection}
               onEditRow={handleEditRow}
+              sorts={sorts}
+              onSortField={setSortField}
             />
           )}
 

@@ -24,6 +24,15 @@ export function applySorts(rows: Project[], sorts: SortSpec[]): Project[] {
   })
 }
 
+export function applySearch(rows: Project[], query: string): Project[] {
+  const q = query.trim().toLowerCase()
+  if (!q) return rows
+  return rows.filter(row =>
+    row.project_name?.toLowerCase().includes(q) ||
+    row.project_topic?.toLowerCase().includes(q)
+  )
+}
+
 export function paginateRows(rows: Project[], page: number, pageSize: number): Project[] {
   const start = (page - 1) * pageSize
   return rows.slice(start, start + pageSize)

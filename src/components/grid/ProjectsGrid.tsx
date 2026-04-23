@@ -1,7 +1,7 @@
 import { useCallback, useMemo, memo, useRef, useState, useEffect } from 'react'
 import { DataSheetGrid, textColumn, keyColumn } from 'react-datasheet-grid'
 import type { Column } from 'react-datasheet-grid'
-import type { Project, ProjectUpdate, ProjectStatus } from '../../types/project'
+import type { Project, ProjectUpdate, ProjectStatus, SortSpec } from '../../types/project'
 import { COLUMN_LABELS } from '../../types/project'
 import { RolePill } from '../shared/RolePill'
 import { useColumnResize, MIN_WIDTH } from '../../hooks/useColumnResize'
@@ -72,6 +72,7 @@ const ResizeHandle = memo(function ResizeHandle({ columnKey, onFinalizeWidth, cu
         cursor: 'col-resize', background: 'transparent',
         zIndex: 1, touchAction: 'none',
       }}
+      onClick={e => e.stopPropagation()}
       onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'var(--border-color)' }}
       onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
     />
@@ -84,13 +85,15 @@ interface ProjectsGridProps {
   selectedIds: Set<string>
   onToggleRow: (id: string) => void
   onEditRow: (id: string) => void
+  sorts: SortSpec[]
+  onSortField: (field: keyof Project) => void
 }
 
 // DSG Column<T, C, PasteValue> — C is the internal column-data shape; we use
 // unknown here because keyColumn's ColumnData type is not publicly exported.
 type ProjectColumn = Partial<Column<ProjectRow, unknown, string>>
 
-export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEditRow }: ProjectsGridProps) {
+export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEditRow, sorts, onSortField }: ProjectsGridProps) {
   const { columnWidths, finalizeWidth } = useColumnResize()
   // Incrementing this forces DataSheetGrid to remount, which reinitialises
   // TanStack Virtual's measurement cache with the new column basis values.
@@ -107,14 +110,27 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
     setResizeVersion(v => v + 1)
   }, [finalizeWidth])
 
-  const colTitle = useCallback((key: string, label: string) => (
-    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%', height: '100%' }}>
-      <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingLeft: 10, paddingRight: 8 }}>
-        {label}
-      </span>
-      <ResizeHandle columnKey={key} onFinalizeWidth={handleFinalizeWidth} currentWidth={columnWidths[key]} />
-    </div>
-  ), [columnWidths, handleFinalizeWidth])
+  const colTitle = useCallback((key: string, label: string) => {
+    const sort = sorts.find(s => s.field === key)
+    return (
+      <div
+        onClick={() => onSortField(key as keyof Project)}
+        style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%', height: '100%', cursor: 'pointer' }}
+      >
+        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingLeft: 10, paddingRight: 4 }}>
+          {label}
+        </span>
+        <span className="material-symbols-outlined" style={{
+          fontSize: 14, marginRight: 6, flexShrink: 0,
+          color: sort ? 'var(--accent-primary)' : 'var(--border-color)',
+          transition: 'color 0.15s',
+        }}>
+          {sort?.direction === 'desc' ? 'arrow_downward' : 'arrow_upward'}
+        </span>
+        <ResizeHandle columnKey={key} onFinalizeWidth={handleFinalizeWidth} currentWidth={columnWidths[key]} />
+      </div>
+    )
+  }, [columnWidths, handleFinalizeWidth, sorts, onSortField])
 
   // keyColumn infers T[K] as string|null for nullable fields, which conflicts
   // with textColumn's string-only CellComponent. Double-cast via unknown.

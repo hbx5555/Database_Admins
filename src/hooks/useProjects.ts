@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { fetchProjects, createProject, updateProject, deleteProject, deleteProjects } from '../lib/projectsApi'
-import { applyFilters, applySorts, paginateRows, applyStatusFilter } from '../lib/transforms'
-import type { Project, ProjectInsert, ProjectUpdate, ViewConfig, PaginationState, ProjectStatus } from '../types/project'
+import { applyFilters, applySorts, applySearch, paginateRows, applyStatusFilter } from '../lib/transforms'
+import type { Project, ProjectInsert, ProjectUpdate, ViewConfig, PaginationState, ProjectStatus, SortSpec } from '../types/project'
 import { DEFAULT_VIEW_CONFIG, DEFAULT_PAGINATION } from '../types/project'
 
 interface UseProjectsReturn {
@@ -17,6 +17,10 @@ interface UseProjectsReturn {
   setPage: (page: number) => void
   activeStatusFilter: ProjectStatus | null
   setStatusFilter: (status: ProjectStatus | null) => void
+  searchQuery: string
+  setSearchQuery: (q: string) => void
+  sorts: SortSpec[]
+  setSortField: (field: keyof Project) => void
   refresh: () => Promise<void>
   addRow: (row: ProjectInsert) => Promise<void>
   editRow: (id: string, changes: ProjectUpdate) => Promise<void>
@@ -32,6 +36,7 @@ export function useProjects(): UseProjectsReturn {
   const [pagination, setPagination] = useState<PaginationState>(DEFAULT_PAGINATION)
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null)
   const [activeStatusFilter, setActiveStatusFilter] = useState<ProjectStatus | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -53,8 +58,8 @@ export function useProjects(): UseProjectsReturn {
   }, [load])
 
   const filteredSorted = useMemo(
-    () => applySorts(applyFilters(sourceRows, viewConfig.filters), viewConfig.sorts),
-    [sourceRows, viewConfig.filters, viewConfig.sorts]
+    () => applySearch(applySorts(applyFilters(sourceRows, viewConfig.filters), viewConfig.sorts), searchQuery),
+    [sourceRows, viewConfig.filters, viewConfig.sorts, searchQuery]
   )
 
   const displayRows = useMemo(
@@ -70,6 +75,17 @@ export function useProjects(): UseProjectsReturn {
 
   const setPage = useCallback((page: number) => {
     setPagination(p => ({ ...p, page }))
+  }, [])
+
+  const setSortField = useCallback((field: keyof Project) => {
+    setViewConfig(vc => {
+      const existing = vc.sorts.find(s => s.field === field)
+      let newSorts: SortSpec[]
+      if (!existing) newSorts = [{ field, direction: 'asc' }]
+      else if (existing.direction === 'asc') newSorts = [{ field, direction: 'desc' }]
+      else newSorts = []
+      return { ...vc, sorts: newSorts }
+    })
   }, [])
 
   const setStatusFilter = useCallback((status: ProjectStatus | null) => {
@@ -146,6 +162,10 @@ export function useProjects(): UseProjectsReturn {
     setPage,
     activeStatusFilter,
     setStatusFilter,
+    searchQuery,
+    setSearchQuery,
+    sorts: viewConfig.sorts,
+    setSortField,
     refresh: load,
     addRow,
     editRow,

@@ -7,9 +7,11 @@ interface GridToolbarProps {
   onSelectAll: () => void
   onClearAll: () => void
   onDeleteSelected: () => void
+  searchQuery: string
+  onSearchChange: (q: string) => void
 }
 
-export function GridToolbar({ onRefresh, selectedCount, totalCount, onSelectAll, onClearAll, onDeleteSelected }: GridToolbarProps) {
+export function GridToolbar({ onRefresh, selectedCount, totalCount, onSelectAll, onClearAll, onDeleteSelected, searchQuery, onSearchChange }: GridToolbarProps) {
   const checkboxRef = useRef<HTMLInputElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const isAllSelected = selectedCount === totalCount && totalCount > 0
@@ -119,6 +121,43 @@ export function GridToolbar({ onRefresh, selectedCount, totalCount, onSelectAll,
               Delete{selectedCount > 0 ? ` (${selectedCount})` : ''}
             </button>
           </div>
+        )}
+      </div>
+
+      {/* Search */}
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', marginLeft: 8 }}>
+        <span className="material-symbols-outlined" style={{
+          position: 'absolute', left: 8, fontSize: 15,
+          color: 'var(--foreground-secondary)', pointerEvents: 'none',
+        }}>search</span>
+        <input
+          type="text"
+          placeholder="Search…"
+          value={searchQuery}
+          onChange={e => onSearchChange(e.target.value)}
+          style={{
+            paddingLeft: 28, paddingRight: searchQuery ? 24 : 10,
+            height: 28, width: 180,
+            border: '1px solid var(--border-color)',
+            borderRadius: 'var(--radius-pill)',
+            fontFamily: 'var(--font-body)', fontSize: 12,
+            color: 'var(--foreground-primary)',
+            background: 'var(--surface-primary)',
+            outline: 'none',
+          }}
+        />
+        {searchQuery && (
+          <button
+            onClick={() => onSearchChange('')}
+            style={{
+              position: 'absolute', right: 6,
+              background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+              display: 'flex', alignItems: 'center',
+              color: 'var(--foreground-secondary)',
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 14 }}>close</span>
+          </button>
         )}
       </div>
 
