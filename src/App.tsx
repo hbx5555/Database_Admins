@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useProjects } from './hooks/useProjects'
 import { IconSidebar } from './components/layout/IconSidebar'
 import { SubItemsPanel } from './components/layout/SubItemsPanel'
@@ -34,6 +35,9 @@ export default function App() {
     setStatusFilter,
   } = useProjects()
 
+  const [panelOpen, setPanelOpen] = useState(true)
+  const handleTogglePanel = () => setPanelOpen(p => !p)
+
   const handleAddItem = () => {
     addRow(NEW_PROJECT_DEFAULTS).catch(() => {
       // error is surfaced via the hook's error state
@@ -42,13 +46,20 @@ export default function App() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', minWidth: 1044 }}>
-      <IconSidebar />
-      <SubItemsPanel
+      <IconSidebar onTogglePanel={handleTogglePanel} />
+      <div style={{
+          width: panelOpen ? 200 : 0,
+          overflow: 'hidden',
+          flexShrink: 0,
+          transition: 'width 250ms ease',
+        }}>
+        <SubItemsPanel
           totalCount={sourceRows.length}
           onAddItem={handleAddItem}
           activeStatusFilter={activeStatusFilter}
           onStatusChange={setStatusFilter}
         />
+      </div>
       <MainContent>
         <div style={{
           flex: 1,
