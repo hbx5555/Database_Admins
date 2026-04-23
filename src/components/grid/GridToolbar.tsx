@@ -1,8 +1,28 @@
+import { useRef, useEffect } from 'react'
+
 interface GridToolbarProps {
   onRefresh: () => void
+  selectedCount: number
+  totalCount: number
+  onSelectAll: () => void
+  onClearAll: () => void
 }
 
-export function GridToolbar({ onRefresh }: GridToolbarProps) {
+export function GridToolbar({ onRefresh, selectedCount, totalCount, onSelectAll, onClearAll }: GridToolbarProps) {
+  const checkboxRef = useRef<HTMLInputElement>(null)
+  const isAllSelected = selectedCount === totalCount && totalCount > 0
+  const isIndeterminate = selectedCount > 0 && selectedCount < totalCount
+
+  useEffect(() => {
+    if (checkboxRef.current) {
+      checkboxRef.current.indeterminate = isIndeterminate
+    }
+  }, [isIndeterminate])
+
+  const handleChange = () => {
+    if (isAllSelected) onClearAll(); else onSelectAll()
+  }
+
   const divider = (
     <div style={{ width: 1, height: 20, background: 'var(--border-color)', margin: '0 4px' }} />
   )
@@ -18,7 +38,10 @@ export function GridToolbar({ onRefresh }: GridToolbarProps) {
     }}>
       {/* Left side */}
       <input
+        ref={checkboxRef}
         type="checkbox"
+        checked={isAllSelected}
+        onChange={handleChange}
         style={{ width: 20, height: 20, borderRadius: 3, cursor: 'pointer', accentColor: 'var(--accent-primary)' }}
       />
       {divider}
