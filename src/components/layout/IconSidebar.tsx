@@ -1,3 +1,7 @@
+interface IconSidebarProps {
+  onTogglePanel: () => void
+}
+
 const NAV_ICONS = [
   { name: 'task_alt', label: 'Tasks', active: false },
   { name: 'folder', label: 'Projects', active: true },
@@ -6,7 +10,7 @@ const NAV_ICONS = [
   { name: 'label', label: 'Statuses', active: false },
 ]
 
-export function IconSidebar() {
+export function IconSidebar({ onTogglePanel }: IconSidebarProps) {
   return (
     <div style={{
       width: 56,
@@ -20,6 +24,7 @@ export function IconSidebar() {
     }}>
       <button
         aria-label="Toggle menu"
+        onClick={onTogglePanel}
         style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', marginBottom: 16, display: 'flex', alignItems: 'center' }}
       >
         <span className="material-symbols-outlined" style={{ fontSize: 28 }}>menu</span>
