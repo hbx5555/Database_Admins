@@ -9,10 +9,11 @@ interface FieldRowProps {
   label: string
   fieldKey: string
   focused: string | null
+  bold?: boolean
   children: React.ReactNode
 }
 
-function FieldRow({ label, fieldKey, focused, children }: FieldRowProps) {
+function FieldRow({ label, fieldKey, focused, bold, children }: FieldRowProps) {
   return (
     <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)' }}>
       <div style={{
@@ -24,7 +25,7 @@ function FieldRow({ label, fieldKey, focused, children }: FieldRowProps) {
         <span style={{
           fontSize: 12, fontFamily: 'var(--font-body)',
           color: focused === fieldKey ? 'var(--accent-primary)' : 'var(--foreground-secondary)',
-          fontWeight: focused === fieldKey ? 600 : 400,
+          fontWeight: bold || focused === fieldKey ? 700 : 400,
           transition: 'color 0.15s',
         }}>
           {label}
@@ -97,53 +98,40 @@ export function RecordEditorModal({ row, onSave, onClose }: RecordEditorModalPro
         boxShadow: '0 16px 64px rgba(0,0,0,0.22)',
         display: 'flex',
         maxHeight: '90vh',
+        position: 'relative',
       }}>
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute', top: 10, right: 10, zIndex: 1,
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: 'var(--foreground-secondary)',
+            display: 'flex', alignItems: 'center', padding: 4,
+            borderRadius: 'var(--radius-sm)',
+          }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>close</span>
+        </button>
+
         {/* Accent bar */}
         <div style={{ width: 8, background: 'var(--accent-primary)', flexShrink: 0 }} />
 
         {/* Form */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', background: 'var(--white)' }}>
 
-          {/* Title row */}
-          <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', position: 'relative' }}>
-            <div style={{ width: LABEL_W, flexShrink: 0, background: 'var(--surface-primary)' }} />
-            <div style={{ flex: 1, padding: '24px 28px 18px' }}>
-              <input
-                value={draft.project_name ?? ''}
-                onChange={e => set('project_name', e.target.value)}
-                onFocus={() => setFocused('project_name')}
-                onBlur={() => setFocused(null)}
-                placeholder="Project name"
-                style={{
-                  fontSize: 20,
-                  fontFamily: 'var(--font-headings)',
-                  fontWeight: 600,
-                  color: 'var(--foreground-primary)',
-                  border: 'none',
-                  borderBottom: `2px solid ${focused === 'project_name' ? 'var(--accent-primary)' : 'transparent'}`,
-                  outline: 'none',
-                  background: 'transparent',
-                  width: '100%',
-                  paddingBottom: 4,
-                  transition: 'border-color 0.15s',
-                }}
-              />
-            </div>
-            <button
-              onClick={onClose}
-              style={{
-                position: 'absolute', top: 12, right: 12,
-                background: 'none', border: 'none', cursor: 'pointer',
-                color: 'var(--foreground-secondary)',
-                display: 'flex', alignItems: 'center', padding: 4,
-                borderRadius: 'var(--radius-sm)',
-              }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: 20 }}>close</span>
-            </button>
-          </div>
-
           {/* Field rows */}
+          <FieldRow label={COLUMN_LABELS.project_name} fieldKey="project_name" focused={focused} bold>
+            <input
+              type="text"
+              value={draft.project_name ?? ''}
+              onChange={e => set('project_name', e.target.value)}
+              onFocus={() => setFocused('project_name')}
+              onBlur={() => setFocused(null)}
+              style={inp('project_name')}
+            />
+          </FieldRow>
+
           <FieldRow label={COLUMN_LABELS.project_topic} fieldKey="project_topic" focused={focused}>
             <input
               type="text"
