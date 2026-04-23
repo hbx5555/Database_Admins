@@ -125,7 +125,7 @@ export function GridToolbar({ onRefresh, selectedCount, totalCount, onSelectAll,
       </div>
 
       {/* Search */}
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', marginLeft: 8 }}>
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', marginLeft: 16 }}>
         <span className="material-symbols-outlined" style={{
           position: 'absolute', left: 8, fontSize: 15,
           color: 'var(--foreground-secondary)', pointerEvents: 'none',
@@ -166,11 +166,8 @@ export function GridToolbar({ onRefresh, selectedCount, totalCount, onSelectAll,
 
       {/* Right side */}
       <div style={{ width: 1, height: 20, background: 'var(--border-color)', margin: '0 4px' }} />
-      <button title="View" style={iconBtn}>
-        <span className="material-symbols-outlined" style={{ fontSize: 20 }}>view_headline</span>
-      </button>
-      <button title="Filter & Sort" style={{ ...iconBtn, marginRight: 8 }}>
-        <span className="material-symbols-outlined" style={{ fontSize: 20 }}>tune</span>
+      <button title="Help" style={{ ...iconBtn, marginRight: 8 }}>
+        <span className="material-symbols-outlined" style={{ fontSize: 20 }}>help</span>
       </button>
       <div style={{
         width: 32,
