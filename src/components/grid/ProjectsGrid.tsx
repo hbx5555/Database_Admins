@@ -15,6 +15,9 @@ type Operation = {
   toRowIndex: number
 }
 
+// Augments Project with transient selection so DSG re-renders cells when selection changes
+type ProjectRow = Project & { _selected: boolean }
+
 interface ResizeHandleProps {
   columnKey: string
   onFinalizeWidth: (key: string, width: number) => void
@@ -84,13 +87,19 @@ interface ProjectsGridProps {
 
 // DSG Column<T, C, PasteValue> — C is the internal column-data shape; we use
 // unknown here because keyColumn's ColumnData type is not publicly exported.
-type ProjectColumn = Partial<Column<Project, unknown, string>>
+type ProjectColumn = Partial<Column<ProjectRow, unknown, string>>
 
 export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow }: ProjectsGridProps) {
   const { columnWidths, finalizeWidth } = useColumnResize()
   // Incrementing this forces DataSheetGrid to remount, which reinitialises
   // TanStack Virtual's measurement cache with the new column basis values.
   const [resizeVersion, setResizeVersion] = useState(0)
+
+  // Merge selection into rowData so DSG sees a real data change and re-renders cells
+  const viewRows = useMemo(
+    () => rows.map(r => ({ ...r, _selected: selectedIds.has(r.id) })),
+    [rows, selectedIds]
+  )
 
   const handleFinalizeWidth = useCallback((key: string, width: number) => {
     finalizeWidth(key, width)
@@ -114,20 +123,20 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow }: Pr
       disableKeys: true,
       cellClassName: 'checkbox-cell',
       title: <div style={{ width: 48 }} />,
-      component: ({ rowData }: { rowData: Project }) => (
+      component: ({ rowData }: { rowData: ProjectRow }) => (
         <div
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', cursor: 'pointer' }}
+          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', cursor: 'pointer' }}
           onMouseDown={(e) => {
-            // DSG calls event.preventDefault() on mousedown for clicks inside the grid,
-            // which prevents click events from firing. Intercept here at the React root
-            // level and stop the native event before it reaches DSG's document listener.
+            // DSG calls event.preventDefault() on mousedown for any click inside the grid,
+            // which prevents click events from firing. stopImmediatePropagation on the native
+            // event intercepts before DSG's document-level listener fires.
             e.nativeEvent.stopImmediatePropagation()
             onToggleRow(rowData.id)
           }}
         >
           <input
             type="checkbox"
-            checked={selectedIds.has(rowData.id)}
+            checked={rowData._selected}
             readOnly
             style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--accent-primary)', pointerEvents: 'none' }}
           />
@@ -314,9 +323,9 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow }: Pr
         project_budget: value !== '' ? parseFloat(value) : null,
       }),
     },
-  ], [columnWidths, colTitle, selectedIds, onToggleRow])
+  ], [columnWidths, colTitle, onToggleRow])
 
-  const handleChange = (newRows: Project[], operations: Operation[]) => {
+  const handleChange = (newRows: ProjectRow[], operations: Operation[]) => {
     for (const op of operations) {
       if (op.type !== 'UPDATE') continue
       for (let i = op.fromRowIndex; i < op.toRowIndex; i++) {
@@ -342,10 +351,11 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow }: Pr
         .dsg-cell-header { background: var(--surface-primary) !important; font-size: 12px; font-weight: 600; color: var(--foreground-primary); font-family: var(--font-body); }
         .dsg-cell-header-container { width: 100%; height: 100%; padding: 0; display: flex; align-items: center; line-height: normal; overflow: visible; }
         .dsg-row:hover .dsg-cell { background: var(--row-hover) !important; }
+        .checkbox-cell { padding: 0 !important; }
       `}</style>
-      <DataSheetGrid<Project>
+      <DataSheetGrid<ProjectRow>
         key={resizeVersion}
-        value={rows}
+        value={viewRows}
         onChange={handleChange}
         columns={columns}
         rowHeight={40}
