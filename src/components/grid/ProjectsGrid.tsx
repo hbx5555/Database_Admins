@@ -115,7 +115,10 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow }: Pr
       cellClassName: 'checkbox-cell',
       title: <div style={{ width: 48 }} />,
       component: ({ rowData }: { rowData: Project }) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+        <div
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}
+          onMouseDown={e => e.stopPropagation()}
+        >
           <input
             type="checkbox"
             checked={selectedIds.has(rowData.id)}

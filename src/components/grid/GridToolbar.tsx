@@ -23,59 +23,49 @@ export function GridToolbar({ onRefresh, selectedCount, totalCount, onSelectAll,
     if (isAllSelected) onClearAll(); else onSelectAll()
   }
 
-  const divider = (
-    <div style={{ width: 1, height: 20, background: 'var(--border-color)', margin: '0 4px' }} />
-  )
+  const iconBtn = { background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground-secondary)', display: 'flex', alignItems: 'center' }
 
   return (
     <div style={{
       height: 52,
       display: 'flex',
       alignItems: 'center',
-      padding: '0 20px',
       borderBottom: '1px solid var(--border-color)',
-      gap: 12,
     }}>
-      {/* Left side */}
-      <input
-        ref={checkboxRef}
-        type="checkbox"
-        aria-label="Select all rows"
-        checked={isAllSelected}
-        onChange={handleChange}
-        style={{ width: 20, height: 20, borderRadius: 3, cursor: 'pointer', accentColor: 'var(--accent-primary)' }}
-      />
-      {divider}
-      <button
-        onClick={onRefresh}
-        title="Refresh"
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground-secondary)', display: 'flex', alignItems: 'center' }}
-      >
-        <span className="material-symbols-outlined">refresh</span>
-      </button>
-      <button
-        title="More options"
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground-secondary)', display: 'flex', alignItems: 'center' }}
-      >
-        <span className="material-symbols-outlined">more_vert</span>
+      {/* Refresh — 40px section matching the DSG row-number gutter width */}
+      <div style={{ width: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <button onClick={onRefresh} title="Refresh" style={iconBtn}>
+          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>refresh</span>
+        </button>
+      </div>
+
+      {/* Select-all checkbox — 48px section matching the checkbox column width */}
+      <div style={{ width: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <input
+          ref={checkboxRef}
+          type="checkbox"
+          aria-label="Select all rows"
+          checked={isAllSelected}
+          onChange={handleChange}
+          style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--accent-primary)' }}
+        />
+      </div>
+
+      {/* 3-dots — immediately right of checkbox */}
+      <button title="More options" style={iconBtn}>
+        <span className="material-symbols-outlined" style={{ fontSize: 20 }}>more_vert</span>
       </button>
 
       {/* Spacer */}
       <div style={{ flex: 1 }} />
 
       {/* Right side */}
-      {divider}
-      <button
-        title="View"
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground-secondary)', display: 'flex', alignItems: 'center' }}
-      >
-        <span className="material-symbols-outlined">view_headline</span>
+      <div style={{ width: 1, height: 20, background: 'var(--border-color)', margin: '0 4px' }} />
+      <button title="View" style={iconBtn}>
+        <span className="material-symbols-outlined" style={{ fontSize: 20 }}>view_headline</span>
       </button>
-      <button
-        title="Filter & Sort"
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground-secondary)', display: 'flex', alignItems: 'center' }}
-      >
-        <span className="material-symbols-outlined">tune</span>
+      <button title="Filter & Sort" style={{ ...iconBtn, marginRight: 8 }}>
+        <span className="material-symbols-outlined" style={{ fontSize: 20 }}>tune</span>
       </button>
       <div style={{
         width: 32,
@@ -90,6 +80,7 @@ export function GridToolbar({ onRefresh, selectedCount, totalCount, onSelectAll,
         fontFamily: 'var(--font-captions)',
         fontWeight: 600,
         cursor: 'pointer',
+        marginRight: 20,
       }}>
         HD
       </div>
