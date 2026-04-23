@@ -40,14 +40,17 @@ export function GridToolbar({ onRefresh, selectedCount, totalCount, onSelectAll,
       </div>
 
       {/* Select-all checkbox — 48px section matching the checkbox column width */}
-      <div style={{ width: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <div
+        style={{ width: 48, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, cursor: 'pointer' }}
+        onClick={handleChange}
+      >
         <input
           ref={checkboxRef}
           type="checkbox"
           aria-label="Select all rows"
           checked={isAllSelected}
-          onChange={handleChange}
-          style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--accent-primary)' }}
+          readOnly
+          style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--accent-primary)', pointerEvents: 'none' }}
         />
       </div>
 

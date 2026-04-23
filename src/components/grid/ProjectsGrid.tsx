@@ -116,14 +116,14 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow }: Pr
       title: <div style={{ width: 48 }} />,
       component: ({ rowData }: { rowData: Project }) => (
         <div
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}
-          onMouseDown={e => e.stopPropagation()}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', cursor: 'pointer' }}
+          onClick={() => onToggleRow(rowData.id)}
         >
           <input
             type="checkbox"
             checked={selectedIds.has(rowData.id)}
-            onChange={() => onToggleRow(rowData.id)}
-            style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--accent-primary)' }}
+            readOnly
+            style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--accent-primary)', pointerEvents: 'none' }}
           />
         </div>
       ),
