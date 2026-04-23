@@ -122,8 +122,8 @@ export default function App() {
             title="Add record"
             style={{
               position: 'absolute',
-              bottom: 56,
-              left: 12,
+              bottom: 64,
+              left: 20,
               width: 44,
               height: 44,
               borderRadius: '50%',
