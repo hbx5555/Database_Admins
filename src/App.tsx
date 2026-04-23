@@ -6,10 +6,11 @@ import { MainContent } from './components/layout/MainContent'
 import { GridToolbar } from './components/grid/GridToolbar'
 import { GridStatusBar } from './components/grid/GridStatusBar'
 import { ProjectsGrid } from './components/grid/ProjectsGrid'
+import { RecordEditorModal } from './components/grid/RecordEditorModal'
 import { LoadingState } from './components/shared/LoadingState'
 import { ErrorState } from './components/shared/ErrorState'
 import { EmptyState } from './components/shared/EmptyState'
-import type { ProjectInsert } from './types/project'
+import type { ProjectInsert, Project } from './types/project'
 
 const NEW_PROJECT_DEFAULTS: ProjectInsert = {
   project_name: 'New Project',
@@ -57,10 +58,20 @@ export default function App() {
 
   useEffect(() => { setSelectedIds(new Set()) }, [displayRows])
 
+  const [editingRow, setEditingRow] = useState<Project | null>(null)
+
   const handleAddItem = () => {
-    addRow(NEW_PROJECT_DEFAULTS).catch(() => {
-      // error is surfaced via the hook's error state
-    })
+    addRow(NEW_PROJECT_DEFAULTS).catch(() => {})
+  }
+
+  const handleFabClick = () => {
+    if (selectedIds.size === 0) {
+      handleAddItem()
+    } else {
+      const firstId = [...selectedIds][0]
+      const row = displayRows.find(r => r.id === firstId)
+      if (row) setEditingRow(row)
+    }
   }
 
   return (
@@ -116,34 +127,47 @@ export default function App() {
             />
           )}
 
-          {/* FAB: visible even when sidebar is collapsed */}
+          {/* FAB: no selection → add new record; selection → edit first selected */}
           <button
-            onClick={handleAddItem}
-            title="Add record"
+            onClick={handleFabClick}
+            title={selectedIds.size > 0 ? 'Edit selected record' : 'Add record'}
             style={{
               position: 'absolute',
               bottom: 64,
               left: 42,
-              width: 44,
               height: 44,
-              borderRadius: '50%',
+              padding: '0 20px 0 14px',
+              borderRadius: 'var(--radius-pill)',
               background: 'var(--accent-primary)',
               color: 'var(--foreground-inverse)',
               border: 'none',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
+              gap: 8,
               boxShadow: '0 3px 10px rgba(0,0,0,0.22)',
               zIndex: 10,
+              fontFamily: 'var(--font-body)',
+              fontSize: 13,
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
             }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: 22 }}>add</span>
+            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>edit</span>
+            Edit Item
           </button>
 
           <GridStatusBar pagination={pagination} onPageChange={setPage} />
         </div>
       </MainContent>
+
+      {editingRow && (
+        <RecordEditorModal
+          row={editingRow}
+          onSave={editRow}
+          onClose={() => setEditingRow(null)}
+        />
+      )}
     </div>
   )
 }
