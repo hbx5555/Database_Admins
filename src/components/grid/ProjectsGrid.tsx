@@ -114,19 +114,22 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
     const sort = sorts.find(s => s.field === key)
     return (
       <div
-        onClick={() => onSortField(key as keyof Project)}
+        onMouseDown={e => {
+          // DSG calls preventDefault() on mousedown inside the grid, which prevents
+          // the click event from firing. Intercept here before DSG's document listener.
+          e.nativeEvent.stopImmediatePropagation()
+          onSortField(key as keyof Project)
+        }}
         style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%', height: '100%', cursor: 'pointer' }}
       >
         <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingLeft: 10, paddingRight: 4 }}>
           {label}
         </span>
-        <span className="material-symbols-outlined" style={{
-          fontSize: 14, marginRight: 6, flexShrink: 0,
-          color: sort ? 'var(--accent-primary)' : 'var(--border-color)',
-          transition: 'color 0.15s',
-        }}>
-          {sort?.direction === 'desc' ? 'arrow_downward' : 'arrow_upward'}
-        </span>
+        {sort && (
+          <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 6, flexShrink: 0, color: 'var(--accent-primary)' }}>
+            {sort.direction === 'desc' ? 'arrow_downward' : 'arrow_upward'}
+          </span>
+        )}
         <ResizeHandle columnKey={key} onFinalizeWidth={handleFinalizeWidth} currentWidth={columnWidths[key]} />
       </div>
     )
