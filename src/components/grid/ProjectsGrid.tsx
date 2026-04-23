@@ -112,6 +112,7 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow }: Pr
     {
       basis: 48, grow: 0, shrink: 0,
       disableKeys: true,
+      cellClassName: 'checkbox-cell',
       title: <div style={{ width: 48 }} />,
       component: ({ rowData }: { rowData: Project }) => (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>

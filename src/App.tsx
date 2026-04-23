@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useProjects } from './hooks/useProjects'
 import { IconSidebar } from './components/layout/IconSidebar'
 import { SubItemsPanel } from './components/layout/SubItemsPanel'
@@ -40,13 +40,13 @@ export default function App() {
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
-  const toggleRowSelection = (id: string) => setSelectedIds(prev => {
+  const toggleRowSelection = useCallback((id: string) => setSelectedIds(prev => {
     const next = new Set(prev)
     if (next.has(id)) next.delete(id); else next.add(id)
     return next
-  })
-  const selectAll = () => setSelectedIds(new Set(displayRows.map(r => r.id)))
-  const clearSelection = () => setSelectedIds(new Set())
+  }), [])
+  const selectAll = useCallback(() => setSelectedIds(new Set(displayRows.map(r => r.id))), [displayRows])
+  const clearSelection = useCallback(() => setSelectedIds(new Set()), [])
 
   useEffect(() => { setSelectedIds(new Set()) }, [displayRows])
 
