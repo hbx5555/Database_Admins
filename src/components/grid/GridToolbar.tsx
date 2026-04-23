@@ -165,8 +165,8 @@ export function GridToolbar({ onRefresh, selectedCount, totalCount, onSelectAll,
       <div style={{ flex: 1 }} />
 
       {/* Right side */}
-      <div style={{ width: 1, height: 20, background: 'var(--border-color)', margin: '0 4px' }} />
-      <button title="Help" style={{ ...iconBtn, marginRight: 12 }}>
+      <div style={{ width: 1, height: 20, background: 'var(--border-color)', margin: '0 12px' }} />
+      <button title="Help" style={{ ...iconBtn, marginRight: 16 }}>
         <span className="material-symbols-outlined" style={{ fontSize: 30 }}>help</span>
       </button>
       <div style={{
