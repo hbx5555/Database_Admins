@@ -30,13 +30,12 @@ export function SubItemsPanel({ totalCount, onAddItem, activeStatusFilter, onSta
 
   return (
     <div style={{
-      width: 200,
+      width: '100%',
       minHeight: '100vh',
       background: 'var(--surface-panel)',
       borderRight: '1px solid var(--border-color)',
       display: 'flex',
       flexDirection: 'column',
-      flexShrink: 0,
       padding: '16px 0',
     }}>
       <div style={{ padding: '0 16px 8px' }}>

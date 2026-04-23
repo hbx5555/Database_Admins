@@ -47,12 +47,16 @@ export default function App() {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', minWidth: 1044 }}>
       <IconSidebar onTogglePanel={handleTogglePanel} />
-      <div style={{
+      <div
+        aria-hidden={!panelOpen}
+        inert={!panelOpen}
+        style={{
           width: panelOpen ? 200 : 0,
           overflow: 'hidden',
           flexShrink: 0,
           transition: 'width 250ms ease',
-        }}>
+        }}
+      >
         <SubItemsPanel
           totalCount={sourceRows.length}
           onAddItem={handleAddItem}
