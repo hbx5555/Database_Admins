@@ -93,6 +93,7 @@ export default function App() {
           border: '1px solid var(--border-color)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
           overflow: 'hidden',
+          position: 'relative',
         }}>
           <GridToolbar
             onRefresh={refresh}
@@ -114,6 +115,31 @@ export default function App() {
               onToggleRow={toggleRowSelection}
             />
           )}
+
+          {/* FAB: visible even when sidebar is collapsed */}
+          <button
+            onClick={handleAddItem}
+            title="Add record"
+            style={{
+              position: 'absolute',
+              bottom: 56,
+              left: 40,
+              width: 44,
+              height: 44,
+              borderRadius: '50%',
+              background: 'var(--accent-primary)',
+              color: 'var(--foreground-inverse)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 3px 10px rgba(0,0,0,0.22)',
+              zIndex: 10,
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 22 }}>add</span>
+          </button>
 
           <GridStatusBar pagination={pagination} onPageChange={setPage} />
         </div>
