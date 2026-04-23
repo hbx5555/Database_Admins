@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useProjects } from './hooks/useProjects'
 import { IconSidebar } from './components/layout/IconSidebar'
 import { SubItemsPanel } from './components/layout/SubItemsPanel'
@@ -38,6 +38,18 @@ export default function App() {
   const [panelOpen, setPanelOpen] = useState(true)
   const handleTogglePanel = () => setPanelOpen(p => !p)
 
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+
+  const toggleRowSelection = (id: string) => setSelectedIds(prev => {
+    const next = new Set(prev)
+    if (next.has(id)) next.delete(id); else next.add(id)
+    return next
+  })
+  const selectAll = () => setSelectedIds(new Set(displayRows.map(r => r.id)))
+  const clearSelection = () => setSelectedIds(new Set())
+
+  useEffect(() => { setSelectedIds(new Set()) }, [displayRows])
+
   const handleAddItem = () => {
     addRow(NEW_PROJECT_DEFAULTS).catch(() => {
       // error is surfaced via the hook's error state
@@ -75,13 +87,24 @@ export default function App() {
           boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
           overflow: 'hidden',
         }}>
-          <GridToolbar onRefresh={refresh} />
+          <GridToolbar
+            onRefresh={refresh}
+            selectedCount={selectedIds.size}
+            totalCount={displayRows.length}
+            onSelectAll={selectAll}
+            onClearAll={clearSelection}
+          />
 
           {loading && <LoadingState />}
           {!loading && error && <ErrorState message={error} onRetry={refresh} />}
           {!loading && !error && displayRows.length === 0 && <EmptyState />}
           {!loading && !error && displayRows.length > 0 && (
-            <ProjectsGrid rows={displayRows} onRowChange={editRow} />
+            <ProjectsGrid
+              rows={displayRows}
+              onRowChange={editRow}
+              selectedIds={selectedIds}
+              onToggleRow={toggleRowSelection}
+            />
           )}
 
           <GridStatusBar pagination={pagination} onPageChange={setPage} />
