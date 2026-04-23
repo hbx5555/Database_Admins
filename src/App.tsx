@@ -31,6 +31,7 @@ export default function App() {
     setPage,
     editRow,
     addRow,
+    removeRows,
     activeStatusFilter,
     setStatusFilter,
   } = useProjects()
@@ -47,6 +48,12 @@ export default function App() {
   }), [])
   const selectAll = useCallback(() => setSelectedIds(new Set(displayRows.map(r => r.id))), [displayRows])
   const clearSelection = useCallback(() => setSelectedIds(new Set()), [])
+  const deleteSelected = useCallback(() => {
+    if (selectedIds.size === 0) return
+    const ids = [...selectedIds]
+    clearSelection()
+    removeRows(ids).catch(() => {})
+  }, [selectedIds, clearSelection, removeRows])
 
   useEffect(() => { setSelectedIds(new Set()) }, [displayRows])
 
@@ -93,6 +100,7 @@ export default function App() {
             totalCount={displayRows.length}
             onSelectAll={selectAll}
             onClearAll={clearSelection}
+            onDeleteSelected={deleteSelected}
           />
 
           {loading && <LoadingState />}

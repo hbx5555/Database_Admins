@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { fetchProjects, createProject, updateProject, deleteProject } from '../lib/projectsApi'
+import { fetchProjects, createProject, updateProject, deleteProject, deleteProjects } from '../lib/projectsApi'
 import { applyFilters, applySorts, paginateRows, applyStatusFilter } from '../lib/transforms'
 import type { Project, ProjectInsert, ProjectUpdate, ViewConfig, PaginationState, ProjectStatus } from '../types/project'
 import { DEFAULT_VIEW_CONFIG, DEFAULT_PAGINATION } from '../types/project'
@@ -21,6 +21,7 @@ interface UseProjectsReturn {
   addRow: (row: ProjectInsert) => Promise<void>
   editRow: (id: string, changes: ProjectUpdate) => Promise<void>
   removeRow: (id: string) => Promise<void>
+  removeRows: (ids: string[]) => Promise<void>
 }
 
 export function useProjects(): UseProjectsReturn {
@@ -119,6 +120,19 @@ export function useProjects(): UseProjectsReturn {
     }
   }, [sourceRows])
 
+  const removeRows = useCallback(async (ids: string[]) => {
+    const snapshot = sourceRows
+    setSourceRows(prev => prev.filter(r => !ids.includes(r.id)))
+    try {
+      // Optimistic rows (not yet saved to Supabase) have no real ID to delete
+      const realIds = ids.filter(id => !id.startsWith('optimistic-'))
+      if (realIds.length > 0) await deleteProjects(realIds)
+    } catch (e) {
+      setSourceRows(snapshot)
+      setError(e instanceof Error ? e.message : 'Failed to delete projects')
+    }
+  }, [sourceRows])
+
   return {
     displayRows,
     sourceRows,
@@ -136,5 +150,6 @@ export function useProjects(): UseProjectsReturn {
     addRow,
     editRow,
     removeRow,
+    removeRows,
   }
 }

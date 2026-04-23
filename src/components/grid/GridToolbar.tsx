@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 
 interface GridToolbarProps {
   onRefresh: () => void
@@ -6,12 +6,15 @@ interface GridToolbarProps {
   totalCount: number
   onSelectAll: () => void
   onClearAll: () => void
+  onDeleteSelected: () => void
 }
 
-export function GridToolbar({ onRefresh, selectedCount, totalCount, onSelectAll, onClearAll }: GridToolbarProps) {
+export function GridToolbar({ onRefresh, selectedCount, totalCount, onSelectAll, onClearAll, onDeleteSelected }: GridToolbarProps) {
   const checkboxRef = useRef<HTMLInputElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
   const isAllSelected = selectedCount === totalCount && totalCount > 0
   const isIndeterminate = selectedCount > 0 && selectedCount < totalCount
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     if (checkboxRef.current) {
@@ -19,8 +22,25 @@ export function GridToolbar({ onRefresh, selectedCount, totalCount, onSelectAll,
     }
   }, [isIndeterminate])
 
+  useEffect(() => {
+    if (!menuOpen) return
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [menuOpen])
+
   const handleChange = () => {
     if (isAllSelected) onClearAll(); else onSelectAll()
+  }
+
+  const handleDelete = () => {
+    if (selectedCount === 0) return
+    onDeleteSelected()
+    setMenuOpen(false)
   }
 
   const iconBtn = { background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground-secondary)', display: 'flex', alignItems: 'center' }
@@ -54,10 +74,53 @@ export function GridToolbar({ onRefresh, selectedCount, totalCount, onSelectAll,
         />
       </div>
 
-      {/* 3-dots — immediately right of checkbox */}
-      <button title="More options" style={iconBtn}>
-        <span className="material-symbols-outlined" style={{ fontSize: 20 }}>more_vert</span>
-      </button>
+      {/* 3-dots with dropdown */}
+      <div ref={menuRef} style={{ position: 'relative' }}>
+        <button
+          title="More options"
+          style={iconBtn}
+          onClick={() => setMenuOpen(o => !o)}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>more_vert</span>
+        </button>
+
+        {menuOpen && (
+          <div style={{
+            position: 'absolute',
+            top: 'calc(100% + 4px)',
+            left: 0,
+            zIndex: 200,
+            background: 'var(--white)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+            minWidth: 160,
+            padding: '4px 0',
+          }}>
+            <button
+              onClick={handleDelete}
+              style={{
+                width: '100%',
+                padding: '8px 14px',
+                background: 'none',
+                border: 'none',
+                textAlign: 'left',
+                cursor: selectedCount > 0 ? 'pointer' : 'default',
+                color: selectedCount > 0 ? '#C0392B' : 'var(--foreground-secondary)',
+                fontFamily: 'var(--font-body)',
+                fontSize: 13,
+                opacity: selectedCount > 0 ? 1 : 0.45,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
+              Delete{selectedCount > 0 ? ` (${selectedCount})` : ''}
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Spacer */}
       <div style={{ flex: 1 }} />

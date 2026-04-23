@@ -42,3 +42,12 @@ export async function deleteProject(id: string): Promise<void> {
 
   if (error) throw new Error(error.message)
 }
+
+export async function deleteProjects(ids: string[]): Promise<void> {
+  const { error } = await supabase
+    .from('projects')
+    .delete()
+    .in('id', ids)
+
+  if (error) throw new Error(error.message)
+}
