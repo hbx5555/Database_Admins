@@ -1,16 +1,20 @@
+export type AppView = 'projects' | 'contacts'
+
 interface IconSidebarProps {
+  activeView: AppView
+  onSelectView: (view: AppView) => void
   onTogglePanel: () => void
 }
 
-const NAV_ICONS = [
-  { name: 'task_alt', label: 'Tasks', active: false },
-  { name: 'folder', label: 'Projects', active: true },
-  { name: 'person', label: 'Contacts', active: false },
-  { name: 'leaderboard', label: 'Leads', active: false },
-  { name: 'label', label: 'Statuses', active: false },
+const NAV_ICONS: { name: string; label: string; view: AppView | null }[] = [
+  { name: 'task_alt', label: 'Tasks', view: null },
+  { name: 'folder', label: 'Projects', view: 'projects' },
+  { name: 'person', label: 'Contacts', view: 'contacts' },
+  { name: 'leaderboard', label: 'Leads', view: null },
+  { name: 'label', label: 'Statuses', view: null },
 ]
 
-export function IconSidebar({ onTogglePanel }: IconSidebarProps) {
+export function IconSidebar({ activeView, onSelectView, onTogglePanel }: IconSidebarProps) {
   return (
     <div style={{
       width: 56,
@@ -31,31 +35,35 @@ export function IconSidebar({ onTogglePanel }: IconSidebarProps) {
       </button>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
-        {NAV_ICONS.map(icon => (
-          <button
-            key={icon.name}
-            title={icon.label}
-            aria-label={icon.label}
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 'var(--radius-md)',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: icon.active ? 'var(--accent-secondary)' : 'transparent',
-            }}
-          >
-            <span className="material-symbols-outlined" style={{
-              fontSize: 24,
-              color: icon.active ? 'white' : 'rgba(255,255,255,0.6)',
-            }}>
-              {icon.name}
-            </span>
-          </button>
-        ))}
+        {NAV_ICONS.map(icon => {
+          const isActive = icon.view !== null && icon.view === activeView
+          return (
+            <button
+              key={icon.name}
+              title={icon.label}
+              aria-label={icon.label}
+              onClick={() => { if (icon.view) onSelectView(icon.view) }}
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 'var(--radius-md)',
+                border: 'none',
+                cursor: icon.view ? 'pointer' : 'default',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: isActive ? 'var(--accent-secondary)' : 'transparent',
+              }}
+            >
+              <span className="material-symbols-outlined" style={{
+                fontSize: 24,
+                color: isActive ? 'white' : 'rgba(255,255,255,0.6)',
+              }}>
+                {icon.name}
+              </span>
+            </button>
+          )
+        })}
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
@@ -68,18 +76,12 @@ export function IconSidebar({ onTogglePanel }: IconSidebarProps) {
         <button
           aria-label="User profile"
           style={{
-            width: 32,
-            height: 32,
+            width: 32, height: 32,
             borderRadius: 'var(--radius-round)',
             background: 'var(--accent-secondary)',
-            color: 'white',
-            border: 'none',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 11,
-            fontFamily: 'var(--font-captions)',
-            fontWeight: 600,
+            color: 'white', border: 'none',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 11, fontFamily: 'var(--font-captions)', fontWeight: 600,
             cursor: 'pointer',
           }}
         >

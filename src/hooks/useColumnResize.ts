@@ -1,9 +1,11 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 
-export const LS_KEY = 'db-admins-column-widths'
 export const MIN_WIDTH = 60
 
-export const DEFAULT_COLUMN_WIDTHS: Record<string, number> = {
+export const PROJECT_COLUMN_LS_KEY = 'db-admins-project-widths'
+export const CONTACT_COLUMN_LS_KEY = 'db-admins-contact-widths'
+
+export const PROJECT_DEFAULT_WIDTHS: Record<string, number> = {
   project_name: 200,
   project_topic: 160,
   project_status: 120,
@@ -12,20 +14,26 @@ export const DEFAULT_COLUMN_WIDTHS: Record<string, number> = {
   project_budget: 110,
 }
 
-function loadFromStorage(): Record<string, number> {
+export const CONTACT_DEFAULT_WIDTHS: Record<string, number> = {
+  full_name: 180,
+  phone_number: 140,
+  email: 180,
+  role: 120,
+  location: 130,
+}
+
+function loadFromStorage(storageKey: string, defaults: Record<string, number>): Record<string, number> {
   try {
-    const raw = localStorage.getItem(LS_KEY)
-    if (!raw) return { ...DEFAULT_COLUMN_WIDTHS }
+    const raw = localStorage.getItem(storageKey)
+    if (!raw) return { ...defaults }
     const parsed = JSON.parse(raw)
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-      return { ...DEFAULT_COLUMN_WIDTHS }
-    }
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return { ...defaults }
     const safe = Object.fromEntries(
       Object.entries(parsed).filter(([, v]) => typeof v === 'number')
     ) as Record<string, number>
-    return { ...DEFAULT_COLUMN_WIDTHS, ...safe }
+    return { ...defaults, ...safe }
   } catch {
-    return { ...DEFAULT_COLUMN_WIDTHS }
+    return { ...defaults }
   }
 }
 
@@ -34,18 +42,19 @@ interface UseColumnResizeReturn {
   finalizeWidth: (key: string, width: number) => void
 }
 
-export function useColumnResize(): UseColumnResizeReturn {
-  const [columnWidths, setColumnWidths] = useState<Record<string, number>>(loadFromStorage)
+export function useColumnResize(storageKey: string, defaults: Record<string, number>): UseColumnResizeReturn {
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>(
+    () => loadFromStorage(storageKey, defaults)
+  )
 
-  // widthsRef lets finalizeWidth read latest widths synchronously without stale closure
   const widthsRef = useRef(columnWidths)
   useEffect(() => { widthsRef.current = columnWidths }, [columnWidths])
 
   const finalizeWidth = useCallback((key: string, width: number) => {
     const next = { ...widthsRef.current, [key]: Math.max(MIN_WIDTH, width) }
-    localStorage.setItem(LS_KEY, JSON.stringify(next))
+    localStorage.setItem(storageKey, JSON.stringify(next))
     setColumnWidths(next)
-  }, [])
+  }, [storageKey])
 
   return { columnWidths, finalizeWidth }
 }

@@ -1,16 +1,20 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useProjects } from './hooks/useProjects'
-import { IconSidebar } from './components/layout/IconSidebar'
+import { useContacts } from './hooks/useContacts'
+import { IconSidebar, type AppView } from './components/layout/IconSidebar'
 import { SubItemsPanel } from './components/layout/SubItemsPanel'
 import { MainContent } from './components/layout/MainContent'
 import { GridToolbar } from './components/grid/GridToolbar'
 import { GridStatusBar } from './components/grid/GridStatusBar'
 import { ProjectsGrid } from './components/grid/ProjectsGrid'
+import { ContactsGrid } from './components/grid/ContactsGrid'
 import { RecordEditorModal } from './components/grid/RecordEditorModal'
+import { ContactEditorModal } from './components/grid/ContactEditorModal'
 import { LoadingState } from './components/shared/LoadingState'
 import { ErrorState } from './components/shared/ErrorState'
 import { EmptyState } from './components/shared/EmptyState'
 import type { ProjectInsert, Project } from './types/project'
+import type { Contact, ContactInsert } from './types/contact'
 
 const NEW_PROJECT_DEFAULTS: ProjectInsert = {
   project_name: 'New Project',
@@ -21,71 +25,146 @@ const NEW_PROJECT_DEFAULTS: ProjectInsert = {
   project_budget: null,
 }
 
+const NEW_CONTACT_DEFAULTS: ContactInsert = {
+  first_name: 'New',
+  last_name: 'Contact',
+  phone_number: null,
+  email: null,
+  role: null,
+  location: null,
+}
+
 export default function App() {
+  const [activeView, setActiveView] = useState<AppView>('projects')
+  const [panelOpen, setPanelOpen] = useState(true)
+
+  // ── Projects ─────────────────────────────────────────────────────────────
   const {
-    displayRows,
-    sourceRows,
-    loading,
-    error,
-    pagination,
-    refresh,
-    setPage,
-    editRow,
-    addRow,
-    removeRows,
+    displayRows: projectRows,
+    sourceRows: projectSourceRows,
+    loading: projectsLoading,
+    error: projectsError,
+    pagination: projectsPagination,
+    refresh: refreshProjects,
+    setPage: setProjectsPage,
+    editRow: editProject,
+    addRow: addProject,
+    removeRows: removeProjects,
     activeStatusFilter,
     setStatusFilter,
-    searchQuery,
-    setSearchQuery,
-    sorts,
-    setSortField,
+    searchQuery: projectSearch,
+    setSearchQuery: setProjectSearch,
+    sorts: projectSorts,
+    setSortField: setProjectSort,
   } = useProjects()
 
-  const [panelOpen, setPanelOpen] = useState(true)
-  const handleTogglePanel = () => setPanelOpen(p => !p)
+  const [projectSelectedIds, setProjectSelectedIds] = useState<Set<string>>(new Set())
+  const [editingProject, setEditingProject] = useState<Project | 'new' | null>(null)
 
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-
-  const toggleRowSelection = useCallback((id: string) => setSelectedIds(prev => {
+  const toggleProjectRow = useCallback((id: string) => setProjectSelectedIds(prev => {
     const next = new Set(prev)
     if (next.has(id)) next.delete(id); else next.add(id)
     return next
   }), [])
-  const selectAll = useCallback(() => setSelectedIds(new Set(displayRows.map(r => r.id))), [displayRows])
-  const clearSelection = useCallback(() => setSelectedIds(new Set()), [])
-  const deleteSelected = useCallback(() => {
-    if (selectedIds.size === 0) return
-    const ids = [...selectedIds]
-    clearSelection()
-    removeRows(ids).catch(() => {})
-  }, [selectedIds, clearSelection, removeRows])
+  const selectAllProjects = useCallback(() => setProjectSelectedIds(new Set(projectRows.map(r => r.id))), [projectRows])
+  const clearProjectSelection = useCallback(() => setProjectSelectedIds(new Set()), [])
+  const deleteSelectedProjects = useCallback(() => {
+    if (projectSelectedIds.size === 0) return
+    clearProjectSelection()
+    removeProjects([...projectSelectedIds]).catch(() => {})
+  }, [projectSelectedIds, clearProjectSelection, removeProjects])
 
-  useEffect(() => { setSelectedIds(new Set()) }, [displayRows])
+  useEffect(() => { setProjectSelectedIds(new Set()) }, [projectRows])
 
-  const [editingRow, setEditingRow] = useState<Project | 'new' | null>(null)
-
-  const handleAddItem = () => {
-    addRow(NEW_PROJECT_DEFAULTS).catch(() => {})
-  }
-
-  const handleFabClick = () => {
-    if (selectedIds.size === 0) {
-      setEditingRow('new')
+  const handleProjectFabClick = useCallback(() => {
+    if (projectSelectedIds.size === 0) {
+      setEditingProject('new')
     } else {
-      const firstId = [...selectedIds][0]
-      const row = displayRows.find(r => r.id === firstId)
-      if (row) setEditingRow(row)
+      const row = projectRows.find(r => r.id === [...projectSelectedIds][0])
+      if (row) setEditingProject(row)
     }
-  }
+  }, [projectSelectedIds, projectRows])
 
-  const handleEditRow = useCallback((id: string) => {
-    const row = displayRows.find(r => r.id === id)
-    if (row) setEditingRow(row)
-  }, [displayRows])
+  const handleEditProject = useCallback((id: string) => {
+    const row = projectRows.find(r => r.id === id)
+    if (row) setEditingProject(row)
+  }, [projectRows])
+
+  // ── Contacts ─────────────────────────────────────────────────────────────
+  const {
+    displayRows: contactRows,
+    sourceRows: contactSourceRows,
+    loading: contactsLoading,
+    error: contactsError,
+    pagination: contactsPagination,
+    refresh: refreshContacts,
+    setPage: setContactsPage,
+    editRow: editContact,
+    addRow: addContact,
+    removeRows: removeContacts,
+    searchQuery: contactSearch,
+    setSearchQuery: setContactSearch,
+    sorts: contactSorts,
+    setSortField: setContactSort,
+  } = useContacts()
+
+  const [contactSelectedIds, setContactSelectedIds] = useState<Set<string>>(new Set())
+  const [editingContact, setEditingContact] = useState<Contact | 'new' | null>(null)
+
+  const toggleContactRow = useCallback((id: string) => setContactSelectedIds(prev => {
+    const next = new Set(prev)
+    if (next.has(id)) next.delete(id); else next.add(id)
+    return next
+  }), [])
+  const selectAllContacts = useCallback(() => setContactSelectedIds(new Set(contactRows.map(r => r.id))), [contactRows])
+  const clearContactSelection = useCallback(() => setContactSelectedIds(new Set()), [])
+  const deleteSelectedContacts = useCallback(() => {
+    if (contactSelectedIds.size === 0) return
+    clearContactSelection()
+    removeContacts([...contactSelectedIds]).catch(() => {})
+  }, [contactSelectedIds, clearContactSelection, removeContacts])
+
+  useEffect(() => { setContactSelectedIds(new Set()) }, [contactRows])
+
+  const handleContactFabClick = useCallback(() => {
+    if (contactSelectedIds.size === 0) {
+      setEditingContact('new')
+    } else {
+      const row = contactRows.find(r => r.id === [...contactSelectedIds][0])
+      if (row) setEditingContact(row)
+    }
+  }, [contactSelectedIds, contactRows])
+
+  const handleEditContact = useCallback((id: string) => {
+    const row = contactRows.find(r => r.id === id)
+    if (row) setEditingContact(row)
+  }, [contactRows])
+
+  // ── Derived values for current view ──────────────────────────────────────
+  const isProjects = activeView === 'projects'
+  const loading = isProjects ? projectsLoading : contactsLoading
+  const error = isProjects ? projectsError : contactsError
+  const displayRows = isProjects ? projectRows : contactRows
+  const sourceCount = isProjects ? projectSourceRows.length : contactSourceRows.length
+  const pagination = isProjects ? projectsPagination : contactsPagination
+  const selectedCount = isProjects ? projectSelectedIds.size : contactSelectedIds.size
+  const searchQuery = isProjects ? projectSearch : contactSearch
+  const onSearchChange = isProjects ? setProjectSearch : setContactSearch
+  const onRefresh = isProjects ? refreshProjects : refreshContacts
+  const onSelectAll = isProjects ? selectAllProjects : selectAllContacts
+  const onClearAll = isProjects ? clearProjectSelection : clearContactSelection
+  const onDeleteSelected = isProjects ? deleteSelectedProjects : deleteSelectedContacts
+  const onPageChange = isProjects ? setProjectsPage : setContactsPage
+  const onFabClick = isProjects ? handleProjectFabClick : handleContactFabClick
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', minWidth: 1044 }}>
-      <IconSidebar onTogglePanel={handleTogglePanel} />
+      <IconSidebar
+        activeView={activeView}
+        onSelectView={setActiveView}
+        onTogglePanel={() => setPanelOpen(p => !p)}
+      />
+
       <div
         aria-hidden={!panelOpen}
         inert={!panelOpen}
@@ -97,12 +176,14 @@ export default function App() {
         }}
       >
         <SubItemsPanel
-          totalCount={sourceRows.length}
-          onAddItem={handleFabClick}
+          activeView={activeView}
+          totalCount={sourceCount}
+          onAddItem={onFabClick}
           activeStatusFilter={activeStatusFilter}
           onStatusChange={setStatusFilter}
         />
       </div>
+
       <MainContent>
         <div style={{
           flex: 1,
@@ -116,66 +197,79 @@ export default function App() {
           position: 'relative',
         }}>
           <GridToolbar
-            onRefresh={refresh}
-            selectedCount={selectedIds.size}
+            onRefresh={onRefresh}
+            selectedCount={selectedCount}
             totalCount={displayRows.length}
-            onSelectAll={selectAll}
-            onClearAll={clearSelection}
-            onDeleteSelected={deleteSelected}
+            onSelectAll={onSelectAll}
+            onClearAll={onClearAll}
+            onDeleteSelected={onDeleteSelected}
             searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
+            onSearchChange={onSearchChange}
           />
 
           {loading && <LoadingState />}
-          {!loading && error && <ErrorState message={error} onRetry={refresh} />}
+          {!loading && error && <ErrorState message={error} onRetry={onRefresh} />}
           {!loading && !error && displayRows.length === 0 && <EmptyState />}
-          {!loading && !error && displayRows.length > 0 && (
+
+          {!loading && !error && displayRows.length > 0 && isProjects && (
             <ProjectsGrid
-              rows={displayRows}
-              onRowChange={editRow}
-              selectedIds={selectedIds}
-              onToggleRow={toggleRowSelection}
-              onEditRow={handleEditRow}
-              sorts={sorts}
-              onSortField={setSortField}
+              rows={projectRows}
+              onRowChange={editProject}
+              selectedIds={projectSelectedIds}
+              onToggleRow={toggleProjectRow}
+              onEditRow={handleEditProject}
+              sorts={projectSorts}
+              onSortField={setProjectSort}
             />
           )}
 
-          {/* FAB: always adds a new record */}
+          {!loading && !error && displayRows.length > 0 && !isProjects && (
+            <ContactsGrid
+              rows={contactRows}
+              onRowChange={editContact}
+              selectedIds={contactSelectedIds}
+              onToggleRow={toggleContactRow}
+              onEditRow={handleEditContact}
+              sorts={contactSorts}
+              onSortField={setContactSort}
+            />
+          )}
+
           <button
-            onClick={handleAddItem}
+            onClick={() => { if (isProjects) addProject(NEW_PROJECT_DEFAULTS).catch(() => {}); else addContact(NEW_CONTACT_DEFAULTS).catch(() => {}) }}
             title="Add record"
             style={{
-              position: 'absolute',
-              bottom: 64,
-              left: 42,
-              width: 44,
-              height: 44,
-              borderRadius: '50%',
+              position: 'absolute', bottom: 64, left: 42,
+              width: 44, height: 44, borderRadius: '50%',
               background: 'var(--accent-primary)',
               color: 'var(--foreground-inverse)',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 3px 10px rgba(0,0,0,0.22)',
-              zIndex: 10,
+              border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 3px 10px rgba(0,0,0,0.22)', zIndex: 10,
             }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: 22 }}>add</span>
           </button>
 
-          <GridStatusBar pagination={pagination} onPageChange={setPage} />
+          <GridStatusBar pagination={pagination} onPageChange={onPageChange} />
         </div>
       </MainContent>
 
-      {editingRow !== null && (
+      {editingProject !== null && (
         <RecordEditorModal
-          row={editingRow === 'new' ? undefined : editingRow}
-          onSave={editRow}
-          onAdd={data => { addRow(data).catch(() => {}) }}
-          onClose={() => setEditingRow(null)}
+          row={editingProject === 'new' ? undefined : editingProject}
+          onSave={editProject}
+          onAdd={data => { addProject(data).catch(() => {}) }}
+          onClose={() => setEditingProject(null)}
+        />
+      )}
+
+      {editingContact !== null && (
+        <ContactEditorModal
+          row={editingContact === 'new' ? undefined : editingContact}
+          onSave={editContact}
+          onAdd={data => { addContact(data).catch(() => {}) }}
+          onClose={() => setEditingContact(null)}
         />
       )}
     </div>

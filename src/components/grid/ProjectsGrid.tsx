@@ -1,10 +1,11 @@
-import { useCallback, useMemo, memo, useRef, useState, useEffect } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { DataSheetGrid, textColumn, keyColumn } from 'react-datasheet-grid'
 import type { Column } from 'react-datasheet-grid'
 import type { Project, ProjectUpdate, ProjectStatus, SortSpec } from '../../types/project'
 import { COLUMN_LABELS } from '../../types/project'
 import { RolePill } from '../shared/RolePill'
-import { useColumnResize, MIN_WIDTH } from '../../hooks/useColumnResize'
+import { useColumnResize, PROJECT_COLUMN_LS_KEY, PROJECT_DEFAULT_WIDTHS } from '../../hooks/useColumnResize'
+import { ResizeHandle } from './ResizeHandle'
 
 const STATUS_OPTIONS: ProjectStatus[] = ['New', 'Started', 'Done']
 
@@ -17,67 +18,6 @@ type Operation = {
 
 // Augments Project with transient selection so DSG re-renders cells when selection changes
 type ProjectRow = Project & { _selected: boolean }
-
-interface ResizeHandleProps {
-  columnKey: string
-  onFinalizeWidth: (key: string, width: number) => void
-  currentWidth: number
-}
-
-const ResizeHandle = memo(function ResizeHandle({ columnKey, onFinalizeWidth, currentWidth }: ResizeHandleProps) {
-  const dragRef = useRef<{ startX: number; startWidth: number } | null>(null)
-  // Line is appended imperatively to document.body to escape DSG's stacking context
-  const lineRef = useRef<HTMLDivElement | null>(null)
-
-  useEffect(() => {
-    const line = document.createElement('div')
-    Object.assign(line.style, {
-      position: 'fixed', top: '0', left: '0',
-      width: '2px', height: '100vh',
-      background: 'var(--accent-primary)',
-      pointerEvents: 'none', zIndex: '9999', display: 'none',
-    })
-    document.body.appendChild(line)
-    lineRef.current = line
-    return () => { document.body.removeChild(line); lineRef.current = null }
-  }, [])
-
-  return (
-    <div
-      onPointerDown={e => {
-        e.preventDefault()
-        e.stopPropagation()
-        dragRef.current = { startX: e.clientX, startWidth: currentWidth }
-        e.currentTarget.setPointerCapture(e.pointerId)
-        if (lineRef.current) {
-          lineRef.current.style.left = `${e.clientX}px`
-          lineRef.current.style.display = 'block'
-        }
-      }}
-      onPointerMove={e => {
-        if (!dragRef.current || !lineRef.current) return
-        const newWidth = dragRef.current.startWidth + (e.clientX - dragRef.current.startX)
-        if (newWidth >= MIN_WIDTH) lineRef.current.style.left = `${e.clientX}px`
-      }}
-      onPointerUp={e => {
-        if (!dragRef.current) return
-        const newWidth = dragRef.current.startWidth + (e.clientX - dragRef.current.startX)
-        dragRef.current = null
-        if (lineRef.current) lineRef.current.style.display = 'none'
-        onFinalizeWidth(columnKey, newWidth)
-      }}
-      style={{
-        position: 'absolute', right: 0, top: 0,
-        width: 4, height: '100%',
-        cursor: 'col-resize', background: 'transparent',
-        zIndex: 1, touchAction: 'none',
-      }}
-      onClick={e => e.stopPropagation()}
-      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = 'var(--border-color)' }}
-      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
-    />
-  )
-})
 
 interface ProjectsGridProps {
   rows: Project[]
@@ -94,7 +34,7 @@ interface ProjectsGridProps {
 type ProjectColumn = Partial<Column<ProjectRow, unknown, string>>
 
 export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEditRow, sorts, onSortField }: ProjectsGridProps) {
-  const { columnWidths, finalizeWidth } = useColumnResize()
+  const { columnWidths, finalizeWidth } = useColumnResize(PROJECT_COLUMN_LS_KEY, PROJECT_DEFAULT_WIDTHS)
   // Incrementing this forces DataSheetGrid to remount, which reinitialises
   // TanStack Virtual's measurement cache with the new column basis values.
   // DSG also does not re-render column titles when columns prop changes, so

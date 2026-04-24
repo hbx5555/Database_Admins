@@ -1,6 +1,8 @@
 import { STATUS_OPTIONS, type ProjectStatus } from '../../types/project'
+import type { AppView } from './IconSidebar'
 
 interface SubItemsPanelProps {
+  activeView: AppView
   totalCount: number
   onAddItem: () => void
   activeStatusFilter: ProjectStatus | null
@@ -25,7 +27,12 @@ function filterButtonStyle(active: boolean) {
   }
 }
 
-export function SubItemsPanel({ totalCount, onAddItem, activeStatusFilter, onStatusChange }: SubItemsPanelProps) {
+const VIEW_LABELS: Record<AppView, string> = {
+  projects: 'Projects',
+  contacts: 'Contacts',
+}
+
+export function SubItemsPanel({ activeView, totalCount, onAddItem, activeStatusFilter, onStatusChange }: SubItemsPanelProps) {
   const isAll = activeStatusFilter === null
 
   return (
@@ -40,7 +47,7 @@ export function SubItemsPanel({ totalCount, onAddItem, activeStatusFilter, onSta
     }}>
       <div style={{ padding: '0 16px 8px' }}>
         <div style={{ fontFamily: 'var(--font-headings)', fontSize: 16, fontWeight: 700, color: 'var(--foreground-primary)' }}>
-          Projects
+          {VIEW_LABELS[activeView]}
         </div>
         <div style={{ fontFamily: 'var(--font-captions)', fontSize: 12, color: 'var(--foreground-secondary)' }}>
           {totalCount.toLocaleString()}
@@ -50,7 +57,7 @@ export function SubItemsPanel({ totalCount, onAddItem, activeStatusFilter, onSta
       <div style={{ padding: '4px 8px 8px' }}>
         <button
           onClick={onAddItem}
-          aria-label="Add new item"
+          aria-label="Edit item"
           style={{
             width: '100%',
             height: 34,
@@ -74,31 +81,32 @@ export function SubItemsPanel({ totalCount, onAddItem, activeStatusFilter, onSta
         </button>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '0 8px' }}>
-        <button
-          aria-label="All"
-          aria-current={isAll ? 'page' : undefined}
-          onClick={() => onStatusChange(null)}
-          style={filterButtonStyle(isAll)}
-        >
-          All
-        </button>
-
-        {STATUS_OPTIONS.map(status => {
-          const active = activeStatusFilter === status
-          return (
-            <button
-              key={status}
-              aria-label={status}
-              aria-current={active ? 'page' : undefined}
-              onClick={() => onStatusChange(status)}
-              style={filterButtonStyle(active)}
-            >
-              {status}
-            </button>
-          )
-        })}
-      </div>
+      {activeView === 'projects' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '0 8px' }}>
+          <button
+            aria-label="All"
+            aria-current={isAll ? 'page' : undefined}
+            onClick={() => onStatusChange(null)}
+            style={filterButtonStyle(isAll)}
+          >
+            All
+          </button>
+          {STATUS_OPTIONS.map(status => {
+            const active = activeStatusFilter === status
+            return (
+              <button
+                key={status}
+                aria-label={status}
+                aria-current={active ? 'page' : undefined}
+                onClick={() => onStatusChange(status)}
+                style={filterButtonStyle(active)}
+              >
+                {status}
+              </button>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
