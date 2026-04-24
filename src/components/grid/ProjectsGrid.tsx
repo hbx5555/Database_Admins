@@ -131,6 +131,7 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
         <span className="material-symbols-outlined" style={{
           fontSize: 36, marginRight: 4, flexShrink: 0,
           color: 'var(--accent-primary)',
+          opacity: sort ? 1 : 0.3,
         }}>
           {sort?.direction === 'asc' ? 'arrow_drop_down' : 'arrow_drop_up'}
         </span>
