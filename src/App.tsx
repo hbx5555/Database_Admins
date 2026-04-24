@@ -62,7 +62,7 @@ export default function App() {
 
   useEffect(() => { setSelectedIds(new Set()) }, [displayRows])
 
-  const [editingRow, setEditingRow] = useState<Project | null>(null)
+  const [editingRow, setEditingRow] = useState<Project | 'new' | null>(null)
 
   const handleAddItem = () => {
     addRow(NEW_PROJECT_DEFAULTS).catch(() => {})
@@ -70,7 +70,7 @@ export default function App() {
 
   const handleFabClick = () => {
     if (selectedIds.size === 0) {
-      handleAddItem()
+      setEditingRow('new')
     } else {
       const firstId = [...selectedIds][0]
       const row = displayRows.find(r => r.id === firstId)
@@ -170,10 +170,11 @@ export default function App() {
         </div>
       </MainContent>
 
-      {editingRow && (
+      {editingRow !== null && (
         <RecordEditorModal
-          row={editingRow}
+          row={editingRow === 'new' ? undefined : editingRow}
           onSave={editRow}
+          onAdd={data => { addRow(data).catch(() => {}) }}
           onClose={() => setEditingRow(null)}
         />
       )}

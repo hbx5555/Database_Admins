@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Project, ProjectUpdate, ProjectStatus } from '../../types/project'
+import type { Project, ProjectInsert, ProjectUpdate, ProjectStatus } from '../../types/project'
 import { COLUMN_LABELS } from '../../types/project'
 
 const STATUS_OPTIONS: ProjectStatus[] = ['New', 'Started', 'Done']
@@ -42,28 +42,50 @@ function FieldRow({ label, fieldKey, focused, bold, children }: FieldRowProps) {
   )
 }
 
+const EMPTY_DRAFT: ProjectInsert = {
+  project_name: '',
+  project_topic: null,
+  project_status: null,
+  project_start_date: null,
+  project_delivery_date: null,
+  project_budget: null,
+}
+
 interface RecordEditorModalProps {
-  row: Project
+  row?: Project
   onSave: (id: string, changes: ProjectUpdate) => void
+  onAdd: (data: ProjectInsert) => void
   onClose: () => void
 }
 
-export function RecordEditorModal({ row, onSave, onClose }: RecordEditorModalProps) {
-  const [draft, setDraft] = useState<Project>({ ...row })
+export function RecordEditorModal({ row, onSave, onAdd, onClose }: RecordEditorModalProps) {
+  const isNew = !row
+  const [draft, setDraft] = useState<ProjectInsert>(isNew ? { ...EMPTY_DRAFT } : {
+    project_name: row.project_name,
+    project_topic: row.project_topic,
+    project_status: row.project_status,
+    project_start_date: row.project_start_date,
+    project_delivery_date: row.project_delivery_date,
+    project_budget: row.project_budget,
+  })
   const [focused, setFocused] = useState<string | null>(null)
 
-  const set = <K extends keyof Project>(key: K, val: Project[K]) =>
+  const set = <K extends keyof ProjectInsert>(key: K, val: ProjectInsert[K]) =>
     setDraft(d => ({ ...d, [key]: val }))
 
   const handleSave = () => {
-    const changes: ProjectUpdate = {}
-    if (draft.project_name !== row.project_name) changes.project_name = draft.project_name
-    if (draft.project_topic !== row.project_topic) changes.project_topic = draft.project_topic
-    if (draft.project_status !== row.project_status) changes.project_status = draft.project_status
-    if (draft.project_start_date !== row.project_start_date) changes.project_start_date = draft.project_start_date
-    if (draft.project_delivery_date !== row.project_delivery_date) changes.project_delivery_date = draft.project_delivery_date
-    if (draft.project_budget !== row.project_budget) changes.project_budget = draft.project_budget
-    if (Object.keys(changes).length > 0) onSave(row.id, changes)
+    if (isNew) {
+      onAdd({ ...draft })
+    } else {
+      const changes: ProjectUpdate = {}
+      if (draft.project_name !== row.project_name) changes.project_name = draft.project_name
+      if (draft.project_topic !== row.project_topic) changes.project_topic = draft.project_topic
+      if (draft.project_status !== row.project_status) changes.project_status = draft.project_status
+      if (draft.project_start_date !== row.project_start_date) changes.project_start_date = draft.project_start_date
+      if (draft.project_delivery_date !== row.project_delivery_date) changes.project_delivery_date = draft.project_delivery_date
+      if (draft.project_budget !== row.project_budget) changes.project_budget = draft.project_budget
+      if (Object.keys(changes).length > 0) onSave(row.id, changes)
+    }
     onClose()
   }
 
@@ -213,7 +235,7 @@ export function RecordEditorModal({ row, onSave, onClose }: RecordEditorModalPro
                   color: 'var(--foreground-inverse)',
                 }}
               >
-                Save Changes
+                {isNew ? 'Add Record' : 'Save Changes'}
               </button>
               <button
                 onClick={onClose}
