@@ -125,11 +125,13 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
         <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingLeft: 10, paddingRight: 4 }}>
           {label}
         </span>
-        {sort && (
-          <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 6, flexShrink: 0, color: 'var(--accent-primary)' }}>
-            {sort.direction === 'desc' ? 'arrow_downward' : 'arrow_upward'}
-          </span>
-        )}
+        <span className="material-symbols-outlined" style={{
+          fontSize: 18, marginRight: 6, flexShrink: 0,
+          color: 'var(--accent-primary)',
+          opacity: sort ? 1 : 0.35,
+        }}>
+          {sort?.direction === 'desc' ? 'arrow_drop_up' : 'arrow_drop_down'}
+        </span>
         <ResizeHandle columnKey={key} onFinalizeWidth={handleFinalizeWidth} currentWidth={columnWidths[key]} />
       </div>
     )

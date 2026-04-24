@@ -80,11 +80,8 @@ export function useProjects(): UseProjectsReturn {
   const setSortField = useCallback((field: keyof Project) => {
     setViewConfig(vc => {
       const existing = vc.sorts.find(s => s.field === field)
-      let newSorts: SortSpec[]
-      if (!existing) newSorts = [{ field, direction: 'asc' }]
-      else if (existing.direction === 'asc') newSorts = [{ field, direction: 'desc' }]
-      else newSorts = []
-      return { ...vc, sorts: newSorts }
+      const direction = existing?.direction === 'asc' ? 'desc' : 'asc'
+      return { ...vc, sorts: [{ field, direction }] }
     })
   }, [])
 
