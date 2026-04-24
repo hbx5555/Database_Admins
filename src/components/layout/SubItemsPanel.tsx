@@ -1,4 +1,5 @@
 import { STATUS_OPTIONS, type ProjectStatus } from '../../types/project'
+import { CONTACT_STATUS_OPTIONS, type ContactStatus } from '../../types/contact'
 import type { AppView } from './IconSidebar'
 
 interface SubItemsPanelProps {
@@ -7,6 +8,8 @@ interface SubItemsPanelProps {
   onAddItem: () => void
   activeStatusFilter: ProjectStatus | null
   onStatusChange: (status: ProjectStatus | null) => void
+  activeContactStatusFilter: ContactStatus | null
+  onContactStatusChange: (status: ContactStatus | null) => void
 }
 
 function filterButtonStyle(active: boolean) {
@@ -32,8 +35,9 @@ const VIEW_LABELS: Record<AppView, string> = {
   contacts: 'Contacts',
 }
 
-export function SubItemsPanel({ activeView, totalCount, onAddItem, activeStatusFilter, onStatusChange }: SubItemsPanelProps) {
+export function SubItemsPanel({ activeView, totalCount, onAddItem, activeStatusFilter, onStatusChange, activeContactStatusFilter, onContactStatusChange }: SubItemsPanelProps) {
   const isAll = activeStatusFilter === null
+  const isContactAll = activeContactStatusFilter === null
 
   return (
     <div style={{
@@ -83,24 +87,25 @@ export function SubItemsPanel({ activeView, totalCount, onAddItem, activeStatusF
 
       {activeView === 'projects' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '0 8px' }}>
-          <button
-            aria-label="All"
-            aria-current={isAll ? 'page' : undefined}
-            onClick={() => onStatusChange(null)}
-            style={filterButtonStyle(isAll)}
-          >
-            All
-          </button>
+          <button aria-label="All" aria-current={isAll ? 'page' : undefined} onClick={() => onStatusChange(null)} style={filterButtonStyle(isAll)}>All</button>
           {STATUS_OPTIONS.map(status => {
             const active = activeStatusFilter === status
             return (
-              <button
-                key={status}
-                aria-label={status}
-                aria-current={active ? 'page' : undefined}
-                onClick={() => onStatusChange(status)}
-                style={filterButtonStyle(active)}
-              >
+              <button key={status} aria-label={status} aria-current={active ? 'page' : undefined} onClick={() => onStatusChange(status)} style={filterButtonStyle(active)}>
+                {status}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      {activeView === 'contacts' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '0 8px' }}>
+          <button aria-label="All" aria-current={isContactAll ? 'page' : undefined} onClick={() => onContactStatusChange(null)} style={filterButtonStyle(isContactAll)}>All</button>
+          {CONTACT_STATUS_OPTIONS.map(status => {
+            const active = activeContactStatusFilter === status
+            return (
+              <button key={status} aria-label={status} aria-current={active ? 'page' : undefined} onClick={() => onContactStatusChange(status)} style={filterButtonStyle(active)}>
                 {status}
               </button>
             )

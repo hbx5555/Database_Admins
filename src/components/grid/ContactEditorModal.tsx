@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import type { Contact, ContactInsert, ContactUpdate } from '../../types/contact'
-import { CONTACT_COLUMN_LABELS } from '../../types/contact'
+import type { Contact, ContactInsert, ContactUpdate, ContactStatus } from '../../types/contact'
+import { CONTACT_COLUMN_LABELS, CONTACT_STATUS_OPTIONS } from '../../types/contact'
 
 const LABEL_W = 180
 
@@ -48,6 +48,7 @@ const EMPTY_DRAFT: ContactInsert = {
   email: null,
   role: null,
   location: null,
+  status: null,
 }
 
 interface ContactEditorModalProps {
@@ -66,6 +67,7 @@ export function ContactEditorModal({ row, onSave, onAdd, onClose }: ContactEdito
     email: row.email,
     role: row.role,
     location: row.location,
+    status: row.status,
   })
   const [focused, setFocused] = useState<string | null>(null)
 
@@ -83,6 +85,7 @@ export function ContactEditorModal({ row, onSave, onAdd, onClose }: ContactEdito
       if (draft.email !== row.email) changes.email = draft.email
       if (draft.role !== row.role) changes.role = draft.role
       if (draft.location !== row.location) changes.location = draft.location
+      if (draft.status !== row.status) changes.status = draft.status
       if (Object.keys(changes).length > 0) onSave(row.id, changes)
     }
     onClose()
@@ -158,6 +161,22 @@ export function ContactEditorModal({ row, onSave, onAdd, onClose }: ContactEdito
           {textField('email')}
           {textField('role')}
           {textField('location')}
+
+          <FieldRow label={CONTACT_COLUMN_LABELS.status} fieldKey="status" focused={focused}>
+            <select
+              value={draft.status ?? ''}
+              onChange={e => {
+                const v = e.target.value
+                set('status', CONTACT_STATUS_OPTIONS.includes(v as ContactStatus) ? v as ContactStatus : null)
+              }}
+              onFocus={() => setFocused('status')}
+              onBlur={() => setFocused(null)}
+              style={{ ...inp('status'), cursor: 'pointer' }}
+            >
+              <option value="">—</option>
+              {CONTACT_STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </FieldRow>
 
           <div style={{ display: 'flex', borderTop: '1px solid var(--border-color)' }}>
             <div style={{ width: LABEL_W, flexShrink: 0, background: 'var(--surface-primary)' }} />

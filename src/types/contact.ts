@@ -1,3 +1,12 @@
+export type ContactStatus = 'New' | 'Active' | 'Archived'
+export const CONTACT_STATUS_OPTIONS: ContactStatus[] = ['New', 'Active', 'Archived']
+
+export const CONTACT_STATUS_COLORS: Record<ContactStatus, { bg: string; text: string }> = {
+  New:      { bg: '#E8F0FE', text: '#1A56DB' },
+  Active:   { bg: '#D4EDDA', text: '#155724' },
+  Archived: { bg: '#F3F4F6', text: '#4B5563' },
+}
+
 export interface Contact {
   id: string
   first_name: string | null
@@ -7,6 +16,7 @@ export interface Contact {
   email: string | null
   role: string | null
   location: string | null
+  status: ContactStatus | null
   created_at: string
   updated_at: string
 }
@@ -36,4 +46,5 @@ export const CONTACT_COLUMN_LABELS: Record<string, string> = {
   email: 'Email',
   role: 'Role',
   location: 'Location',
+  status: 'Status',
 }

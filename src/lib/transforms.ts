@@ -46,8 +46,12 @@ export function applyStatusFilter(filters: FilterSpec[], status: ProjectStatus |
 
 // ── Contact transforms ────────────────────────────────────────────────────────
 
-import type { Contact } from '../types/contact'
-import type { ContactSortSpec } from '../types/contact'
+import type { Contact, ContactSortSpec, ContactStatus } from '../types/contact'
+
+export function applyContactStatusFilter(rows: Contact[], status: ContactStatus | null): Contact[] {
+  if (status === null) return rows
+  return rows.filter(row => row.status === status)
+}
 
 export function applyContactSorts(rows: Contact[], sorts: ContactSortSpec[]): Contact[] {
   if (sorts.length === 0) return rows

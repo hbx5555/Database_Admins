@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { DataSheetGrid, textColumn, keyColumn } from 'react-datasheet-grid'
 import type { Column } from 'react-datasheet-grid'
-import type { Contact, ContactUpdate, ContactSortSpec } from '../../types/contact'
-import { CONTACT_COLUMN_LABELS } from '../../types/contact'
+import type { Contact, ContactUpdate, ContactSortSpec, ContactStatus } from '../../types/contact'
+import { CONTACT_COLUMN_LABELS, CONTACT_STATUS_OPTIONS, CONTACT_STATUS_COLORS } from '../../types/contact'
 import { useColumnResize, CONTACT_COLUMN_LS_KEY, CONTACT_DEFAULT_WIDTHS } from '../../hooks/useColumnResize'
 import { ResizeHandle } from './ResizeHandle'
 
@@ -128,6 +128,40 @@ export function ContactsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
       title: colTitle('location', CONTACT_COLUMN_LABELS.location),
       basis: columnWidths.location, grow: 0, shrink: 0,
     },
+    {
+      title: colTitle('status', CONTACT_COLUMN_LABELS.status),
+      basis: columnWidths.status ?? 120, grow: 0, shrink: 0,
+      keepFocus: true,
+      component: ({ rowData, setRowData, focus }: { rowData: ContactRow; setRowData: (r: ContactRow) => void; focus: boolean }) => {
+        if (focus) {
+          return (
+            <select
+              autoFocus
+              value={rowData.status ?? ''}
+              onChange={e => {
+                const val = e.target.value
+                setRowData({ ...rowData, status: (CONTACT_STATUS_OPTIONS.includes(val as ContactStatus) ? val as ContactStatus : null) })
+              }}
+              style={{ width: '100%', height: '100%', border: 'none', outline: 'none', background: 'transparent', fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--foreground-primary)', cursor: 'pointer', padding: '0 8px' }}
+            >
+              <option value="">—</option>
+              {CONTACT_STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          )
+        }
+        return (
+          <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%' }}>
+            {rowData.status
+              ? <span style={{ display: 'inline-block', padding: '2px 10px', borderRadius: 'var(--radius-pill)', backgroundColor: CONTACT_STATUS_COLORS[rowData.status].bg, color: CONTACT_STATUS_COLORS[rowData.status].text, fontSize: 12, fontFamily: 'var(--font-captions)', fontWeight: 500, lineHeight: '20px', whiteSpace: 'nowrap' }}>{rowData.status}</span>
+              : <span style={{ color: 'var(--foreground-secondary)' }}>—</span>
+            }
+          </div>
+        )
+      },
+      deleteValue: ({ rowData }: { rowData: ContactRow }) => ({ ...rowData, status: null }),
+      copyValue: ({ rowData }: { rowData: ContactRow }) => rowData.status ?? '',
+      pasteValue: ({ rowData, value }: { rowData: ContactRow; value: string }) => ({ ...rowData, status: CONTACT_STATUS_OPTIONS.includes(value as ContactStatus) ? value as ContactStatus : null }),
+    },
   ], [columnWidths, colTitle, onToggleRow])
 
   const handleChange = (newRows: ContactRow[], operations: Operation[]) => {
@@ -142,6 +176,7 @@ export function ContactsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
         if (updated.email !== original.email) changes.email = updated.email
         if (updated.role !== original.role) changes.role = updated.role
         if (updated.location !== original.location) changes.location = updated.location
+        if (updated.status !== original.status) changes.status = updated.status
         if (Object.keys(changes).length > 0) onRowChange(original.id, changes)
       }
     }

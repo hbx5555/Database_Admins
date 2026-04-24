@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { fetchContacts, createContact, updateContact, deleteContacts } from '../lib/contactsApi'
-import { applyContactSorts, applyContactSearch, paginateContactRows } from '../lib/transforms'
-import type { Contact, ContactInsert, ContactUpdate, ContactViewConfig, ContactSortSpec } from '../types/contact'
+import { applyContactSorts, applyContactSearch, applyContactStatusFilter, paginateContactRows } from '../lib/transforms'
+import type { Contact, ContactInsert, ContactUpdate, ContactViewConfig, ContactSortSpec, ContactStatus } from '../types/contact'
 import { DEFAULT_CONTACT_VIEW_CONFIG, DEFAULT_CONTACT_PAGINATION } from '../types/contact'
 
 interface UseContactsReturn {
@@ -10,6 +10,8 @@ interface UseContactsReturn {
   loading: boolean
   error: string | null
   pagination: { page: number; pageSize: number; total: number }
+  activeStatusFilter: ContactStatus | null
+  setStatusFilter: (status: ContactStatus | null) => void
   searchQuery: string
   setSearchQuery: (q: string) => void
   sorts: ContactSortSpec[]
@@ -28,6 +30,7 @@ export function useContacts(): UseContactsReturn {
   const [viewConfig, setViewConfig] = useState<ContactViewConfig>(DEFAULT_CONTACT_VIEW_CONFIG)
   const [pagination, setPagination] = useState(DEFAULT_CONTACT_PAGINATION)
   const [searchQuery, setSearchQuery] = useState('')
+  const [activeStatusFilter, setActiveStatusFilter] = useState<ContactStatus | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -46,8 +49,14 @@ export function useContacts(): UseContactsReturn {
   useEffect(() => { load() }, [load])
 
   const filteredSorted = useMemo(
-    () => applyContactSearch(applyContactSorts(sourceRows, viewConfig.sorts), searchQuery),
-    [sourceRows, viewConfig.sorts, searchQuery]
+    () => applyContactSearch(
+      applyContactSorts(
+        applyContactStatusFilter(sourceRows, activeStatusFilter),
+        viewConfig.sorts
+      ),
+      searchQuery
+    ),
+    [sourceRows, viewConfig.sorts, searchQuery, activeStatusFilter]
   )
 
   const displayRows = useMemo(
@@ -61,6 +70,10 @@ export function useContacts(): UseContactsReturn {
 
   const setPage = useCallback((page: number) => {
     setPagination(p => ({ ...p, page }))
+  }, [])
+
+  const setStatusFilter = useCallback((status: ContactStatus | null) => {
+    setActiveStatusFilter(status)
   }, [])
 
   const setSortField = useCallback((field: keyof Contact) => {
@@ -115,6 +128,7 @@ export function useContacts(): UseContactsReturn {
 
   return {
     displayRows, sourceRows, loading, error, pagination,
+    activeStatusFilter, setStatusFilter,
     searchQuery, setSearchQuery,
     sorts: viewConfig.sorts, setSortField,
     setPage, refresh: load,

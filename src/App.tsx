@@ -32,6 +32,7 @@ const NEW_CONTACT_DEFAULTS: ContactInsert = {
   email: null,
   role: null,
   location: null,
+  status: null,
 }
 
 export default function App() {
@@ -106,6 +107,8 @@ export default function App() {
     setSearchQuery: setContactSearch,
     sorts: contactSorts,
     setSortField: setContactSort,
+    activeStatusFilter: activeContactStatusFilter,
+    setStatusFilter: setContactStatusFilter,
   } = useContacts()
 
   const [contactSelectedIds, setContactSelectedIds] = useState<Set<string>>(new Set())
@@ -181,6 +184,8 @@ export default function App() {
           onAddItem={onFabClick}
           activeStatusFilter={activeStatusFilter}
           onStatusChange={setStatusFilter}
+          activeContactStatusFilter={activeContactStatusFilter}
+          onContactStatusChange={setContactStatusFilter}
         />
       </div>
 
