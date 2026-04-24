@@ -97,7 +97,10 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
   const { columnWidths, finalizeWidth } = useColumnResize()
   // Incrementing this forces DataSheetGrid to remount, which reinitialises
   // TanStack Virtual's measurement cache with the new column basis values.
+  // DSG also does not re-render column titles when columns prop changes, so
+  // sort state is included in the key so headers remount with correct triangles.
   const [resizeVersion, setResizeVersion] = useState(0)
+  const sortKey = sorts.map(s => `${String(s.field)}:${s.direction}`).join(',')
 
   // Merge selection into rowData so DSG sees a real data change and re-renders cells
   const viewRows = useMemo(
@@ -387,7 +390,7 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
         .checkbox-cell { padding: 0 !important; }
       `}</style>
       <DataSheetGrid<ProjectRow>
-        key={resizeVersion}
+        key={`${resizeVersion}-${sortKey}`}
         value={viewRows}
         onChange={handleChange}
         columns={columns}
