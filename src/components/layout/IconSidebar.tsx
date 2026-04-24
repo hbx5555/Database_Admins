@@ -7,9 +7,9 @@ interface IconSidebarProps {
 }
 
 const NAV_ICONS: { name: string; label: string; view: AppView | null }[] = [
-  { name: 'task_alt', label: 'Tasks', view: null },
-  { name: 'folder', label: 'Projects', view: 'projects' },
+  { name: 'task_alt', label: 'Projects', view: 'projects' },
   { name: 'person', label: 'Contacts', view: 'contacts' },
+  { name: 'folder', label: 'Folder', view: null },
   { name: 'leaderboard', label: 'Leads', view: null },
   { name: 'label', label: 'Statuses', view: null },
 ]

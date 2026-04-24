@@ -68,7 +68,7 @@ export function ContactsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
 
   const inp = (readOnly?: boolean): React.CSSProperties => ({
     width: '100%', height: '100%', border: 'none', outline: 'none',
-    background: readOnly ? 'var(--surface-primary)' : 'transparent',
+    background: readOnly ? '#F9F8F6' : 'transparent',
     fontFamily: 'var(--font-body)', fontSize: 13,
     color: readOnly ? 'var(--foreground-secondary)' : 'var(--foreground-primary)',
     padding: '0 8px', cursor: readOnly ? 'default' : 'text',
