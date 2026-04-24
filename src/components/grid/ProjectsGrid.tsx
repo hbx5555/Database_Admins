@@ -129,7 +129,7 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
           fontSize: 36, marginRight: 4, flexShrink: 0,
           color: 'var(--accent-primary)',
         }}>
-          {sort?.direction === 'desc' ? 'arrow_drop_up' : 'arrow_drop_down'}
+          {sort?.direction === 'asc' ? 'arrow_drop_down' : 'arrow_drop_up'}
         </span>
         <ResizeHandle columnKey={key} onFinalizeWidth={handleFinalizeWidth} currentWidth={columnWidths[key]} />
       </div>
