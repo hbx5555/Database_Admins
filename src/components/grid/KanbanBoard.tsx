@@ -75,7 +75,7 @@ function CardContent<T extends { id: string }>({
         <div style={{
           width: 34, flexShrink: 0,
           display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'flex-start', gap: 6,
+          alignItems: 'center', justifyContent: 'flex-start', gap: 2,
           paddingTop: 8,
           borderLeft: '1px solid var(--border-color)',
         }}>
