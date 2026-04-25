@@ -1,4 +1,13 @@
 import { useState } from 'react'
+
+const ACTION_BTN: React.CSSProperties = {
+  background: 'var(--white)',
+  border: '1px solid var(--border-color)',
+  borderRadius: 'var(--radius-sm)',
+  cursor: 'pointer',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  width: 26, height: 26, padding: 0, flexShrink: 0,
+}
 import {
   DndContext,
   DragOverlay,
@@ -76,12 +85,14 @@ interface KanbanCardProps<T extends { id: string }> {
   columnLabels: Record<string, string>
   accentColor: string
   onEdit: (id: string) => void
+  onDelete: (id: string) => void
 }
 
 function KanbanCard<T extends { id: string }>({
-  row, primaryField, cardFields, columnLabels, accentColor, onEdit,
+  row, primaryField, cardFields, columnLabels, accentColor, onEdit, onDelete,
 }: KanbanCardProps<T>) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: row.id })
+  const [hovered, setHovered] = useState(false)
 
   if (isDragging) {
     return (
@@ -100,7 +111,9 @@ function KanbanCard<T extends { id: string }>({
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      style={{ marginBottom: 8, cursor: 'grab' }}
+      style={{ marginBottom: 8, cursor: 'grab', position: 'relative' }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       onDoubleClick={() => onEdit(row.id)}
     >
       <CardContent
@@ -110,6 +123,29 @@ function KanbanCard<T extends { id: string }>({
         columnLabels={columnLabels}
         accentColor={accentColor}
       />
+      {hovered && (
+        <div style={{
+          position: 'absolute', top: 7, right: 8,
+          display: 'flex', gap: 4, zIndex: 1,
+        }}>
+          <button
+            title="Edit"
+            style={ACTION_BTN}
+            onPointerDown={e => e.stopPropagation()}
+            onClick={e => { e.stopPropagation(); onEdit(row.id) }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 14, color: 'var(--foreground-secondary)' }}>edit</span>
+          </button>
+          <button
+            title="Delete"
+            style={ACTION_BTN}
+            onPointerDown={e => e.stopPropagation()}
+            onClick={e => { e.stopPropagation(); onDelete(row.id) }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#C0392B' }}>delete</span>
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -124,10 +160,11 @@ interface KanbanLaneProps<T extends { id: string }, TStatus extends string> {
   cardFields: (keyof T)[]
   columnLabels: Record<string, string>
   onEdit: (id: string) => void
+  onDelete: (id: string) => void
 }
 
 function KanbanLane<T extends { id: string }, TStatus extends string>({
-  status, colors, cards, primaryField, cardFields, columnLabels, onEdit,
+  status, colors, cards, primaryField, cardFields, columnLabels, onEdit, onDelete,
 }: KanbanLaneProps<T, TStatus>) {
   const { isOver, setNodeRef } = useDroppable({ id: status })
 
@@ -176,6 +213,7 @@ function KanbanLane<T extends { id: string }, TStatus extends string>({
             columnLabels={columnLabels}
             accentColor={colors.text}
             onEdit={onEdit}
+            onDelete={onDelete}
           />
         ))}
         {cards.length === 0 && (
@@ -201,11 +239,12 @@ interface KanbanBoardProps<T extends { id: string }, TStatus extends string> {
   rows: T[]
   config: TableConfig<T, TStatus>
   onEdit: (id: string) => void
+  onDelete: (id: string) => void
   onStatusChange: (id: string, newStatus: TStatus) => void
 }
 
 export function KanbanBoard<T extends { id: string }, TStatus extends string>({
-  rows, config, onEdit, onStatusChange,
+  rows, config, onEdit, onDelete, onStatusChange,
 }: KanbanBoardProps<T, TStatus>) {
   const [activeId, setActiveId] = useState<string | null>(null)
 
@@ -275,6 +314,7 @@ export function KanbanBoard<T extends { id: string }, TStatus extends string>({
               cardFields={config.cardFields}
               columnLabels={config.columnLabels}
               onEdit={onEdit}
+              onDelete={onDelete}
             />
           ))}
         </div>

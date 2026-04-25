@@ -246,6 +246,7 @@ export default function App() {
               rows={projectFilteredRows}
               config={PROJECTS_CONFIG}
               onEdit={handleEditProject}
+              onDelete={id => removeProjects([id])}
               onStatusChange={(id, status) => editProject(id, { project_status: status })}
             />
           )}
@@ -267,6 +268,7 @@ export default function App() {
               rows={contactFilteredRows}
               config={CONTACTS_CONFIG}
               onEdit={handleEditContact}
+              onDelete={id => removeContacts([id])}
               onStatusChange={(id, status) => editContact(id, { status })}
             />
           )}
