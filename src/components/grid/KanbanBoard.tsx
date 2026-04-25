@@ -12,6 +12,9 @@ import {
 } from '@dnd-kit/core'
 import type { TableConfig } from '../../types/tableConfig'
 
+const CARD_BG = '#f4f1e9'
+const CARD_RADIUS = 8
+
 // ── Card content — rendered both in place and inside DragOverlay ─────────────
 
 interface CardContentProps<T> {
@@ -19,37 +22,46 @@ interface CardContentProps<T> {
   primaryField: keyof T
   cardFields: (keyof T)[]
   columnLabels: Record<string, string>
+  accentColor: string  // left bar colour derived from the lane's status
 }
 
-function CardContent<T>({ row, primaryField, cardFields, columnLabels }: CardContentProps<T>) {
+function CardContent<T>({ row, primaryField, cardFields, columnLabels, accentColor }: CardContentProps<T>) {
+  const visibleFields = cardFields.filter(f => {
+    const v = row[f]
+    return v !== null && v !== undefined && v !== ''
+  })
   return (
     <div style={{
-      background: 'var(--white)',
-      border: '1px solid var(--border-color)',
-      borderRadius: 'var(--radius-md)',
-      padding: '10px 12px',
+      display: 'flex',
+      background: CARD_BG,
+      borderRadius: CARD_RADIUS,
+      overflow: 'hidden',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
     }}>
-      <div style={{
-        fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600,
-        color: 'var(--foreground-primary)',
-        marginBottom: cardFields.length > 0 ? 4 : 0,
-        lineHeight: 1.4,
-      }}>
-        {String(row[primaryField] ?? '—')}
-      </div>
-      {cardFields.map(field => {
-        const val = row[field]
-        if (val === null || val === undefined || val === '') return null
-        return (
+      {/* Status accent bar — mirrors the form modal's left stripe */}
+      <div style={{ width: 5, flexShrink: 0, background: accentColor }} />
+
+      <div style={{ flex: 1, padding: '10px 12px' }}>
+        <div style={{
+          fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600,
+          color: 'var(--foreground-primary)',
+          lineHeight: 1.4,
+          marginBottom: visibleFields.length > 0 ? 8 : 0,
+        }}>
+          {String(row[primaryField] ?? '—')}
+        </div>
+        {visibleFields.map(field => (
           <div key={String(field)} style={{
             fontFamily: 'var(--font-body)', fontSize: 11,
-            color: 'var(--foreground-secondary)', marginTop: 2,
+            color: 'var(--foreground-secondary)',
+            lineHeight: 1.5,
+            marginTop: 7,
           }}>
             <span style={{ fontWeight: 500 }}>{columnLabels[String(field)] ?? String(field)}: </span>
-            {String(val)}
+            {String(row[field])}
           </div>
-        )
-      })}
+        ))}
+      </div>
     </div>
   )
 }
@@ -61,11 +73,12 @@ interface KanbanCardProps<T extends { id: string }> {
   primaryField: keyof T
   cardFields: (keyof T)[]
   columnLabels: Record<string, string>
+  accentColor: string
   onEdit: (id: string) => void
 }
 
 function KanbanCard<T extends { id: string }>({
-  row, primaryField, cardFields, columnLabels, onEdit,
+  row, primaryField, cardFields, columnLabels, accentColor, onEdit,
 }: KanbanCardProps<T>) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: row.id })
 
@@ -74,9 +87,9 @@ function KanbanCard<T extends { id: string }>({
       <div ref={setNodeRef} style={{
         height: 52,
         border: '2px dashed var(--border-color)',
-        borderRadius: 'var(--radius-md)',
+        borderRadius: CARD_RADIUS,
         marginBottom: 8,
-        background: 'var(--surface-primary)',
+        background: 'rgba(0,0,0,0.03)',
       }} />
     )
   }
@@ -94,6 +107,7 @@ function KanbanCard<T extends { id: string }>({
         primaryField={primaryField}
         cardFields={cardFields}
         columnLabels={columnLabels}
+        accentColor={accentColor}
       />
     </div>
   )
@@ -117,26 +131,11 @@ function KanbanLane<T extends { id: string }, TStatus extends string>({
   const { isOver, setNodeRef } = useDroppable({ id: status })
 
   return (
-    <div
-      ref={setNodeRef}
-      style={{
-        width: 280,
-        flexShrink: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        background: isOver ? 'rgba(44,94,58,0.06)' : 'var(--surface-primary)',
-        borderRadius: 'var(--radius-md)',
-        border: `1px solid ${isOver ? 'var(--accent-secondary)' : 'var(--border-color)'}`,
-        transition: 'background 0.15s, border-color 0.15s',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Lane header */}
+    <div style={{ width: 280, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+      {/* Lane header — status pill + count only, no background box */}
       <div style={{
-        padding: '10px 12px 8px',
         display: 'flex', alignItems: 'center', gap: 8,
-        flexShrink: 0,
-        borderBottom: '1px solid var(--border-color)',
+        paddingBottom: 10, flexShrink: 0,
       }}>
         <span style={{
           display: 'inline-block',
@@ -149,16 +148,24 @@ function KanbanLane<T extends { id: string }, TStatus extends string>({
         }}>
           {status}
         </span>
-        <span style={{
-          fontFamily: 'var(--font-captions)', fontSize: 12,
-          color: 'var(--foreground-secondary)',
-        }}>
+        <span style={{ fontFamily: 'var(--font-captions)', fontSize: 12, color: 'var(--foreground-secondary)' }}>
           {cards.length}
         </span>
       </div>
 
-      {/* Cards */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '10px 10px 4px' }}>
+      {/* Cards area — the droppable target */}
+      <div
+        ref={setNodeRef}
+        style={{
+          flex: 1, overflowY: 'auto',
+          borderRadius: CARD_RADIUS,
+          padding: 8,
+          background: isOver ? 'rgba(44,94,58,0.05)' : 'transparent',
+          outline: isOver ? '2px dashed rgba(44,94,58,0.25)' : '2px dashed transparent',
+          transition: 'background 0.15s, outline-color 0.15s',
+          minHeight: 80,
+        }}
+      >
         {cards.map(row => (
           <KanbanCard
             key={row.id}
@@ -166,6 +173,7 @@ function KanbanLane<T extends { id: string }, TStatus extends string>({
             primaryField={primaryField}
             cardFields={cardFields}
             columnLabels={columnLabels}
+            accentColor={colors.text}
             onEdit={onEdit}
           />
         ))}
@@ -173,7 +181,7 @@ function KanbanLane<T extends { id: string }, TStatus extends string>({
           <div style={{
             height: 56,
             border: '2px dashed var(--border-color)',
-            borderRadius: 'var(--radius-md)',
+            borderRadius: CARD_RADIUS,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: 'var(--foreground-secondary)',
             fontFamily: 'var(--font-body)', fontSize: 12,
@@ -215,6 +223,12 @@ export function KanbanBoard<T extends { id: string }, TStatus extends string>({
   ).length
 
   const activeRow = activeId ? rows.find(r => r.id === activeId) ?? null : null
+  const activeStatus = activeRow
+    ? (activeRow[config.statusField] as unknown as TStatus | null)
+    : null
+  const activeAccentColor = activeStatus && config.statusColors[activeStatus]
+    ? config.statusColors[activeStatus].text
+    : 'var(--accent-primary)'
 
   function handleDragStart(event: DragStartEvent) {
     setActiveId(event.active.id as string)
@@ -245,9 +259,9 @@ export function KanbanBoard<T extends { id: string }, TStatus extends string>({
           </div>
         )}
         <div style={{
-          display: 'flex', gap: 12, padding: 16,
+          display: 'flex', gap: 20, padding: 20,
           overflowX: 'auto', overflowY: 'hidden',
-          flex: 1, alignItems: 'stretch',
+          flex: 1, alignItems: 'flex-start',
         }}>
           {config.statusOptions.map(status => (
             <KanbanLane
@@ -269,8 +283,8 @@ export function KanbanBoard<T extends { id: string }, TStatus extends string>({
           <div style={{
             cursor: 'grabbing',
             transform: 'rotate(1.5deg)',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
-            borderRadius: 'var(--radius-md)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+            borderRadius: CARD_RADIUS,
             width: 280,
           }}>
             <CardContent
@@ -278,6 +292,7 @@ export function KanbanBoard<T extends { id: string }, TStatus extends string>({
               primaryField={config.primaryField}
               cardFields={config.cardFields}
               columnLabels={config.columnLabels}
+              accentColor={activeAccentColor}
             />
           </div>
         )}
