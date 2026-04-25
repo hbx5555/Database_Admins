@@ -1,13 +1,4 @@
 import { useState } from 'react'
-
-const ACTION_BTN: React.CSSProperties = {
-  background: 'var(--white)',
-  border: '1px solid var(--border-color)',
-  borderRadius: 'var(--radius-sm)',
-  cursor: 'pointer',
-  display: 'flex', alignItems: 'center', justifyContent: 'center',
-  width: 26, height: 26, padding: 0, flexShrink: 0,
-}
 import {
   DndContext,
   DragOverlay,
@@ -25,21 +16,29 @@ const CARD_BG = 'var(--white)'
 const BOARD_BG = '#f4f1e9'
 const CARD_RADIUS = 8
 
-// ── Card content — rendered both in place and inside DragOverlay ─────────────
+// ── Card content — rendered both in-lane and inside DragOverlay ───────────────
+// When onEdit + onDelete are provided a permanent icon strip appears on the right.
+// DragOverlay omits them so the floating preview stays clean.
 
-interface CardContentProps<T> {
+interface CardContentProps<T extends { id: string }> {
   row: T
   primaryField: keyof T
   cardFields: (keyof T)[]
   columnLabels: Record<string, string>
-  accentColor: string  // left bar colour derived from the lane's status
+  accentColor: string
+  onEdit?: (id: string) => void
+  onDelete?: (id: string) => void
 }
 
-function CardContent<T>({ row, primaryField, cardFields, columnLabels, accentColor }: CardContentProps<T>) {
+function CardContent<T extends { id: string }>({
+  row, primaryField, cardFields, columnLabels, accentColor, onEdit, onDelete,
+}: CardContentProps<T>) {
   const visibleFields = cardFields.filter(f => {
     const v = row[f]
     return v !== null && v !== undefined && v !== ''
   })
+  const showActions = !!(onEdit && onDelete)
+
   return (
     <div style={{
       display: 'flex',
@@ -51,11 +50,11 @@ function CardContent<T>({ row, primaryField, cardFields, columnLabels, accentCol
       {/* Status accent bar — mirrors the form modal's left stripe */}
       <div style={{ width: 5, flexShrink: 0, background: accentColor }} />
 
+      {/* Text content */}
       <div style={{ flex: 1, padding: '10px 12px' }}>
         <div style={{
           fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600,
-          color: 'var(--foreground-primary)',
-          lineHeight: 1.4,
+          color: 'var(--foreground-primary)', lineHeight: 1.4,
           marginBottom: visibleFields.length > 0 ? 8 : 0,
         }}>
           {String(row[primaryField] ?? '—')}
@@ -63,15 +62,40 @@ function CardContent<T>({ row, primaryField, cardFields, columnLabels, accentCol
         {visibleFields.map(field => (
           <div key={String(field)} style={{
             fontFamily: 'var(--font-body)', fontSize: 11,
-            color: 'var(--foreground-secondary)',
-            lineHeight: 1.5,
-            marginTop: 7,
+            color: 'var(--foreground-secondary)', lineHeight: 1.5, marginTop: 7,
           }}>
             <span style={{ fontWeight: 500 }}>{columnLabels[String(field)] ?? String(field)}: </span>
             {String(row[field])}
           </div>
         ))}
       </div>
+
+      {/* Permanent action strip — vertical column on the right */}
+      {showActions && (
+        <div style={{
+          width: 34, flexShrink: 0,
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center', gap: 6,
+          borderLeft: '1px solid var(--border-color)',
+        }}>
+          <button
+            title="Edit"
+            onPointerDown={e => e.stopPropagation()}
+            onClick={e => { e.stopPropagation(); onEdit!(row.id) }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 15, color: 'var(--foreground-secondary)' }}>edit</span>
+          </button>
+          <button
+            title="Delete"
+            onPointerDown={e => e.stopPropagation()}
+            onClick={e => { e.stopPropagation(); onDelete!(row.id) }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 15, color: '#C0392B' }}>delete</span>
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -92,7 +116,6 @@ function KanbanCard<T extends { id: string }>({
   row, primaryField, cardFields, columnLabels, accentColor, onEdit, onDelete,
 }: KanbanCardProps<T>) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: row.id })
-  const [hovered, setHovered] = useState(false)
 
   if (isDragging) {
     return (
@@ -111,9 +134,7 @@ function KanbanCard<T extends { id: string }>({
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      style={{ marginBottom: 8, cursor: 'grab', position: 'relative' }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      style={{ marginBottom: 8, cursor: 'grab' }}
       onDoubleClick={() => onEdit(row.id)}
     >
       <CardContent
@@ -122,30 +143,9 @@ function KanbanCard<T extends { id: string }>({
         cardFields={cardFields}
         columnLabels={columnLabels}
         accentColor={accentColor}
+        onEdit={onEdit}
+        onDelete={onDelete}
       />
-      {hovered && (
-        <div style={{
-          position: 'absolute', top: 7, right: 8,
-          display: 'flex', gap: 4, zIndex: 1,
-        }}>
-          <button
-            title="Edit"
-            style={ACTION_BTN}
-            onPointerDown={e => e.stopPropagation()}
-            onClick={e => { e.stopPropagation(); onEdit(row.id) }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 14, color: 'var(--foreground-secondary)' }}>edit</span>
-          </button>
-          <button
-            title="Delete"
-            style={ACTION_BTN}
-            onPointerDown={e => e.stopPropagation()}
-            onClick={e => { e.stopPropagation(); onDelete(row.id) }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#C0392B' }}>delete</span>
-          </button>
-        </div>
-      )}
     </div>
   )
 }
@@ -170,17 +170,12 @@ function KanbanLane<T extends { id: string }, TStatus extends string>({
 
   return (
     <div style={{ width: 280, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
-      {/* Lane header — status pill + count only, no background box */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 8,
-        paddingBottom: 10, flexShrink: 0,
-      }}>
+      {/* Lane header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingBottom: 10, flexShrink: 0 }}>
         <span style={{
-          display: 'inline-block',
-          padding: '2px 10px',
+          display: 'inline-block', padding: '2px 10px',
           borderRadius: 'var(--radius-pill)',
-          background: colors.bg,
-          color: colors.text,
+          background: colors.bg, color: colors.text,
           fontSize: 12, fontFamily: 'var(--font-captions)', fontWeight: 600,
           lineHeight: '20px', whiteSpace: 'nowrap',
         }}>
@@ -191,13 +186,11 @@ function KanbanLane<T extends { id: string }, TStatus extends string>({
         </span>
       </div>
 
-      {/* Cards area — the droppable target */}
+      {/* Cards area — droppable */}
       <div
         ref={setNodeRef}
         style={{
-          flex: 1, overflowY: 'auto',
-          borderRadius: CARD_RADIUS,
-          padding: 8,
+          flex: 1, overflowY: 'auto', borderRadius: CARD_RADIUS, padding: 8,
           background: isOver ? 'rgba(44,94,58,0.05)' : 'transparent',
           outline: isOver ? '2px dashed rgba(44,94,58,0.25)' : '2px dashed transparent',
           transition: 'background 0.15s, outline-color 0.15s',
@@ -218,12 +211,10 @@ function KanbanLane<T extends { id: string }, TStatus extends string>({
         ))}
         {cards.length === 0 && (
           <div style={{
-            height: 56,
-            border: '2px dashed var(--border-color)',
+            height: 56, border: '2px dashed var(--border-color)',
             borderRadius: CARD_RADIUS,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: 'var(--foreground-secondary)',
-            fontFamily: 'var(--font-body)', fontSize: 12,
+            color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)', fontSize: 12,
           }}>
             Drop here
           </div>
@@ -248,7 +239,7 @@ export function KanbanBoard<T extends { id: string }, TStatus extends string>({
 }: KanbanBoardProps<T, TStatus>) {
   const [activeId, setActiveId] = useState<string | null>(null)
 
-  // Drag only activates after 8 px of movement so clicks/double-clicks are never swallowed
+  // Drag only activates after 8 px of movement so clicks are never swallowed
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
 
   const grouped: Partial<Record<TStatus, T[]>> = {}
@@ -289,11 +280,9 @@ export function KanbanBoard<T extends { id: string }, TStatus extends string>({
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
         {unassignedCount > 0 && (
           <div style={{
-            padding: '6px 16px',
-            background: '#FFF8E7',
+            padding: '6px 16px', background: '#FFF8E7',
             borderBottom: '1px solid var(--border-color)',
-            fontFamily: 'var(--font-body)', fontSize: 12,
-            color: '#856404', flexShrink: 0,
+            fontFamily: 'var(--font-body)', fontSize: 12, color: '#856404', flexShrink: 0,
           }}>
             {unassignedCount} record{unassignedCount > 1 ? 's' : ''} without a status are not shown — set a status in grid view to include them.
           </div>
@@ -320,14 +309,13 @@ export function KanbanBoard<T extends { id: string }, TStatus extends string>({
         </div>
       </div>
 
+      {/* Drag preview — no action strip so it stays clean while dragging */}
       <DragOverlay>
         {activeRow && (
           <div style={{
-            cursor: 'grabbing',
-            transform: 'rotate(1.5deg)',
+            cursor: 'grabbing', transform: 'rotate(1.5deg)',
             boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
-            borderRadius: CARD_RADIUS,
-            width: 280,
+            borderRadius: CARD_RADIUS, width: 280,
           }}>
             <CardContent
               row={activeRow}
