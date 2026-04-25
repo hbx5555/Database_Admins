@@ -2,8 +2,11 @@ import { useState } from 'react'
 import {
   DndContext,
   DragOverlay,
+  PointerSensor,
   useDraggable,
   useDroppable,
+  useSensor,
+  useSensors,
   type DragStartEvent,
   type DragEndEvent,
 } from '@dnd-kit/core'
@@ -197,6 +200,9 @@ export function KanbanBoard<T extends { id: string }, TStatus extends string>({
 }: KanbanBoardProps<T, TStatus>) {
   const [activeId, setActiveId] = useState<string | null>(null)
 
+  // Drag only activates after 8 px of movement so clicks/double-clicks are never swallowed
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
+
   const grouped: Partial<Record<TStatus, T[]>> = {}
   for (const status of config.statusOptions) {
     grouped[status] = rows.filter(
@@ -225,7 +231,7 @@ export function KanbanBoard<T extends { id: string }, TStatus extends string>({
   }
 
   return (
-    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
         {unassignedCount > 0 && (
           <div style={{
