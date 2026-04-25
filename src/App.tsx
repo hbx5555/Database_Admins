@@ -8,8 +8,10 @@ import { GridToolbar } from './components/grid/GridToolbar'
 import { GridStatusBar } from './components/grid/GridStatusBar'
 import { ProjectsGrid } from './components/grid/ProjectsGrid'
 import { ContactsGrid } from './components/grid/ContactsGrid'
+import { KanbanBoard } from './components/grid/KanbanBoard'
 import { RecordEditorModal } from './components/grid/RecordEditorModal'
 import { ContactEditorModal } from './components/grid/ContactEditorModal'
+import { PROJECTS_CONFIG, CONTACTS_CONFIG } from './config/tables'
 import { LoadingState } from './components/shared/LoadingState'
 import { ErrorState } from './components/shared/ErrorState'
 import { EmptyState } from './components/shared/EmptyState'
@@ -42,6 +44,7 @@ export default function App() {
   // ── Projects ─────────────────────────────────────────────────────────────
   const {
     displayRows: projectRows,
+    filteredRows: projectFilteredRows,
     sourceRows: projectSourceRows,
     loading: projectsLoading,
     error: projectsError,
@@ -57,6 +60,8 @@ export default function App() {
     setSearchQuery: setProjectSearch,
     sorts: projectSorts,
     setSortField: setProjectSort,
+    viewMode: projectViewMode,
+    setViewMode: setProjectViewMode,
   } = useProjects()
 
   const [projectSelectedIds, setProjectSelectedIds] = useState<Set<string>>(new Set())
@@ -94,6 +99,7 @@ export default function App() {
   // ── Contacts ─────────────────────────────────────────────────────────────
   const {
     displayRows: contactRows,
+    filteredRows: contactFilteredRows,
     sourceRows: contactSourceRows,
     loading: contactsLoading,
     error: contactsError,
@@ -109,6 +115,8 @@ export default function App() {
     setSortField: setContactSort,
     activeStatusFilter: activeContactStatusFilter,
     setStatusFilter: setContactStatusFilter,
+    viewMode: contactViewMode,
+    setViewMode: setContactViewMode,
   } = useContacts()
 
   const [contactSelectedIds, setContactSelectedIds] = useState<Set<string>>(new Set())
@@ -159,6 +167,9 @@ export default function App() {
   const onDeleteSelected = isProjects ? deleteSelectedProjects : deleteSelectedContacts
   const onPageChange = isProjects ? setProjectsPage : setContactsPage
   const onFabClick = isProjects ? handleProjectFabClick : handleContactFabClick
+  const viewMode = isProjects ? projectViewMode : contactViewMode
+  const onViewModeChange = isProjects ? setProjectViewMode : setContactViewMode
+  const filteredRows = isProjects ? projectFilteredRows : contactFilteredRows
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', minWidth: 1044 }}>
@@ -210,13 +221,15 @@ export default function App() {
             onDeleteSelected={onDeleteSelected}
             searchQuery={searchQuery}
             onSearchChange={onSearchChange}
+            viewMode={viewMode}
+            onViewModeChange={onViewModeChange}
           />
 
           {loading && <LoadingState />}
           {!loading && error && <ErrorState message={error} onRetry={onRefresh} />}
           {!loading && !error && displayRows.length === 0 && <EmptyState />}
 
-          {!loading && !error && displayRows.length > 0 && isProjects && (
+          {!loading && !error && filteredRows.length > 0 && isProjects && viewMode === 'grid' && (
             <ProjectsGrid
               rows={projectRows}
               onRowChange={editProject}
@@ -228,7 +241,16 @@ export default function App() {
             />
           )}
 
-          {!loading && !error && displayRows.length > 0 && !isProjects && (
+          {!loading && !error && filteredRows.length > 0 && isProjects && viewMode === 'kanban' && (
+            <KanbanBoard
+              rows={projectFilteredRows}
+              config={PROJECTS_CONFIG}
+              onEdit={handleEditProject}
+              onStatusChange={(id, status) => editProject(id, { project_status: status })}
+            />
+          )}
+
+          {!loading && !error && filteredRows.length > 0 && !isProjects && viewMode === 'grid' && (
             <ContactsGrid
               rows={contactRows}
               onRowChange={editContact}
@@ -240,7 +262,16 @@ export default function App() {
             />
           )}
 
-          <button
+          {!loading && !error && filteredRows.length > 0 && !isProjects && viewMode === 'kanban' && (
+            <KanbanBoard
+              rows={contactFilteredRows}
+              config={CONTACTS_CONFIG}
+              onEdit={handleEditContact}
+              onStatusChange={(id, status) => editContact(id, { status })}
+            />
+          )}
+
+          {viewMode === 'grid' && <button
             onClick={() => { if (isProjects) addProject(NEW_PROJECT_DEFAULTS).catch(() => {}); else addContact(NEW_CONTACT_DEFAULTS).catch(() => {}) }}
             title="Add record"
             style={{
@@ -254,9 +285,9 @@ export default function App() {
             }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: 22 }}>add</span>
-          </button>
+          </button>}
 
-          <GridStatusBar pagination={pagination} onPageChange={onPageChange} />
+          {viewMode === 'grid' && <GridStatusBar pagination={pagination} onPageChange={onPageChange} />}
         </div>
       </MainContent>
 

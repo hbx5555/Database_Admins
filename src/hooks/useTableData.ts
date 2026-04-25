@@ -22,7 +22,8 @@ interface TableDataConfig<
 
 export interface TableDataReturn<T, TInsert, TUpdate, TStatus extends string = string> {
   sourceRows: T[]
-  displayRows: T[]
+  filteredRows: T[]  // post-filter+sort+search, pre-pagination — used by KanbanBoard
+  displayRows: T[]   // paginated filteredRows — used by Grid
   loading: boolean
   error: string | null
   pagination: { page: number; pageSize: number; total: number }
@@ -33,6 +34,8 @@ export interface TableDataReturn<T, TInsert, TUpdate, TStatus extends string = s
   sorts: GenericSortSpec<T>[]
   setSortField: (field: keyof T) => void
   setPage: (page: number) => void
+  viewMode: 'grid' | 'kanban'
+  setViewMode: (mode: 'grid' | 'kanban') => void
   refresh: () => Promise<void>
   addRow: (data: TInsert) => Promise<void>
   editRow: (id: string, changes: TUpdate) => Promise<void>
@@ -59,6 +62,7 @@ export function useTableData<
   const [pagination, setPagination] = useState({ page: 1, pageSize: PAGE_SIZE, total: 0 })
   const [searchQuery, setSearchQuery] = useState('')
   const [activeStatusFilter, setActiveStatusFilter] = useState<TStatus | null>(null)
+  const [viewMode, setViewMode] = useState<'grid' | 'kanban'>('grid')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -151,10 +155,11 @@ export function useTableData<
   }, [sourceRows])
 
   return {
-    sourceRows, displayRows, loading, error, pagination,
+    sourceRows, filteredRows: filteredSorted, displayRows, loading, error, pagination,
     activeStatusFilter, setStatusFilter,
     searchQuery, setSearchQuery,
     sorts, setSortField,
+    viewMode, setViewMode,
     setPage, refresh: load,
     addRow, editRow, removeRows,
   }

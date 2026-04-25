@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { GridToolbar } from '../src/components/grid/GridToolbar'
 
-const base = { onRefresh: vi.fn(), onSelectAll: vi.fn(), onClearAll: vi.fn(), onDeleteSelected: vi.fn(), searchQuery: '', onSearchChange: vi.fn() }
+const base = { onRefresh: vi.fn(), onSelectAll: vi.fn(), onClearAll: vi.fn(), onDeleteSelected: vi.fn(), searchQuery: '', onSearchChange: vi.fn(), viewMode: 'grid' as const, onViewModeChange: vi.fn() }
 
 describe('GridToolbar checkbox', () => {
   beforeEach(() => vi.clearAllMocks())

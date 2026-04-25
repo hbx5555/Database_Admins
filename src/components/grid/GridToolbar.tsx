@@ -9,9 +9,11 @@ interface GridToolbarProps {
   onDeleteSelected: () => void
   searchQuery: string
   onSearchChange: (q: string) => void
+  viewMode: 'grid' | 'kanban'
+  onViewModeChange: (mode: 'grid' | 'kanban') => void
 }
 
-export function GridToolbar({ onRefresh, selectedCount, totalCount, onSelectAll, onClearAll, onDeleteSelected, searchQuery, onSearchChange }: GridToolbarProps) {
+export function GridToolbar({ onRefresh, selectedCount, totalCount, onSelectAll, onClearAll, onDeleteSelected, searchQuery, onSearchChange, viewMode, onViewModeChange }: GridToolbarProps) {
   const checkboxRef = useRef<HTMLInputElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const isAllSelected = selectedCount === totalCount && totalCount > 0
@@ -123,6 +125,21 @@ export function GridToolbar({ onRefresh, selectedCount, totalCount, onSelectAll,
           </div>
         )}
       </div>
+
+      {/* View mode toggle */}
+      <button
+        onClick={() => onViewModeChange(viewMode === 'grid' ? 'kanban' : 'grid')}
+        title={viewMode === 'grid' ? 'Switch to Kanban view' : 'Switch to Grid view'}
+        style={{
+          ...iconBtn,
+          color: viewMode === 'kanban' ? 'var(--accent-primary)' : 'var(--foreground-secondary)',
+          marginLeft: 4,
+        }}
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+          {viewMode === 'grid' ? 'view_kanban' : 'table_rows'}
+        </span>
+      </button>
 
       {/* Search */}
       <div style={{ position: 'relative', display: 'flex', alignItems: 'center', marginLeft: 16 }}>
