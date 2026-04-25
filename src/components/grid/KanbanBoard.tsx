@@ -12,7 +12,8 @@ import {
 } from '@dnd-kit/core'
 import type { TableConfig } from '../../types/tableConfig'
 
-const CARD_BG = '#f4f1e9'
+const CARD_BG = 'var(--white)'
+const BOARD_BG = '#f4f1e9'
 const CARD_RADIUS = 8
 
 // ── Card content — rendered both in place and inside DragOverlay ─────────────
@@ -262,6 +263,7 @@ export function KanbanBoard<T extends { id: string }, TStatus extends string>({
           display: 'flex', gap: 20, padding: 20,
           overflowX: 'auto', overflowY: 'hidden',
           flex: 1, alignItems: 'flex-start',
+          background: BOARD_BG,
         }}>
           {config.statusOptions.map(status => (
             <KanbanLane
