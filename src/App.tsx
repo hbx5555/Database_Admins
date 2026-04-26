@@ -55,6 +55,7 @@ const NEW_DEAL_DEFAULTS: DealInsert = {
 export default function App() {
   const [activeView, setActiveView] = useState<AppView>('deals')
   const [panelOpen, setPanelOpen] = useState(true)
+  const [dealUploadError, setDealUploadError] = useState<string | null>(null)
 
   // ── Projects ─────────────────────────────────────────────────────────────
   const {
@@ -222,8 +223,13 @@ export default function App() {
   }, [dealSelectedIds, dealRows])
 
   const handleUploadProposal = useCallback(async (id: string, file: File) => {
-    const { url, filename } = await uploadDocument('deals', id, file)
-    editDeal(id, { proposal_url: url, proposal_filename: filename })
+    setDealUploadError(null)
+    try {
+      const { url, filename } = await uploadDocument('deals', id, file)
+      editDeal(id, { proposal_url: url, proposal_filename: filename })
+    } catch (err) {
+      setDealUploadError(err instanceof Error ? err.message : 'Upload failed')
+    }
   }, [editDeal])
 
   // ── Derived values for current view ──────────────────────────────────────
@@ -292,6 +298,7 @@ export default function App() {
 
           {loading && <LoadingState />}
           {!loading && error && <ErrorState message={error} onRetry={onRefresh} />}
+          {isDeals && dealUploadError && <ErrorState message={dealUploadError} onRetry={() => setDealUploadError(null)} />}
           {!loading && !error && displayRows.length === 0 && <EmptyState />}
 
           {!loading && !error && filteredRows.length > 0 && isProjects && viewMode === 'grid' && (

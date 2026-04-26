@@ -80,10 +80,13 @@ export function DealEditorModal({ row, onSave, onAdd, onClose }: DealEditorModal
   const set = <K extends keyof DealInsert>(key: K, val: DealInsert[K]) =>
     setDraft(d => ({ ...d, [key]: val }))
 
-  // Converts ISO string to value suitable for <input type="datetime-local">
+  // Converts ISO string to value suitable for <input type="datetime-local"> using local timezone
+  // so the displayed time matches what the user entered, not a UTC-shifted equivalent.
   const toDatetimeLocal = (iso: string | null): string => {
     if (!iso) return ''
-    return iso.slice(0, 16)
+    const d = new Date(iso)
+    const pad = (n: number) => String(n).padStart(2, '0')
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
   }
 
   const handleSave = async () => {
