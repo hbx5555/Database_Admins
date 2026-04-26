@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useProjects } from './hooks/useProjects'
 import { useContacts } from './hooks/useContacts'
+import { useDeals } from './hooks/useDeals'
 import { IconSidebar, type AppView } from './components/layout/IconSidebar'
 import { SubItemsPanel } from './components/layout/SubItemsPanel'
 import { MainContent } from './components/layout/MainContent'
@@ -8,15 +9,19 @@ import { GridToolbar } from './components/grid/GridToolbar'
 import { GridStatusBar } from './components/grid/GridStatusBar'
 import { ProjectsGrid } from './components/grid/ProjectsGrid'
 import { ContactsGrid } from './components/grid/ContactsGrid'
+import { DealsGrid } from './components/grid/DealsGrid'
 import { KanbanBoard } from './components/grid/KanbanBoard'
 import { RecordEditorModal } from './components/grid/RecordEditorModal'
 import { ContactEditorModal } from './components/grid/ContactEditorModal'
-import { PROJECTS_CONFIG, CONTACTS_CONFIG } from './config/tables'
+import { DealEditorModal } from './components/grid/DealEditorModal'
+import { PROJECTS_CONFIG, CONTACTS_CONFIG, DEALS_CONFIG } from './config/tables'
+import { uploadDocument } from './lib/storageApi'
 import { LoadingState } from './components/shared/LoadingState'
 import { ErrorState } from './components/shared/ErrorState'
 import { EmptyState } from './components/shared/EmptyState'
 import type { ProjectInsert, Project } from './types/project'
 import type { Contact, ContactInsert } from './types/contact'
+import type { Deal, DealInsert } from './types/deal'
 
 const NEW_PROJECT_DEFAULTS: ProjectInsert = {
   project_name: 'New Project',
@@ -37,8 +42,18 @@ const NEW_CONTACT_DEFAULTS: ContactInsert = {
   status: null,
 }
 
+const NEW_DEAL_DEFAULTS: DealInsert = {
+  deal_name: 'New Deal',
+  deal_description: null,
+  last_call_content: null,
+  last_call_datetime: null,
+  proposal_url: null,
+  proposal_filename: null,
+  status: 'New',
+}
+
 export default function App() {
-  const [activeView, setActiveView] = useState<AppView>('projects')
+  const [activeView, setActiveView] = useState<AppView>('deals')
   const [panelOpen, setPanelOpen] = useState(true)
 
   // ── Projects ─────────────────────────────────────────────────────────────
@@ -82,6 +97,11 @@ export default function App() {
 
   useEffect(() => { setProjectSelectedIds(new Set()) }, [projectRows])
 
+  const handleEditProject = useCallback((id: string) => {
+    const row = projectRows.find(r => r.id === id)
+    if (row) setEditingProject(row)
+  }, [projectRows])
+
   const handleProjectFabClick = useCallback(() => {
     if (projectSelectedIds.size === 0) {
       setEditingProject('new')
@@ -90,11 +110,6 @@ export default function App() {
       if (row) setEditingProject(row)
     }
   }, [projectSelectedIds, projectRows])
-
-  const handleEditProject = useCallback((id: string) => {
-    const row = projectRows.find(r => r.id === id)
-    if (row) setEditingProject(row)
-  }, [projectRows])
 
   // ── Contacts ─────────────────────────────────────────────────────────────
   const {
@@ -137,6 +152,11 @@ export default function App() {
 
   useEffect(() => { setContactSelectedIds(new Set()) }, [contactRows])
 
+  const handleEditContact = useCallback((id: string) => {
+    const row = contactRows.find(r => r.id === id)
+    if (row) setEditingContact(row)
+  }, [contactRows])
+
   const handleContactFabClick = useCallback(() => {
     if (contactSelectedIds.size === 0) {
       setEditingContact('new')
@@ -146,30 +166,88 @@ export default function App() {
     }
   }, [contactSelectedIds, contactRows])
 
-  const handleEditContact = useCallback((id: string) => {
-    const row = contactRows.find(r => r.id === id)
-    if (row) setEditingContact(row)
-  }, [contactRows])
+  // ── Deals ─────────────────────────────────────────────────────────────────
+  const {
+    displayRows: dealRows,
+    filteredRows: dealFilteredRows,
+    sourceRows: dealSourceRows,
+    loading: dealsLoading,
+    error: dealsError,
+    pagination: dealsPagination,
+    refresh: refreshDeals,
+    setPage: setDealsPage,
+    editRow: editDeal,
+    addRow: addDeal,
+    removeRows: removeDeals,
+    searchQuery: dealSearch,
+    setSearchQuery: setDealSearch,
+    sorts: dealSorts,
+    setSortField: setDealSort,
+    activeStatusFilter: activeDealStatusFilter,
+    setStatusFilter: setDealStatusFilter,
+    viewMode: dealViewMode,
+    setViewMode: setDealViewMode,
+  } = useDeals()
+
+  const [dealSelectedIds, setDealSelectedIds] = useState<Set<string>>(new Set())
+  const [editingDeal, setEditingDeal] = useState<Deal | 'new' | null>(null)
+
+  const toggleDealRow = useCallback((id: string) => setDealSelectedIds(prev => {
+    const next = new Set(prev)
+    if (next.has(id)) next.delete(id); else next.add(id)
+    return next
+  }), [])
+  const selectAllDeals = useCallback(() => setDealSelectedIds(new Set(dealRows.map(r => r.id))), [dealRows])
+  const clearDealSelection = useCallback(() => setDealSelectedIds(new Set()), [])
+  const deleteSelectedDeals = useCallback(() => {
+    if (dealSelectedIds.size === 0) return
+    clearDealSelection()
+    removeDeals([...dealSelectedIds]).catch(() => {})
+  }, [dealSelectedIds, clearDealSelection, removeDeals])
+
+  useEffect(() => { setDealSelectedIds(new Set()) }, [dealRows])
+
+  const handleEditDeal = useCallback((id: string) => {
+    const row = dealRows.find(r => r.id === id)
+    if (row) setEditingDeal(row)
+  }, [dealRows])
+
+  const handleDealFabClick = useCallback(() => {
+    if (dealSelectedIds.size === 0) {
+      setEditingDeal('new')
+    } else {
+      const row = dealRows.find(r => r.id === [...dealSelectedIds][0])
+      if (row) setEditingDeal(row)
+    }
+  }, [dealSelectedIds, dealRows])
+
+  const handleUploadProposal = useCallback(async (id: string, file: File) => {
+    const { url, filename } = await uploadDocument('deals', id, file)
+    editDeal(id, { proposal_url: url, proposal_filename: filename })
+  }, [editDeal])
 
   // ── Derived values for current view ──────────────────────────────────────
   const isProjects = activeView === 'projects'
-  const loading = isProjects ? projectsLoading : contactsLoading
-  const error = isProjects ? projectsError : contactsError
-  const displayRows = isProjects ? projectRows : contactRows
-  const sourceCount = isProjects ? projectSourceRows.length : contactSourceRows.length
-  const pagination = isProjects ? projectsPagination : contactsPagination
-  const selectedCount = isProjects ? projectSelectedIds.size : contactSelectedIds.size
-  const searchQuery = isProjects ? projectSearch : contactSearch
-  const onSearchChange = isProjects ? setProjectSearch : setContactSearch
-  const onRefresh = isProjects ? refreshProjects : refreshContacts
-  const onSelectAll = isProjects ? selectAllProjects : selectAllContacts
-  const onClearAll = isProjects ? clearProjectSelection : clearContactSelection
-  const onDeleteSelected = isProjects ? deleteSelectedProjects : deleteSelectedContacts
-  const onPageChange = isProjects ? setProjectsPage : setContactsPage
-  const onFabClick = isProjects ? handleProjectFabClick : handleContactFabClick
-  const viewMode = isProjects ? projectViewMode : contactViewMode
-  const onViewModeChange = isProjects ? setProjectViewMode : setContactViewMode
-  const filteredRows = isProjects ? projectFilteredRows : contactFilteredRows
+  const isContacts = activeView === 'contacts'
+  const isDeals = activeView === 'deals'
+
+  const loading = isProjects ? projectsLoading : isContacts ? contactsLoading : dealsLoading
+  const error = isProjects ? projectsError : isContacts ? contactsError : dealsError
+  const displayRows = isProjects ? projectRows : isContacts ? contactRows : dealRows
+  const sourceCount = isProjects ? projectSourceRows.length : isContacts ? contactSourceRows.length : dealSourceRows.length
+  const pagination = isProjects ? projectsPagination : isContacts ? contactsPagination : dealsPagination
+  const selectedCount = isProjects ? projectSelectedIds.size : isContacts ? contactSelectedIds.size : dealSelectedIds.size
+  const searchQuery = isProjects ? projectSearch : isContacts ? contactSearch : dealSearch
+  const onSearchChange = isProjects ? setProjectSearch : isContacts ? setContactSearch : setDealSearch
+  const onRefresh = isProjects ? refreshProjects : isContacts ? refreshContacts : refreshDeals
+  const onSelectAll = isProjects ? selectAllProjects : isContacts ? selectAllContacts : selectAllDeals
+  const onClearAll = isProjects ? clearProjectSelection : isContacts ? clearContactSelection : clearDealSelection
+  const onDeleteSelected = isProjects ? deleteSelectedProjects : isContacts ? deleteSelectedContacts : deleteSelectedDeals
+  const onPageChange = isProjects ? setProjectsPage : isContacts ? setContactsPage : setDealsPage
+  const onFabClick = isProjects ? handleProjectFabClick : isContacts ? handleContactFabClick : handleDealFabClick
+  const viewMode = isProjects ? projectViewMode : isContacts ? contactViewMode : dealViewMode
+  const onViewModeChange = isProjects ? setProjectViewMode : isContacts ? setContactViewMode : setDealViewMode
+  const filteredRows = isProjects ? projectFilteredRows : isContacts ? contactFilteredRows : dealFilteredRows
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', minWidth: 1044 }}>
@@ -182,12 +260,7 @@ export default function App() {
       <div
         aria-hidden={!panelOpen}
         inert={!panelOpen}
-        style={{
-          width: panelOpen ? 200 : 0,
-          overflow: 'hidden',
-          flexShrink: 0,
-          transition: 'width 250ms ease',
-        }}
+        style={{ width: panelOpen ? 200 : 0, overflow: 'hidden', flexShrink: 0, transition: 'width 250ms ease' }}
       >
         <SubItemsPanel
           activeView={activeView}
@@ -197,21 +270,13 @@ export default function App() {
           onStatusChange={setStatusFilter}
           activeContactStatusFilter={activeContactStatusFilter}
           onContactStatusChange={setContactStatusFilter}
+          activeDealStatusFilter={activeDealStatusFilter}
+          onDealStatusChange={setDealStatusFilter}
         />
       </div>
 
       <MainContent>
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          background: 'var(--white)',
-          borderRadius: 'var(--radius-lg)',
-          border: '1px solid var(--border-color)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-          overflow: 'hidden',
-          position: 'relative',
-        }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--white)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', overflow: 'hidden', position: 'relative' }}>
           <GridToolbar
             onRefresh={onRefresh}
             selectedCount={selectedCount}
@@ -251,7 +316,7 @@ export default function App() {
             />
           )}
 
-          {!loading && !error && filteredRows.length > 0 && !isProjects && viewMode === 'grid' && (
+          {!loading && !error && filteredRows.length > 0 && isContacts && viewMode === 'grid' && (
             <ContactsGrid
               rows={contactRows}
               onRowChange={editContact}
@@ -263,7 +328,7 @@ export default function App() {
             />
           )}
 
-          {!loading && !error && filteredRows.length > 0 && !isProjects && viewMode === 'kanban' && (
+          {!loading && !error && filteredRows.length > 0 && isContacts && viewMode === 'kanban' && (
             <KanbanBoard
               rows={contactFilteredRows}
               config={CONTACTS_CONFIG}
@@ -273,21 +338,42 @@ export default function App() {
             />
           )}
 
-          {viewMode === 'grid' && <button
-            onClick={() => { if (isProjects) addProject(NEW_PROJECT_DEFAULTS).catch(() => {}); else addContact(NEW_CONTACT_DEFAULTS).catch(() => {}) }}
-            title="Add record"
-            style={{
-              position: 'absolute', bottom: 64, left: 42,
-              width: 44, height: 44, borderRadius: '50%',
-              background: 'var(--accent-primary)',
-              color: 'var(--foreground-inverse)',
-              border: 'none', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 3px 10px rgba(0,0,0,0.22)', zIndex: 10,
-            }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 22 }}>add</span>
-          </button>}
+          {!loading && !error && filteredRows.length > 0 && isDeals && viewMode === 'grid' && (
+            <DealsGrid
+              rows={dealRows}
+              onRowChange={editDeal}
+              selectedIds={dealSelectedIds}
+              onToggleRow={toggleDealRow}
+              onEditRow={handleEditDeal}
+              sorts={dealSorts}
+              onSortField={setDealSort}
+              onUploadProposal={handleUploadProposal}
+            />
+          )}
+
+          {!loading && !error && filteredRows.length > 0 && isDeals && viewMode === 'kanban' && (
+            <KanbanBoard
+              rows={dealFilteredRows}
+              config={DEALS_CONFIG}
+              onEdit={handleEditDeal}
+              onDelete={id => removeDeals([id])}
+              onStatusChange={(id, status) => editDeal(id, { status })}
+            />
+          )}
+
+          {viewMode === 'grid' && (
+            <button
+              onClick={() => {
+                if (isProjects) addProject(NEW_PROJECT_DEFAULTS).catch(() => {})
+                else if (isContacts) addContact(NEW_CONTACT_DEFAULTS).catch(() => {})
+                else addDeal(NEW_DEAL_DEFAULTS).catch(() => {})
+              }}
+              title="Add record"
+              style={{ position: 'absolute', bottom: 64, left: 42, width: 44, height: 44, borderRadius: '50%', background: 'var(--accent-primary)', color: 'var(--foreground-inverse)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 3px 10px rgba(0,0,0,0.22)', zIndex: 10 }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 22 }}>add</span>
+            </button>
+          )}
 
           {viewMode === 'grid' && <GridStatusBar pagination={pagination} onPageChange={onPageChange} />}
         </div>
@@ -308,6 +394,15 @@ export default function App() {
           onSave={editContact}
           onAdd={data => { addContact(data).catch(() => {}) }}
           onClose={() => setEditingContact(null)}
+        />
+      )}
+
+      {editingDeal !== null && (
+        <DealEditorModal
+          row={editingDeal === 'new' ? undefined : editingDeal}
+          onSave={editDeal}
+          onAdd={data => { addDeal(data).catch(() => {}) }}
+          onClose={() => setEditingDeal(null)}
         />
       )}
     </div>
