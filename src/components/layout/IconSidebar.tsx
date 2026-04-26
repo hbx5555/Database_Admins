@@ -1,4 +1,4 @@
-export type AppView = 'projects' | 'contacts'
+export type AppView = 'deals' | 'projects' | 'contacts'
 
 interface IconSidebarProps {
   activeView: AppView
@@ -7,25 +7,16 @@ interface IconSidebarProps {
 }
 
 const NAV_ICONS: { name: string; label: string; view: AppView | null }[] = [
-  { name: 'task_alt', label: 'Projects', view: 'projects' },
-  { name: 'person', label: 'Contacts', view: 'contacts' },
-  { name: 'folder', label: 'Folder', view: null },
-  { name: 'leaderboard', label: 'Leads', view: null },
-  { name: 'label', label: 'Statuses', view: null },
+  { name: 'label',      label: 'Deals',    view: 'deals' },
+  { name: 'task_alt',   label: 'Projects', view: 'projects' },
+  { name: 'person',     label: 'Contacts', view: 'contacts' },
+  { name: 'folder',     label: 'Folder',   view: null },
+  { name: 'leaderboard',label: 'Leads',    view: null },
 ]
 
 export function IconSidebar({ activeView, onSelectView, onTogglePanel }: IconSidebarProps) {
   return (
-    <div style={{
-      width: 56,
-      minHeight: '100vh',
-      background: 'var(--accent-primary)',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      padding: '16px 0',
-      flexShrink: 0,
-    }}>
+    <div style={{ width: 56, minHeight: '100vh', background: 'var(--accent-primary)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 0', flexShrink: 0 }}>
       <button
         aria-label="Toggle menu"
         onClick={onTogglePanel}
@@ -43,22 +34,9 @@ export function IconSidebar({ activeView, onSelectView, onTogglePanel }: IconSid
               title={icon.label}
               aria-label={icon.label}
               onClick={() => { if (icon.view) onSelectView(icon.view) }}
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 'var(--radius-md)',
-                border: 'none',
-                cursor: icon.view ? 'pointer' : 'default',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: isActive ? 'var(--accent-secondary)' : 'transparent',
-              }}
+              style={{ width: 40, height: 40, borderRadius: 'var(--radius-md)', border: 'none', cursor: icon.view ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', background: isActive ? 'var(--accent-secondary)' : 'transparent' }}
             >
-              <span className="material-symbols-outlined" style={{
-                fontSize: 24,
-                color: isActive ? 'white' : 'rgba(255,255,255,0.6)',
-              }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 24, color: isActive ? 'white' : 'rgba(255,255,255,0.6)' }}>
                 {icon.name}
               </span>
             </button>
@@ -75,15 +53,7 @@ export function IconSidebar({ activeView, onSelectView, onTogglePanel }: IconSid
         </button>
         <button
           aria-label="User profile"
-          style={{
-            width: 32, height: 32,
-            borderRadius: 'var(--radius-round)',
-            background: 'var(--accent-secondary)',
-            color: 'white', border: 'none',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 11, fontFamily: 'var(--font-captions)', fontWeight: 600,
-            cursor: 'pointer',
-          }}
+          style={{ width: 32, height: 32, borderRadius: 'var(--radius-round)', background: 'var(--accent-secondary)', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontFamily: 'var(--font-captions)', fontWeight: 600, cursor: 'pointer' }}
         >
           HD
         </button>
