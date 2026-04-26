@@ -331,6 +331,7 @@ export function KanbanBoard<T extends { id: string }, TStatus extends string>({
               primaryField={config.primaryField}
               cardFields={config.cardFields}
               columnLabels={config.columnLabels}
+              cardFieldFormatters={config.cardFieldFormatters}
               accentColor={activeAccentColor}
             />
           </div>
