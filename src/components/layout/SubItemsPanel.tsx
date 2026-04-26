@@ -1,5 +1,6 @@
 import { STATUS_OPTIONS, type ProjectStatus } from '../../types/project'
 import { CONTACT_STATUS_OPTIONS, type ContactStatus } from '../../types/contact'
+import { DEAL_STATUS_OPTIONS, type DealStatus } from '../../types/deal'
 import type { AppView } from './IconSidebar'
 
 interface SubItemsPanelProps {
@@ -10,6 +11,8 @@ interface SubItemsPanelProps {
   onStatusChange: (status: ProjectStatus | null) => void
   activeContactStatusFilter: ContactStatus | null
   onContactStatusChange: (status: ContactStatus | null) => void
+  activeDealStatusFilter: DealStatus | null
+  onDealStatusChange: (status: DealStatus | null) => void
 }
 
 function filterButtonStyle(active: boolean) {
@@ -31,24 +34,23 @@ function filterButtonStyle(active: boolean) {
 }
 
 const VIEW_LABELS: Record<AppView, string> = {
+  deals: 'Deals',
   projects: 'Projects',
   contacts: 'Contacts',
 }
 
-export function SubItemsPanel({ activeView, totalCount, onAddItem, activeStatusFilter, onStatusChange, activeContactStatusFilter, onContactStatusChange }: SubItemsPanelProps) {
+export function SubItemsPanel({
+  activeView, totalCount, onAddItem,
+  activeStatusFilter, onStatusChange,
+  activeContactStatusFilter, onContactStatusChange,
+  activeDealStatusFilter, onDealStatusChange,
+}: SubItemsPanelProps) {
   const isAll = activeStatusFilter === null
   const isContactAll = activeContactStatusFilter === null
+  const isDealAll = activeDealStatusFilter === null
 
   return (
-    <div style={{
-      width: '100%',
-      minHeight: '100vh',
-      background: 'var(--surface-panel)',
-      borderRight: '1px solid var(--border-color)',
-      display: 'flex',
-      flexDirection: 'column',
-      padding: '16px 0',
-    }}>
+    <div style={{ width: '100%', minHeight: '100vh', background: 'var(--surface-panel)', borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', padding: '16px 0' }}>
       <div style={{ padding: '0 16px 8px' }}>
         <div style={{ fontFamily: 'var(--font-headings)', fontSize: 16, fontWeight: 700, color: 'var(--foreground-primary)' }}>
           {VIEW_LABELS[activeView]}
@@ -62,28 +64,26 @@ export function SubItemsPanel({ activeView, totalCount, onAddItem, activeStatusF
         <button
           onClick={onAddItem}
           aria-label="Edit item"
-          style={{
-            width: '100%',
-            height: 34,
-            borderRadius: 'var(--radius-round)',
-            background: 'var(--accent-primary)',
-            color: 'white',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 6,
-            fontFamily: 'var(--font-body)',
-            fontSize: 13,
-            fontWeight: 600,
-            boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
-          }}
+          style={{ width: '100%', height: 34, borderRadius: 'var(--radius-round)', background: 'var(--accent-primary)', color: 'white', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600, boxShadow: '0 2px 4px rgba(0,0,0,0.15)' }}
         >
           <span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit</span>
           Edit Item
         </button>
       </div>
+
+      {activeView === 'deals' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '0 8px' }}>
+          <button aria-label="All" aria-current={isDealAll ? 'page' : undefined} onClick={() => onDealStatusChange(null)} style={filterButtonStyle(isDealAll)}>All</button>
+          {DEAL_STATUS_OPTIONS.map(status => {
+            const active = activeDealStatusFilter === status
+            return (
+              <button key={status} aria-label={status} aria-current={active ? 'page' : undefined} onClick={() => onDealStatusChange(status)} style={filterButtonStyle(active)}>
+                {status}
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       {activeView === 'projects' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '0 8px' }}>
