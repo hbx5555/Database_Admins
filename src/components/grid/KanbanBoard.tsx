@@ -26,12 +26,13 @@ interface CardContentProps<T extends { id: string }> {
   cardFields: (keyof T)[]
   columnLabels: Record<string, string>
   accentColor: string
+  cardFieldFormatters?: Record<string, (val: unknown) => string>
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
 }
 
 function CardContent<T extends { id: string }>({
-  row, primaryField, cardFields, columnLabels, accentColor, onEdit, onDelete,
+  row, primaryField, cardFields, columnLabels, accentColor, cardFieldFormatters, onEdit, onDelete,
 }: CardContentProps<T>) {
   const visibleFields = cardFields.filter(f => {
     const v = row[f]
@@ -65,7 +66,9 @@ function CardContent<T extends { id: string }>({
             color: 'var(--foreground-secondary)', lineHeight: 1.5, marginTop: 7,
           }}>
             <span style={{ fontWeight: 500 }}>{columnLabels[String(field)] ?? String(field)}: </span>
-            {String(row[field])}
+            {cardFieldFormatters?.[String(field)]
+              ? cardFieldFormatters[String(field)](row[field])
+              : String(row[field])}
           </div>
         ))}
       </div>
@@ -109,12 +112,13 @@ interface KanbanCardProps<T extends { id: string }> {
   cardFields: (keyof T)[]
   columnLabels: Record<string, string>
   accentColor: string
+  cardFieldFormatters?: Record<string, (val: unknown) => string>
   onEdit: (id: string) => void
   onDelete: (id: string) => void
 }
 
 function KanbanCard<T extends { id: string }>({
-  row, primaryField, cardFields, columnLabels, accentColor, onEdit, onDelete,
+  row, primaryField, cardFields, columnLabels, accentColor, cardFieldFormatters, onEdit, onDelete,
 }: KanbanCardProps<T>) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: row.id })
 
@@ -143,6 +147,7 @@ function KanbanCard<T extends { id: string }>({
         primaryField={primaryField}
         cardFields={cardFields}
         columnLabels={columnLabels}
+        cardFieldFormatters={cardFieldFormatters}
         accentColor={accentColor}
         onEdit={onEdit}
         onDelete={onDelete}
@@ -160,12 +165,13 @@ interface KanbanLaneProps<T extends { id: string }, TStatus extends string> {
   primaryField: keyof T
   cardFields: (keyof T)[]
   columnLabels: Record<string, string>
+  cardFieldFormatters?: Record<string, (val: unknown) => string>
   onEdit: (id: string) => void
   onDelete: (id: string) => void
 }
 
 function KanbanLane<T extends { id: string }, TStatus extends string>({
-  status, colors, cards, primaryField, cardFields, columnLabels, onEdit, onDelete,
+  status, colors, cards, primaryField, cardFields, columnLabels, cardFieldFormatters, onEdit, onDelete,
 }: KanbanLaneProps<T, TStatus>) {
   const { isOver, setNodeRef } = useDroppable({ id: status })
 
@@ -205,6 +211,7 @@ function KanbanLane<T extends { id: string }, TStatus extends string>({
             primaryField={primaryField}
             cardFields={cardFields}
             columnLabels={columnLabels}
+            cardFieldFormatters={cardFieldFormatters}
             accentColor={colors.text}
             onEdit={onEdit}
             onDelete={onDelete}
@@ -303,6 +310,7 @@ export function KanbanBoard<T extends { id: string }, TStatus extends string>({
               primaryField={config.primaryField}
               cardFields={config.cardFields}
               columnLabels={config.columnLabels}
+              cardFieldFormatters={config.cardFieldFormatters}
               onEdit={onEdit}
               onDelete={onDelete}
             />

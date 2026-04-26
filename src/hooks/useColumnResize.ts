@@ -22,6 +22,16 @@ export const CONTACT_DEFAULT_WIDTHS: Record<string, number> = {
   location: 130,
 }
 
+export const DEAL_COLUMN_LS_KEY = 'db-admins-deal-widths'
+
+export const DEAL_DEFAULT_WIDTHS: Record<string, number> = {
+  deal_name: 200,
+  deal_description: 220,
+  last_call_datetime: 160,
+  proposal_filename: 160,
+  status: 130,
+}
+
 function loadFromStorage(storageKey: string, defaults: Record<string, number>): Record<string, number> {
   try {
     const raw = localStorage.getItem(storageKey)
