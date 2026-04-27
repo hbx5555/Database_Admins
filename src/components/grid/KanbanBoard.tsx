@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -27,18 +27,15 @@ interface CardContentProps<T extends { id: string }> {
   columnLabels: Record<string, string>
   accentColor: string
   cardFieldFormatters?: Record<string, (val: unknown) => string>
-  onEdit?: (id: string) => void
-  onDelete?: (id: string) => void
 }
 
 function CardContent<T extends { id: string }>({
-  row, primaryField, cardFields, columnLabels, accentColor, cardFieldFormatters, onEdit, onDelete,
+  row, primaryField, cardFields, columnLabels, accentColor, cardFieldFormatters,
 }: CardContentProps<T>) {
   const visibleFields = cardFields.filter(f => {
     const v = row[f]
     return v !== null && v !== undefined && v !== ''
   })
-  const showActions = !!(onEdit && onDelete)
 
   return (
     <div style={{
@@ -72,34 +69,6 @@ function CardContent<T extends { id: string }>({
           </div>
         ))}
       </div>
-
-      {/* Permanent action strip — vertical column on the right */}
-      {showActions && (
-        <div style={{
-          width: 34, flexShrink: 0,
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'space-between',
-          paddingTop: 8, paddingBottom: 10,
-          borderLeft: '1px solid var(--border-color)',
-        }}>
-          <button
-            title="Edit"
-            onPointerDown={e => e.stopPropagation()}
-            onClick={e => { e.stopPropagation(); onEdit!(row.id) }}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 15, color: 'var(--foreground-secondary)' }}>edit</span>
-          </button>
-          <button
-            title="Delete"
-            onPointerDown={e => e.stopPropagation()}
-            onClick={e => { e.stopPropagation(); onDelete!(row.id) }}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 15, color: '#C0392B' }}>delete</span>
-          </button>
-        </div>
-      )}
     </div>
   )
 }
@@ -121,6 +90,8 @@ function KanbanCard<T extends { id: string }>({
   row, primaryField, cardFields, columnLabels, accentColor, cardFieldFormatters, onEdit, onDelete,
 }: KanbanCardProps<T>) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: row.id })
+  const [hovered, setHovered] = useState(false)
+  const hoverRef = useRef<HTMLDivElement>(null)
 
   if (isDragging) {
     return (
@@ -128,7 +99,7 @@ function KanbanCard<T extends { id: string }>({
         height: 52,
         border: '2px dashed var(--border-color)',
         borderRadius: CARD_RADIUS,
-        marginBottom: 8,
+        marginBottom: 6,
         background: 'rgba(0,0,0,0.03)',
       }} />
     )
@@ -136,10 +107,15 @@ function KanbanCard<T extends { id: string }>({
 
   return (
     <div
-      ref={setNodeRef}
+      ref={node => {
+        setNodeRef(node)
+        ;(hoverRef as React.MutableRefObject<HTMLDivElement | null>).current = node
+      }}
       {...listeners}
       {...attributes}
-      style={{ marginBottom: 8, cursor: 'grab' }}
+      style={{ marginBottom: 6, cursor: 'grab', position: 'relative' }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       onDoubleClick={() => onEdit(row.id)}
     >
       <CardContent
@@ -149,9 +125,38 @@ function KanbanCard<T extends { id: string }>({
         columnLabels={columnLabels}
         cardFieldFormatters={cardFieldFormatters}
         accentColor={accentColor}
-        onEdit={onEdit}
-        onDelete={onDelete}
       />
+      {/* Hover action buttons — top-right corner overlay */}
+      {hovered && (
+        <div
+          style={{
+            position: 'absolute', top: 6, right: 6,
+            display: 'flex', gap: 2,
+            background: 'var(--white)',
+            borderRadius: 'var(--radius-sm)',
+            border: '1px solid var(--border-color)',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
+            padding: '2px 3px',
+          }}
+        >
+          <button
+            title="Edit"
+            onPointerDown={e => e.stopPropagation()}
+            onClick={e => { e.stopPropagation(); onEdit(row.id) }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 3px', display: 'flex', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 14, color: 'var(--foreground-secondary)' }}>edit</span>
+          </button>
+          <button
+            title="Delete"
+            onPointerDown={e => e.stopPropagation()}
+            onClick={e => { e.stopPropagation(); onDelete(row.id) }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 3px', display: 'flex', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#C0392B' }}>delete</span>
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -176,7 +181,7 @@ function KanbanLane<T extends { id: string }, TStatus extends string>({
   const { isOver, setNodeRef } = useDroppable({ id: status })
 
   return (
-    <div style={{ width: 280, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+    <div style={{ width: 240, flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
       {/* Lane header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingBottom: 10, flexShrink: 0 }}>
         <span style={{
@@ -296,7 +301,7 @@ export function KanbanBoard<T extends { id: string }, TStatus extends string>({
           </div>
         )}
         <div style={{
-          display: 'flex', gap: 20, padding: 20,
+          display: 'flex', gap: 10, padding: 12,
           overflowX: 'auto', overflowY: 'hidden',
           flex: 1, alignItems: 'flex-start',
           background: BOARD_BG,
@@ -324,7 +329,7 @@ export function KanbanBoard<T extends { id: string }, TStatus extends string>({
           <div style={{
             cursor: 'grabbing', transform: 'rotate(1.5deg)',
             boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
-            borderRadius: CARD_RADIUS, width: 280,
+            borderRadius: CARD_RADIUS, width: 240,
           }}>
             <CardContent
               row={activeRow}
