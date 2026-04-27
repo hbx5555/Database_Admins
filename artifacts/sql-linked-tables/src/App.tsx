@@ -63,8 +63,11 @@ export default function App() {
     side: 'left' | 'right',
     id: number,
   ) {
-    setFn(prev => toggle(prev, side, id));
-    setPulseKey(k => k + 1);
+    setFn(prev => {
+      const next = toggle(prev, side, id);
+      if (next !== null) setPulseKey(k => k + 1);
+      return next;
+    });
   }
 
   const { leftLinked: otoLeftLinked, rightLinked: otoRightLinked } = deriveOtoLinkedIds(otoSel);
