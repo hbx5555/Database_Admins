@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -27,10 +27,12 @@ interface CardContentProps<T extends { id: string }> {
   columnLabels: Record<string, string>
   accentColor: string
   cardFieldFormatters?: Record<string, (val: unknown) => string>
+  onEdit?: (id: string) => void
+  onDelete?: (id: string) => void
 }
 
 function CardContent<T extends { id: string }>({
-  row, primaryField, cardFields, columnLabels, accentColor, cardFieldFormatters,
+  row, primaryField, cardFields, columnLabels, accentColor, cardFieldFormatters, onEdit, onDelete,
 }: CardContentProps<T>) {
   const visibleFields = cardFields.filter(f => {
     const v = row[f]
@@ -69,6 +71,33 @@ function CardContent<T extends { id: string }>({
           </div>
         ))}
       </div>
+
+      {/* Compact action strip — no separator line, icons only */}
+      {onEdit && onDelete && (
+        <div style={{
+          width: 26, flexShrink: 0,
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'space-between',
+          paddingTop: 8, paddingBottom: 8,
+        }}>
+          <button
+            title="Edit"
+            onPointerDown={e => e.stopPropagation()}
+            onClick={e => { e.stopPropagation(); onEdit(row.id) }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, display: 'flex', alignItems: 'center' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 14, color: 'var(--foreground-secondary)' }}>edit</span>
+          </button>
+          <button
+            title="Delete"
+            onPointerDown={e => e.stopPropagation()}
+            onClick={e => { e.stopPropagation(); onDelete(row.id) }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, display: 'flex', alignItems: 'center' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#C0392B' }}>delete</span>
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -90,8 +119,6 @@ function KanbanCard<T extends { id: string }>({
   row, primaryField, cardFields, columnLabels, accentColor, cardFieldFormatters, onEdit, onDelete,
 }: KanbanCardProps<T>) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: row.id })
-  const [hovered, setHovered] = useState(false)
-  const hoverRef = useRef<HTMLDivElement>(null)
 
   if (isDragging) {
     return (
@@ -107,15 +134,10 @@ function KanbanCard<T extends { id: string }>({
 
   return (
     <div
-      ref={node => {
-        setNodeRef(node)
-        ;(hoverRef as React.MutableRefObject<HTMLDivElement | null>).current = node
-      }}
+      ref={setNodeRef}
       {...listeners}
       {...attributes}
-      style={{ marginBottom: 6, cursor: 'grab', position: 'relative' }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      style={{ marginBottom: 6, cursor: 'grab' }}
       onDoubleClick={() => onEdit(row.id)}
     >
       <CardContent
@@ -125,38 +147,9 @@ function KanbanCard<T extends { id: string }>({
         columnLabels={columnLabels}
         cardFieldFormatters={cardFieldFormatters}
         accentColor={accentColor}
+        onEdit={onEdit}
+        onDelete={onDelete}
       />
-      {/* Hover action buttons — top-right corner overlay */}
-      {hovered && (
-        <div
-          style={{
-            position: 'absolute', top: 6, right: 6,
-            display: 'flex', gap: 2,
-            background: 'var(--white)',
-            borderRadius: 'var(--radius-sm)',
-            border: '1px solid var(--border-color)',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
-            padding: '2px 3px',
-          }}
-        >
-          <button
-            title="Edit"
-            onPointerDown={e => e.stopPropagation()}
-            onClick={e => { e.stopPropagation(); onEdit(row.id) }}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 3px', display: 'flex', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 14, color: 'var(--foreground-secondary)' }}>edit</span>
-          </button>
-          <button
-            title="Delete"
-            onPointerDown={e => e.stopPropagation()}
-            onClick={e => { e.stopPropagation(); onDelete(row.id) }}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 3px', display: 'flex', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#C0392B' }}>delete</span>
-          </button>
-        </div>
-      )}
     </div>
   )
 }
