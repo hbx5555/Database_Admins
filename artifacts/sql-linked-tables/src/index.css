@@ -57,3 +57,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes fk-pulse {
+  0%   { opacity: 1; }
+  40%  { opacity: 0.2; }
+  100% { opacity: 1; }
+}
+
+.fk-pulse {
+  animation: fk-pulse 400ms ease-in-out;
+}
