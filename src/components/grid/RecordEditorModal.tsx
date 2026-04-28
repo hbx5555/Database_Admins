@@ -86,6 +86,7 @@ export function RecordEditorModal({ row, onSave, onAdd, onClose }: RecordEditorM
       if (draft.project_start_date !== row.project_start_date) changes.project_start_date = draft.project_start_date
       if (draft.project_delivery_date !== row.project_delivery_date) changes.project_delivery_date = draft.project_delivery_date
       if (draft.project_budget !== row.project_budget) changes.project_budget = draft.project_budget
+      if (draft.deal_id !== row.deal_id) changes.deal_id = draft.deal_id
       if (Object.keys(changes).length > 0) onSave(row.id, changes)
     }
     onClose()

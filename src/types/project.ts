@@ -17,7 +17,6 @@ export interface Project {
   updated_at: string
 }
 
-// Excludes id, created_at, updated_at, deals — deals is a Supabase join result, not a writable column
 export type ProjectInsert = Omit<Project, 'id' | 'created_at' | 'updated_at' | 'deals'>
 export type ProjectUpdate = Partial<ProjectInsert>
 
