@@ -31,6 +31,7 @@ const NEW_PROJECT_DEFAULTS: ProjectInsert = {
   project_start_date: null,
   project_delivery_date: null,
   project_budget: null,
+  deal_id: null,
 }
 
 const NEW_CONTACT_DEFAULTS: ContactInsert = {

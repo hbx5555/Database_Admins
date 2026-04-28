@@ -49,6 +49,7 @@ const EMPTY_DRAFT: ProjectInsert = {
   project_start_date: null,
   project_delivery_date: null,
   project_budget: null,
+  deal_id: null,
 }
 
 interface RecordEditorModalProps {
@@ -67,6 +68,7 @@ export function RecordEditorModal({ row, onSave, onAdd, onClose }: RecordEditorM
     project_start_date: row.project_start_date,
     project_delivery_date: row.project_delivery_date,
     project_budget: row.project_budget,
+    deal_id: row.deal_id,
   })
   const [focused, setFocused] = useState<string | null>(null)
 

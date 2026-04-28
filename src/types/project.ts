@@ -1,3 +1,5 @@
+import type { Deal } from './deal'
+
 export type ProjectStatus = 'New' | 'Started' | 'Done'
 export const STATUS_OPTIONS: ProjectStatus[] = ['New', 'Started', 'Done']
 
@@ -9,11 +11,14 @@ export interface Project {
   project_start_date: string | null      // ISO date string "YYYY-MM-DD"
   project_delivery_date: string | null   // ISO date string "YYYY-MM-DD"
   project_budget: number | null
+  deal_id: string | null
+  deals: Deal | null                     // populated by Supabase join; not a DB column
   created_at: string
   updated_at: string
 }
 
-export type ProjectInsert = Omit<Project, 'id' | 'created_at' | 'updated_at'>
+// Excludes id, created_at, updated_at, deals — deals is a Supabase join result, not a writable column
+export type ProjectInsert = Omit<Project, 'id' | 'created_at' | 'updated_at' | 'deals'>
 export type ProjectUpdate = Partial<ProjectInsert>
 
 export interface FilterSpec {
@@ -70,4 +75,5 @@ export const COLUMN_LABELS: Record<string, string> = {
   project_start_date: 'Start Date',
   project_delivery_date: 'Delivery Date',
   project_budget: 'Budget',
+  deal_id: 'Deal',
 }

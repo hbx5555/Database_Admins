@@ -7,6 +7,7 @@ export const CONTACT_COLUMN_LS_KEY = 'db-admins-contact-widths'
 
 export const PROJECT_DEFAULT_WIDTHS: Record<string, number> = {
   project_name: 200,
+  deal: 140,
   project_topic: 160,
   project_status: 120,
   project_start_date: 120,
