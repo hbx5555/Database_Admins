@@ -87,6 +87,7 @@ export function DealsGrid({
     {
       basis: columnWidths.contact, grow: 0, shrink: 0,
       disableKeys: true,
+      // virtual join column — no sort key, so colTitle is not used
       title: (
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%', height: '100%' }}>
           <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingLeft: 10, paddingRight: 4 }}>
@@ -108,7 +109,7 @@ export function DealsGrid({
         return (
           <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%' }}>
             <button
-              onPointerDown={e => e.nativeEvent.stopImmediatePropagation()}
+              onMouseDown={e => e.nativeEvent.stopImmediatePropagation()}
               onClick={e => { e.stopPropagation(); onViewContact(rowData.contacts!) }}
               style={{ border: 'none', background: 'transparent', color: 'var(--accent-primary)', fontSize: 13, fontFamily: 'var(--font-body)', cursor: 'pointer', padding: 0, textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}
             >
@@ -117,7 +118,11 @@ export function DealsGrid({
           </div>
         )
       },
-      copyValue: ({ rowData }: { rowData: DealRow }) => rowData.contacts?.full_name ?? '',
+      copyValue: ({ rowData }: { rowData: DealRow }) => {
+        if (!rowData.contacts) return ''
+        const { full_name, first_name, last_name } = rowData.contacts
+        return full_name ?? [first_name, last_name].filter(Boolean).join(' ')
+      },
     },
     {
       ...(keyColumn('deal_name', textColumn) as unknown as DealColumn),
