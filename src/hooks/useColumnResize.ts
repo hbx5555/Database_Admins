@@ -25,6 +25,7 @@ export const CONTACT_DEFAULT_WIDTHS: Record<string, number> = {
 export const DEAL_COLUMN_LS_KEY = 'db-admins-deal-widths'
 
 export const DEAL_DEFAULT_WIDTHS: Record<string, number> = {
+  contact: 140,
   deal_name: 200,
   deal_description: 220,
   last_call_datetime: 160,

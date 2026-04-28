@@ -356,6 +356,7 @@ export default function App() {
               sorts={dealSorts}
               onSortField={setDealSort}
               onUploadProposal={handleUploadProposal}
+              onViewContact={setEditingContact}
             />
           )}
 
