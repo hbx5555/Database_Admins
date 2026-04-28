@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 import { DataSheetGrid, textColumn, keyColumn } from 'react-datasheet-grid'
 import type { Column } from 'react-datasheet-grid'
 import type { Project, ProjectUpdate, ProjectStatus, SortSpec } from '../../types/project'
+import type { Deal } from '../../types/deal'
 import { COLUMN_LABELS } from '../../types/project'
 import { RolePill } from '../shared/RolePill'
 import { useColumnResize, PROJECT_COLUMN_LS_KEY, PROJECT_DEFAULT_WIDTHS } from '../../hooks/useColumnResize'
@@ -27,13 +28,14 @@ interface ProjectsGridProps {
   onEditRow: (id: string) => void
   sorts: SortSpec[]
   onSortField: (field: keyof Project) => void
+  onViewDeal: (deal: Deal) => void
 }
 
 // DSG Column<T, C, PasteValue> — C is the internal column-data shape; we use
 // unknown here because keyColumn's ColumnData type is not publicly exported.
 type ProjectColumn = Partial<Column<ProjectRow, unknown, string>>
 
-export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEditRow, sorts, onSortField }: ProjectsGridProps) {
+export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEditRow, sorts, onSortField, onViewDeal }: ProjectsGridProps) {
   const { columnWidths, finalizeWidth } = useColumnResize(PROJECT_COLUMN_LS_KEY, PROJECT_DEFAULT_WIDTHS)
   // Incrementing this forces DataSheetGrid to remount, which reinitialises
   // TanStack Virtual's measurement cache with the new column basis values.
@@ -112,6 +114,40 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
       ...(keyColumn('project_name', textColumn) as unknown as ProjectColumn),
       title: colTitle('project_name', COLUMN_LABELS.project_name),
       basis: columnWidths.project_name, grow: 0, shrink: 0,
+    },
+    {
+      basis: columnWidths.deal ?? 140, grow: 0, shrink: 0,
+      disableKeys: true,
+      title: (
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%', height: '100%' }}>
+          <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingLeft: 10, paddingRight: 4 }}>
+            {COLUMN_LABELS.deal_id}
+          </span>
+          <ResizeHandle columnKey="deal" onFinalizeWidth={handleFinalizeWidth} currentWidth={columnWidths.deal} />
+        </div>
+      ),
+      component: ({ rowData }: { rowData: ProjectRow }) => {
+        const deal = rowData.deals
+        if (!deal) {
+          return (
+            <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%', color: 'var(--foreground-secondary)', fontSize: 13, fontFamily: 'var(--font-body)' }}>
+              —
+            </div>
+          )
+        }
+        return (
+          <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%' }}>
+            <button
+              onMouseDown={e => e.nativeEvent.stopImmediatePropagation()}
+              onClick={e => { e.stopPropagation(); onViewDeal(deal) }}
+              style={{ border: 'none', background: 'transparent', color: 'var(--accent-primary)', fontSize: 13, fontFamily: 'var(--font-body)', cursor: 'pointer', padding: 0, textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}
+            >
+              {deal.deal_name}
+            </button>
+          </div>
+        )
+      },
+      copyValue: ({ rowData }: { rowData: ProjectRow }) => rowData.deals?.deal_name ?? '',
     },
     {
       ...(keyColumn('project_topic', textColumn) as unknown as ProjectColumn),
@@ -288,7 +324,7 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
         project_budget: value !== '' ? parseFloat(value) : null,
       }),
     },
-  ], [columnWidths, colTitle, onToggleRow])
+  ], [columnWidths, colTitle, onToggleRow, onViewDeal])
 
   const handleChange = (newRows: ProjectRow[], operations: Operation[]) => {
     for (const op of operations) {
