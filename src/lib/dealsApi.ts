@@ -4,7 +4,7 @@ import type { Deal, DealInsert, DealUpdate } from '../types/deal'
 export async function fetchDeals(): Promise<Deal[]> {
   const { data, error } = await supabase
     .from('deals')
-    .select('*')
+    .select('*, contacts(*)')
     .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)
   return data as Deal[]

@@ -50,6 +50,7 @@ const NEW_DEAL_DEFAULTS: DealInsert = {
   proposal_url: null,
   proposal_filename: null,
   status: 'New',
+  contact_id: null,
 }
 
 export default function App() {

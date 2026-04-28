@@ -52,6 +52,7 @@ const EMPTY_DRAFT: DealInsert = {
   proposal_url: null,
   proposal_filename: null,
   status: null,
+  contact_id: null,
 }
 
 interface DealEditorModalProps {
@@ -71,6 +72,7 @@ export function DealEditorModal({ row, onSave, onAdd, onClose }: DealEditorModal
     proposal_url: row.proposal_url,
     proposal_filename: row.proposal_filename,
     status: row.status,
+    contact_id: row.contact_id,
   })
   const [focused, setFocused] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
