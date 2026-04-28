@@ -414,6 +414,7 @@ export default function App() {
           onSave={editDeal}
           onAdd={data => { addDeal(data).catch(() => {}) }}
           onClose={() => setEditingDeal(null)}
+          onViewContact={setViewingContact}
         />
       )}
 

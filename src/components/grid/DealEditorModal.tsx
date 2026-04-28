@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import type { Deal, DealInsert, DealUpdate, DealStatus } from '../../types/deal'
 import { DEAL_COLUMN_LABELS, DEAL_STATUS_OPTIONS } from '../../types/deal'
+import type { Contact } from '../../types/contact'
 import { uploadDocument, deleteDocument } from '../../lib/storageApi'
 
 const LABEL_W = 180
@@ -60,9 +61,10 @@ interface DealEditorModalProps {
   onSave: (id: string, changes: DealUpdate) => void
   onAdd: (data: DealInsert) => void
   onClose: () => void
+  onViewContact: (contact: Contact) => void
 }
 
-export function DealEditorModal({ row, onSave, onAdd, onClose }: DealEditorModalProps) {
+export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact }: DealEditorModalProps) {
   const isNew = !row
   const [draft, setDraft] = useState<DealInsert>(isNew ? { ...EMPTY_DRAFT } : {
     deal_name: row.deal_name,
@@ -157,6 +159,31 @@ export function DealEditorModal({ row, onSave, onAdd, onClose }: DealEditorModal
               onBlur={() => setFocused(null)}
               style={inp('deal_name')}
             />
+          </FieldRow>
+
+          <FieldRow label="Contact" fieldKey="contact" focused={focused}>
+            {!isNew && row?.contacts ? (
+              <button
+                type="button"
+                onClick={() => onViewContact(row.contacts!)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0,
+                  fontSize: 13,
+                  fontFamily: 'var(--font-body)',
+                  color: 'var(--accent-primary)',
+                  textDecoration: 'underline',
+                }}
+              >
+                {row.contacts.full_name ?? ([row.contacts.first_name, row.contacts.last_name].filter(Boolean).join(' ') || '—')}
+              </button>
+            ) : (
+              <span style={{ fontSize: 13, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>
+                —
+              </span>
+            )}
           </FieldRow>
 
           <FieldRow label={DEAL_COLUMN_LABELS.deal_description} fieldKey="deal_description" focused={focused} align="start">
