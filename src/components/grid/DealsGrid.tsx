@@ -97,20 +97,21 @@ export function DealsGrid({
         </div>
       ),
       component: ({ rowData }: { rowData: DealRow }) => {
-        if (!rowData.contacts) {
+        const contact = rowData.contacts
+        if (!contact) {
           return (
             <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%', color: 'var(--foreground-secondary)', fontSize: 13, fontFamily: 'var(--font-body)' }}>
               —
             </div>
           )
         }
-        const joinedName = [rowData.contacts.first_name, rowData.contacts.last_name].filter(Boolean).join(' ')
-        const displayName = rowData.contacts.full_name ?? (joinedName || '—')
+        const joinedName = [contact.first_name, contact.last_name].filter(Boolean).join(' ')
+        const displayName = contact.full_name ?? (joinedName || '—')
         return (
           <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%' }}>
             <button
               onMouseDown={e => e.nativeEvent.stopImmediatePropagation()}
-              onClick={e => { e.stopPropagation(); onViewContact(rowData.contacts!) }}
+              onClick={e => { e.stopPropagation(); onViewContact(contact) }}
               style={{ border: 'none', background: 'transparent', color: 'var(--accent-primary)', fontSize: 13, fontFamily: 'var(--font-body)', cursor: 'pointer', padding: 0, textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}
             >
               {displayName}
