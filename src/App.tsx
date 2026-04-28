@@ -13,6 +13,7 @@ import { DealsGrid } from './components/grid/DealsGrid'
 import { KanbanBoard } from './components/grid/KanbanBoard'
 import { RecordEditorModal } from './components/grid/RecordEditorModal'
 import { ContactEditorModal } from './components/grid/ContactEditorModal'
+import { ContactViewModal } from './components/grid/ContactViewModal'
 import { DealEditorModal } from './components/grid/DealEditorModal'
 import { PROJECTS_CONFIG, CONTACTS_CONFIG, DEALS_CONFIG } from './config/tables'
 import { uploadDocument } from './lib/storageApi'
@@ -50,6 +51,7 @@ const NEW_DEAL_DEFAULTS: DealInsert = {
   proposal_url: null,
   proposal_filename: null,
   status: 'New',
+  contact_id: null,
 }
 
 export default function App() {
@@ -137,6 +139,7 @@ export default function App() {
 
   const [contactSelectedIds, setContactSelectedIds] = useState<Set<string>>(new Set())
   const [editingContact, setEditingContact] = useState<Contact | 'new' | null>(null)
+  const [viewingContact, setViewingContact] = useState<Contact | null>(null)
 
   const toggleContactRow = useCallback((id: string) => setContactSelectedIds(prev => {
     const next = new Set(prev)
@@ -355,6 +358,7 @@ export default function App() {
               sorts={dealSorts}
               onSortField={setDealSort}
               onUploadProposal={handleUploadProposal}
+              onViewContact={setViewingContact}
             />
           )}
 
@@ -410,6 +414,14 @@ export default function App() {
           onSave={editDeal}
           onAdd={data => { addDeal(data).catch(() => {}) }}
           onClose={() => setEditingDeal(null)}
+          onViewContact={setViewingContact}
+        />
+      )}
+
+      {viewingContact !== null && (
+        <ContactViewModal
+          contact={viewingContact}
+          onClose={() => setViewingContact(null)}
         />
       )}
     </div>

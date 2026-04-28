@@ -12,6 +12,7 @@ function makeDeal(overrides: Partial<Deal>): Deal {
     id: '1', deal_name: 'Test Deal', deal_description: null,
     last_call_content: null, last_call_datetime: null,
     proposal_url: null, proposal_filename: null, status: 'New',
+    contact_id: null, contacts: null,
     created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z',
     ...overrides,
   }

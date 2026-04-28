@@ -1,3 +1,5 @@
+import type { Contact } from './contact'
+
 export type DealStatus = 'New' | 'In Discussions' | 'Signed' | 'Rejected'
 export const DEAL_STATUS_OPTIONS: DealStatus[] = ['New', 'In Discussions', 'Signed', 'Rejected']
 
@@ -17,12 +19,14 @@ export interface Deal {
   proposal_url: string | null
   proposal_filename: string | null
   status: DealStatus | null
+  contact_id: string | null
+  contacts: Contact | null
   created_at: string
   updated_at: string
 }
 
-// Excludes id, created_at, updated_at — generated server-side
-export type DealInsert = Omit<Deal, 'id' | 'created_at' | 'updated_at'>
+// Excludes id, created_at, updated_at, contacts — contacts is a Supabase join result, not a DB column
+export type DealInsert = Omit<Deal, 'id' | 'created_at' | 'updated_at' | 'contacts'>
 export type DealUpdate = Partial<DealInsert>
 
 export const DEAL_COLUMN_LABELS: Record<string, string> = {
@@ -33,4 +37,5 @@ export const DEAL_COLUMN_LABELS: Record<string, string> = {
   proposal_url: 'Proposal',
   proposal_filename: 'Proposal',
   status: 'Status',
+  contact_id: 'Contact',
 }

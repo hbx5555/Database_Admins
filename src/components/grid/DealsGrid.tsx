@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 import { DataSheetGrid, textColumn, keyColumn } from 'react-datasheet-grid'
 import type { Column } from 'react-datasheet-grid'
 import type { Deal, DealUpdate, DealStatus } from '../../types/deal'
+import type { Contact } from '../../types/contact'
 import { DEAL_COLUMN_LABELS, DEAL_STATUS_OPTIONS, DEAL_STATUS_COLORS } from '../../types/deal'
 import { useColumnResize, DEAL_COLUMN_LS_KEY, DEAL_DEFAULT_WIDTHS } from '../../hooks/useColumnResize'
 import { ResizeHandle } from './ResizeHandle'
@@ -20,10 +21,11 @@ interface DealsGridProps {
   sorts: GenericSortSpec<Deal>[]
   onSortField: (field: keyof Deal) => void
   onUploadProposal: (id: string, file: File) => Promise<void>
+  onViewContact: (contact: Contact) => void
 }
 
 export function DealsGrid({
-  rows, onRowChange, selectedIds, onToggleRow, onEditRow, sorts, onSortField, onUploadProposal,
+  rows, onRowChange, selectedIds, onToggleRow, onEditRow, sorts, onSortField, onUploadProposal, onViewContact,
 }: DealsGridProps) {
   const { columnWidths, finalizeWidth } = useColumnResize(DEAL_COLUMN_LS_KEY, DEAL_DEFAULT_WIDTHS)
   const [resizeVersion, setResizeVersion] = useState(0)
@@ -81,6 +83,47 @@ export function DealsGrid({
             style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--accent-primary)', pointerEvents: 'none' }} />
         </div>
       ),
+    },
+    {
+      basis: columnWidths.contact, grow: 0, shrink: 0,
+      disableKeys: true,
+      // virtual join column — no sort key, so colTitle is not used
+      title: (
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%', height: '100%' }}>
+          <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingLeft: 10, paddingRight: 4 }}>
+            Contact
+          </span>
+          <ResizeHandle columnKey="contact" onFinalizeWidth={handleFinalizeWidth} currentWidth={columnWidths.contact} />
+        </div>
+      ),
+      component: ({ rowData }: { rowData: DealRow }) => {
+        const contact = rowData.contacts
+        if (!contact) {
+          return (
+            <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%', color: 'var(--foreground-secondary)', fontSize: 13, fontFamily: 'var(--font-body)' }}>
+              —
+            </div>
+          )
+        }
+        const joinedName = [contact.first_name, contact.last_name].filter(Boolean).join(' ')
+        const displayName = contact.full_name ?? (joinedName || '—')
+        return (
+          <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%' }}>
+            <button
+              onMouseDown={e => e.nativeEvent.stopImmediatePropagation()}
+              onClick={e => { e.stopPropagation(); onViewContact(contact) }}
+              style={{ border: 'none', background: 'transparent', color: 'var(--accent-primary)', fontSize: 13, fontFamily: 'var(--font-body)', cursor: 'pointer', padding: 0, textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}
+            >
+              {displayName}
+            </button>
+          </div>
+        )
+      },
+      copyValue: ({ rowData }: { rowData: DealRow }) => {
+        if (!rowData.contacts) return ''
+        const { full_name, first_name, last_name } = rowData.contacts
+        return full_name ?? [first_name, last_name].filter(Boolean).join(' ')
+      },
     },
     {
       ...(keyColumn('deal_name', textColumn) as unknown as DealColumn),
@@ -186,7 +229,7 @@ export function DealsGrid({
         ...rowData, status: DEAL_STATUS_OPTIONS.includes(value as DealStatus) ? value as DealStatus : null,
       }),
     },
-  ], [columnWidths, colTitle, onToggleRow, onUploadProposal])
+  ], [columnWidths, colTitle, onToggleRow, onUploadProposal, onViewContact])
 
   const handleChange = (newRows: DealRow[], operations: Operation[]) => {
     for (const op of operations) {

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import type { Deal, DealInsert, DealUpdate, DealStatus } from '../../types/deal'
 import { DEAL_COLUMN_LABELS, DEAL_STATUS_OPTIONS } from '../../types/deal'
+import type { Contact } from '../../types/contact'
 import { uploadDocument, deleteDocument } from '../../lib/storageApi'
 
 const LABEL_W = 180
@@ -52,6 +53,7 @@ const EMPTY_DRAFT: DealInsert = {
   proposal_url: null,
   proposal_filename: null,
   status: null,
+  contact_id: null,
 }
 
 interface DealEditorModalProps {
@@ -59,9 +61,10 @@ interface DealEditorModalProps {
   onSave: (id: string, changes: DealUpdate) => void
   onAdd: (data: DealInsert) => void
   onClose: () => void
+  onViewContact?: (contact: Contact) => void
 }
 
-export function DealEditorModal({ row, onSave, onAdd, onClose }: DealEditorModalProps) {
+export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact }: DealEditorModalProps) {
   const isNew = !row
   const [draft, setDraft] = useState<DealInsert>(isNew ? { ...EMPTY_DRAFT } : {
     deal_name: row.deal_name,
@@ -71,6 +74,7 @@ export function DealEditorModal({ row, onSave, onAdd, onClose }: DealEditorModal
     proposal_url: row.proposal_url,
     proposal_filename: row.proposal_filename,
     status: row.status,
+    contact_id: row.contact_id,
   })
   const [focused, setFocused] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
@@ -109,6 +113,7 @@ export function DealEditorModal({ row, onSave, onAdd, onClose }: DealEditorModal
       if (draft.proposal_url !== row.proposal_url) changes.proposal_url = draft.proposal_url
       if (draft.proposal_filename !== row.proposal_filename) changes.proposal_filename = draft.proposal_filename
       if (draft.status !== row.status) changes.status = draft.status
+      if (draft.contact_id !== row.contact_id) changes.contact_id = draft.contact_id
       if (Object.keys(changes).length > 0) onSave(row.id, changes)
     }
     onClose()
@@ -154,6 +159,25 @@ export function DealEditorModal({ row, onSave, onAdd, onClose }: DealEditorModal
               onBlur={() => setFocused(null)}
               style={inp('deal_name')}
             />
+          </FieldRow>
+
+          <FieldRow label="Contact" fieldKey="contact" focused={focused}>
+            {(() => {
+              const contact = !isNew ? row?.contacts ?? null : null
+              if (contact) {
+                const name = contact.full_name ?? ([contact.first_name, contact.last_name].filter(Boolean).join(' ') || '—')
+                return (
+                  <button
+                    type="button"
+                    onClick={() => onViewContact?.(contact)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 13, fontFamily: 'var(--font-body)', color: 'var(--accent-primary)', textDecoration: 'underline' }}
+                  >
+                    {name}
+                  </button>
+                )
+              }
+              return <span style={{ fontSize: 13, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>—</span>
+            })()}
           </FieldRow>
 
           <FieldRow label={DEAL_COLUMN_LABELS.deal_description} fieldKey="deal_description" focused={focused} align="start">
