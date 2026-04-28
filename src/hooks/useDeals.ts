@@ -7,7 +7,7 @@ function buildOptimisticRow(data: DealInsert): Deal {
   return {
     ...data,
     id: `optimistic-${Date.now()}`,
-    contact_id: data.contact_id ?? null,
+    contact_id: data.contact_id,
     contacts: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),

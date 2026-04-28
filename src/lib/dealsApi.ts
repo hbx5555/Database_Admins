@@ -14,7 +14,7 @@ export async function createDeal(row: DealInsert): Promise<Deal> {
   const { data, error } = await supabase
     .from('deals')
     .insert(row)
-    .select()
+    .select('*, contacts(*)')
     .single()
   if (error) throw new Error(error.message)
   return data as Deal
@@ -25,7 +25,7 @@ export async function updateDeal(id: string, changes: DealUpdate): Promise<Deal>
     .from('deals')
     .update(changes)
     .eq('id', id)
-    .select()
+    .select('*, contacts(*)')
     .single()
   if (error) throw new Error(error.message)
   return data as Deal

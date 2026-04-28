@@ -37,4 +37,5 @@ export const DEAL_COLUMN_LABELS: Record<string, string> = {
   proposal_url: 'Proposal',
   proposal_filename: 'Proposal',
   status: 'Status',
+  contact_id: 'Contact',
 }

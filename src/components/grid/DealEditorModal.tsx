@@ -111,6 +111,7 @@ export function DealEditorModal({ row, onSave, onAdd, onClose }: DealEditorModal
       if (draft.proposal_url !== row.proposal_url) changes.proposal_url = draft.proposal_url
       if (draft.proposal_filename !== row.proposal_filename) changes.proposal_filename = draft.proposal_filename
       if (draft.status !== row.status) changes.status = draft.status
+      if (draft.contact_id !== row.contact_id) changes.contact_id = draft.contact_id
       if (Object.keys(changes).length > 0) onSave(row.id, changes)
     }
     onClose()
