@@ -61,7 +61,7 @@ interface DealEditorModalProps {
   onSave: (id: string, changes: DealUpdate) => void
   onAdd: (data: DealInsert) => void
   onClose: () => void
-  onViewContact: (contact: Contact) => void
+  onViewContact?: (contact: Contact) => void
 }
 
 export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact }: DealEditorModalProps) {
@@ -162,28 +162,22 @@ export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact }: 
           </FieldRow>
 
           <FieldRow label="Contact" fieldKey="contact" focused={focused}>
-            {!isNew && row?.contacts ? (
-              <button
-                type="button"
-                onClick={() => onViewContact(row.contacts!)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: 0,
-                  fontSize: 13,
-                  fontFamily: 'var(--font-body)',
-                  color: 'var(--accent-primary)',
-                  textDecoration: 'underline',
-                }}
-              >
-                {row.contacts.full_name ?? ([row.contacts.first_name, row.contacts.last_name].filter(Boolean).join(' ') || '—')}
-              </button>
-            ) : (
-              <span style={{ fontSize: 13, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>
-                —
-              </span>
-            )}
+            {(() => {
+              const contact = !isNew ? row?.contacts ?? null : null
+              if (contact) {
+                const name = contact.full_name ?? ([contact.first_name, contact.last_name].filter(Boolean).join(' ') || '—')
+                return (
+                  <button
+                    type="button"
+                    onClick={() => onViewContact?.(contact)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 13, fontFamily: 'var(--font-body)', color: 'var(--accent-primary)', textDecoration: 'underline' }}
+                  >
+                    {name}
+                  </button>
+                )
+              }
+              return <span style={{ fontSize: 13, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>—</span>
+            })()}
           </FieldRow>
 
           <FieldRow label={DEAL_COLUMN_LABELS.deal_description} fieldKey="deal_description" focused={focused} align="start">
