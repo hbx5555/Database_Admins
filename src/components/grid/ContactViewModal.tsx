@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { Contact, ContactStatus } from '../../types/contact'
 import { CONTACT_COLUMN_LABELS, CONTACT_STATUS_COLORS } from '../../types/contact'
 
@@ -6,7 +7,7 @@ const LABEL_W = 180
 interface FieldRowProps {
   label: string
   bold?: boolean
-  children: React.ReactNode
+  children: ReactNode
 }
 
 function FieldRow({ label, bold, children }: FieldRowProps) {
@@ -37,35 +38,35 @@ function FieldRow({ label, bold, children }: FieldRowProps) {
   )
 }
 
+function renderField(value: string | null) {
+  if (value === null || value === '') return <span style={{ color: 'var(--foreground-primary)', fontSize: 13, fontFamily: 'var(--font-body)' }}>—</span>
+  return <span style={{ color: 'var(--foreground-primary)', fontSize: 13, fontFamily: 'var(--font-body)' }}>{value}</span>
+}
+
+function renderStatus(status: ContactStatus | null) {
+  if (!status) return <span style={{ color: 'var(--foreground-primary)', fontSize: 13, fontFamily: 'var(--font-body)' }}>—</span>
+  const colors = CONTACT_STATUS_COLORS[status]
+  return (
+    <span style={{
+      padding: '2px 10px',
+      borderRadius: 'var(--radius-pill)',
+      fontSize: 12,
+      fontFamily: 'var(--font-captions)',
+      fontWeight: 500,
+      background: colors.bg,
+      color: colors.text,
+    }}>
+      {status}
+    </span>
+  )
+}
+
 interface ContactViewModalProps {
   contact: Contact
   onClose: () => void
 }
 
 export function ContactViewModal({ contact, onClose }: ContactViewModalProps) {
-  const renderField = (value: string | null) => {
-    if (value === null || value === '') return <span style={{ color: 'var(--foreground-primary)', fontSize: 13, fontFamily: 'var(--font-body)' }}>—</span>
-    return <span style={{ color: 'var(--foreground-primary)', fontSize: 13, fontFamily: 'var(--font-body)' }}>{value}</span>
-  }
-
-  const renderStatus = (status: ContactStatus | null) => {
-    if (!status) return <span style={{ color: 'var(--foreground-primary)', fontSize: 13, fontFamily: 'var(--font-body)' }}>—</span>
-    const colors = CONTACT_STATUS_COLORS[status]
-    return (
-      <span style={{
-        padding: '2px 10px',
-        borderRadius: 'var(--radius-pill)',
-        fontSize: 12,
-        fontFamily: 'var(--font-captions)',
-        fontWeight: 500,
-        background: colors.bg,
-        color: colors.text,
-      }}>
-        {status}
-      </span>
-    )
-  }
-
   return (
     <div
       style={{
