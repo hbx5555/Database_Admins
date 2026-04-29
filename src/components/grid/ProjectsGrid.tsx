@@ -116,6 +116,11 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
       basis: columnWidths.project_name, grow: 0, shrink: 0,
     },
     {
+      ...(keyColumn('project_topic', textColumn) as unknown as ProjectColumn),
+      title: colTitle('project_topic', COLUMN_LABELS.project_topic),
+      basis: columnWidths.project_topic, grow: 0, shrink: 0,
+    },
+    {
       basis: columnWidths.deal ?? 140, grow: 0, shrink: 0,
       disableKeys: true,
       title: (
@@ -148,60 +153,6 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
         )
       },
       copyValue: ({ rowData }: { rowData: ProjectRow }) => rowData.deals?.deal_name ?? '',
-    },
-    {
-      ...(keyColumn('project_topic', textColumn) as unknown as ProjectColumn),
-      title: colTitle('project_topic', COLUMN_LABELS.project_topic),
-      basis: columnWidths.project_topic, grow: 0, shrink: 0,
-    },
-    {
-      title: colTitle('project_status', COLUMN_LABELS.project_status),
-      basis: columnWidths.project_status, grow: 0, shrink: 0,
-      // keepFocus prevents the grid from stealing focus when the <select> opens
-      keepFocus: true,
-      component: ({ rowData, setRowData, focus }) => {
-        if (focus) {
-          return (
-            <select
-              autoFocus
-              value={rowData.project_status ?? ''}
-              onChange={e => {
-                const val = e.target.value
-                setRowData({
-                  ...rowData,
-                  project_status: (STATUS_OPTIONS.includes(val as ProjectStatus) ? val as ProjectStatus : null),
-                })
-              }}
-              style={{
-                width: '100%',
-                height: '100%',
-                border: 'none',
-                outline: 'none',
-                background: 'transparent',
-                fontFamily: 'var(--font-body)',
-                fontSize: 13,
-                color: 'var(--foreground-primary)',
-                cursor: 'pointer',
-                padding: '0 8px',
-              }}
-            >
-              <option value="">—</option>
-              {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-          )
-        }
-        return (
-          <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%' }}>
-            <RolePill status={rowData.project_status} />
-          </div>
-        )
-      },
-      deleteValue: ({ rowData }) => ({ ...rowData, project_status: null }),
-      copyValue: ({ rowData }) => rowData.project_status ?? '',
-      pasteValue: ({ rowData, value }) => ({
-        ...rowData,
-        project_status: STATUS_OPTIONS.includes(value as ProjectStatus) ? value as ProjectStatus : null,
-      }),
     },
     {
       title: colTitle('project_start_date', COLUMN_LABELS.project_start_date),
@@ -322,6 +273,55 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
       pasteValue: ({ rowData, value }) => ({
         ...rowData,
         project_budget: value !== '' ? parseFloat(value) : null,
+      }),
+    },
+    {
+      title: colTitle('project_status', COLUMN_LABELS.project_status),
+      basis: columnWidths.project_status, grow: 0, shrink: 0,
+      // keepFocus prevents the grid from stealing focus when the <select> opens
+      keepFocus: true,
+      component: ({ rowData, setRowData, focus }) => {
+        if (focus) {
+          return (
+            <select
+              autoFocus
+              value={rowData.project_status ?? ''}
+              onChange={e => {
+                const val = e.target.value
+                setRowData({
+                  ...rowData,
+                  project_status: (STATUS_OPTIONS.includes(val as ProjectStatus) ? val as ProjectStatus : null),
+                })
+              }}
+              style={{
+                width: '100%',
+                height: '100%',
+                border: 'none',
+                outline: 'none',
+                background: 'transparent',
+                fontFamily: 'var(--font-body)',
+                fontSize: 13,
+                color: 'var(--foreground-primary)',
+                cursor: 'pointer',
+                padding: '0 8px',
+              }}
+            >
+              <option value="">—</option>
+              {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          )
+        }
+        return (
+          <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%' }}>
+            <RolePill status={rowData.project_status} />
+          </div>
+        )
+      },
+      deleteValue: ({ rowData }) => ({ ...rowData, project_status: null }),
+      copyValue: ({ rowData }) => rowData.project_status ?? '',
+      pasteValue: ({ rowData, value }) => ({
+        ...rowData,
+        project_status: STATUS_OPTIONS.includes(value as ProjectStatus) ? value as ProjectStatus : null,
       }),
     },
   ], [columnWidths, colTitle, onToggleRow, onViewDeal])

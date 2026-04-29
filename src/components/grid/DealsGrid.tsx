@@ -85,6 +85,16 @@ export function DealsGrid({
       ),
     },
     {
+      ...(keyColumn('deal_name', textColumn) as unknown as DealColumn),
+      title: colTitle('deal_name', DEAL_COLUMN_LABELS.deal_name),
+      basis: columnWidths.deal_name, grow: 0, shrink: 0,
+    },
+    {
+      ...(keyColumn('deal_description', textColumn) as unknown as DealColumn),
+      title: colTitle('deal_description', DEAL_COLUMN_LABELS.deal_description),
+      basis: columnWidths.deal_description, grow: 0, shrink: 0,
+    },
+    {
       basis: columnWidths.contact, grow: 0, shrink: 0,
       disableKeys: true,
       // virtual join column — no sort key, so colTitle is not used
@@ -126,16 +136,6 @@ export function DealsGrid({
       },
     },
     {
-      ...(keyColumn('deal_name', textColumn) as unknown as DealColumn),
-      title: colTitle('deal_name', DEAL_COLUMN_LABELS.deal_name),
-      basis: columnWidths.deal_name, grow: 0, shrink: 0,
-    },
-    {
-      ...(keyColumn('deal_description', textColumn) as unknown as DealColumn),
-      title: colTitle('deal_description', DEAL_COLUMN_LABELS.deal_description),
-      basis: columnWidths.deal_description, grow: 0, shrink: 0,
-    },
-    {
       title: colTitle('last_call_datetime', DEAL_COLUMN_LABELS.last_call_datetime),
       basis: columnWidths.last_call_datetime, grow: 0, shrink: 0,
       disableKeys: true,
@@ -147,52 +147,6 @@ export function DealsGrid({
         </div>
       ),
       copyValue: ({ rowData }: { rowData: DealRow }) => rowData.last_call_datetime ?? '',
-    },
-    {
-      title: colTitle('proposal_filename', DEAL_COLUMN_LABELS.proposal_filename),
-      basis: columnWidths.proposal_filename, grow: 0, shrink: 0,
-      disableKeys: true,
-      component: ({ rowData }: { rowData: DealRow }) => {
-        const isOptimistic = rowData.id.startsWith('optimistic-')
-        if (rowData.proposal_filename && rowData.proposal_url) {
-          return (
-            <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%' }}>
-              <a
-                href={rowData.proposal_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={e => e.stopPropagation()}
-                style={{ fontSize: 12, color: 'var(--accent-primary)', textDecoration: 'underline', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-              >
-                {rowData.proposal_filename}
-              </a>
-            </div>
-          )
-        }
-        return (
-          <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%' }}>
-            {isOptimistic ? (
-              <span style={{ fontSize: 11, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>Save first</span>
-            ) : (
-              <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}
-                onMouseDown={e => e.nativeEvent.stopImmediatePropagation()}>
-                <span className="material-symbols-outlined" style={{ fontSize: 14, color: 'var(--foreground-secondary)' }}>upload_file</span>
-                <span style={{ fontSize: 12, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>Upload</span>
-                <input
-                  type="file"
-                  style={{ display: 'none' }}
-                  onChange={async e => {
-                    const file = e.target.files?.[0]
-                    if (!file) return
-                    await onUploadProposal(rowData.id, file)
-                    e.target.value = ''
-                  }}
-                />
-              </label>
-            )}
-          </div>
-        )
-      },
     },
     {
       title: colTitle('status', DEAL_COLUMN_LABELS.status),
@@ -228,6 +182,52 @@ export function DealsGrid({
       pasteValue: ({ rowData, value }: { rowData: DealRow; value: string }) => ({
         ...rowData, status: DEAL_STATUS_OPTIONS.includes(value as DealStatus) ? value as DealStatus : null,
       }),
+    },
+    {
+      title: colTitle('proposal_filename', DEAL_COLUMN_LABELS.proposal_filename),
+      basis: columnWidths.proposal_filename, grow: 0, shrink: 0,
+      disableKeys: true,
+      component: ({ rowData }: { rowData: DealRow }) => {
+        const isOptimistic = rowData.id.startsWith('optimistic-')
+        if (rowData.proposal_filename && rowData.proposal_url) {
+          return (
+            <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%', overflow: 'hidden', minWidth: 0 }}>
+              <a
+                href={rowData.proposal_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={e => e.stopPropagation()}
+                style={{ display: 'block', fontSize: 12, color: 'var(--accent-primary)', textDecoration: 'underline', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}
+              >
+                {rowData.proposal_filename}
+              </a>
+            </div>
+          )
+        }
+        return (
+          <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%' }}>
+            {isOptimistic ? (
+              <span style={{ fontSize: 11, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>Save first</span>
+            ) : (
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}
+                onMouseDown={e => e.nativeEvent.stopImmediatePropagation()}>
+                <span className="material-symbols-outlined" style={{ fontSize: 14, color: 'var(--foreground-secondary)' }}>upload_file</span>
+                <span style={{ fontSize: 12, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>Upload</span>
+                <input
+                  type="file"
+                  style={{ display: 'none' }}
+                  onChange={async e => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    await onUploadProposal(rowData.id, file)
+                    e.target.value = ''
+                  }}
+                />
+              </label>
+            )}
+          </div>
+        )
+      },
     },
   ], [columnWidths, colTitle, onToggleRow, onUploadProposal, onViewContact])
 
