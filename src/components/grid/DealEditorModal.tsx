@@ -64,9 +64,10 @@ interface DealEditorModalProps {
   onAdd: (data: DealInsert) => void
   onClose: () => void
   onViewContact?: (contact: Contact) => void
+  onCreateProject?: () => void
 }
 
-export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact }: DealEditorModalProps) {
+export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact, onCreateProject }: DealEditorModalProps) {
   const isNew = !row
   const [draft, setDraft] = useState<DealInsert>(isNew ? { ...EMPTY_DRAFT } : {
     deal_name: row.deal_name,
@@ -363,6 +364,29 @@ export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact }: 
               {DEAL_STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </FieldRow>
+
+          {!isNew && row.status === 'Signed' && (
+            <FieldRow label="Project" fieldKey="project" focused={focused}>
+              <button
+                type="button"
+                onClick={() => { onCreateProject?.(); onClose() }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '8px 16px',
+                  borderRadius: 'var(--radius-md)',
+                  background: 'var(--accent-primary)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: 13, fontWeight: 600,
+                  fontFamily: 'var(--font-body)',
+                  color: 'var(--foreground-inverse)',
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add_circle</span>
+                Create Project
+              </button>
+            </FieldRow>
+          )}
 
           <div style={{ display: 'flex', borderTop: '1px solid var(--border-color)' }}>
             <div style={{ width: LABEL_W, flexShrink: 0, background: 'var(--surface-primary)' }} />

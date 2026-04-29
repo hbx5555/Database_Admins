@@ -448,6 +448,19 @@ export default function App() {
           onAdd={data => { addDeal(data).catch(() => {}) }}
           onClose={() => setEditingDeal(null)}
           onViewContact={setViewingContact}
+          onCreateProject={editingDeal !== 'new' ? () => {
+            addProject({
+              project_name: editingDeal.deal_name,
+              deal_id: editingDeal.id,
+              project_start_date: new Date().toISOString().split('T')[0],
+              project_status: 'New',
+              project_topic: null,
+              project_delivery_date: null,
+              project_budget: null,
+              spec_url: null,
+              spec_filename: null,
+            }).catch(() => {})
+          } : undefined}
         />
       )}
 
