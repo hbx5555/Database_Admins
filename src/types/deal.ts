@@ -18,6 +18,8 @@ export interface Deal {
   last_call_datetime: string | null  // ISO 8601 with timezone, e.g. "2026-04-26T14:30:00Z"
   proposal_url: string | null
   proposal_filename: string | null
+  contract_url: string | null
+  contract_filename: string | null
   status: DealStatus | null
   contact_id: string | null
   contacts: Contact | null
@@ -36,6 +38,8 @@ export const DEAL_COLUMN_LABELS: Record<string, string> = {
   last_call_datetime: 'Last Call',
   proposal_url: 'Proposal',
   proposal_filename: 'Proposal',
+  contract_url: 'Contract',
+  contract_filename: 'Contract',
   status: 'Status',
   contact_id: 'Contact',
 }

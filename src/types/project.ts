@@ -11,6 +11,8 @@ export interface Project {
   project_start_date: string | null      // ISO date string "YYYY-MM-DD"
   project_delivery_date: string | null   // ISO date string "YYYY-MM-DD"
   project_budget: number | null
+  spec_url: string | null
+  spec_filename: string | null
   deal_id: string | null
   deals: Deal | null                     // populated by Supabase join; not a DB column
   created_at: string
@@ -75,4 +77,5 @@ export const COLUMN_LABELS: Record<string, string> = {
   project_delivery_date: 'Delivery Date',
   project_budget: 'Budget',
   deal_id: 'Deal',
+  spec_filename: 'Spec',
 }

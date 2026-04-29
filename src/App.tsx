@@ -32,6 +32,8 @@ const NEW_PROJECT_DEFAULTS: ProjectInsert = {
   project_start_date: null,
   project_delivery_date: null,
   project_budget: null,
+  spec_url: null,
+  spec_filename: null,
   deal_id: null,
 }
 
@@ -52,6 +54,8 @@ const NEW_DEAL_DEFAULTS: DealInsert = {
   last_call_datetime: null,
   proposal_url: null,
   proposal_filename: null,
+  contract_url: null,
+  contract_filename: null,
   status: 'New',
   contact_id: null,
 }
@@ -60,6 +64,7 @@ export default function App() {
   const [activeView, setActiveView] = useState<AppView>('deals')
   const [panelOpen, setPanelOpen] = useState(true)
   const [dealUploadError, setDealUploadError] = useState<string | null>(null)
+  const [projectUploadError, setProjectUploadError] = useState<string | null>(null)
 
   // ── Projects ─────────────────────────────────────────────────────────────
   const {
@@ -238,6 +243,26 @@ export default function App() {
     }
   }, [editDeal])
 
+  const handleUploadContract = useCallback(async (id: string, file: File) => {
+    setDealUploadError(null)
+    try {
+      const { url, filename } = await uploadDocument('deals', id, file)
+      editDeal(id, { contract_url: url, contract_filename: filename })
+    } catch (err) {
+      setDealUploadError(err instanceof Error ? err.message : 'Upload failed')
+    }
+  }, [editDeal])
+
+  const handleUploadSpec = useCallback(async (id: string, file: File) => {
+    setProjectUploadError(null)
+    try {
+      const { url, filename } = await uploadDocument('projects', id, file)
+      editProject(id, { spec_url: url, spec_filename: filename })
+    } catch (err) {
+      setProjectUploadError(err instanceof Error ? err.message : 'Upload failed')
+    }
+  }, [editProject])
+
   // ── Derived values for current view ──────────────────────────────────────
   const isProjects = activeView === 'projects'
   const isContacts = activeView === 'contacts'
@@ -305,6 +330,7 @@ export default function App() {
           {loading && <LoadingState />}
           {!loading && error && <ErrorState message={error} onRetry={onRefresh} />}
           {isDeals && dealUploadError && <ErrorState message={dealUploadError} onRetry={() => setDealUploadError(null)} />}
+          {isProjects && projectUploadError && <ErrorState message={projectUploadError} onRetry={() => setProjectUploadError(null)} />}
           {!loading && !error && displayRows.length === 0 && <EmptyState />}
 
           {!loading && !error && filteredRows.length > 0 && isProjects && viewMode === 'grid' && (
@@ -317,6 +343,7 @@ export default function App() {
               sorts={projectSorts}
               onSortField={setProjectSort}
               onViewDeal={setViewingDeal}
+              onUploadSpec={handleUploadSpec}
             />
           )}
 
@@ -362,6 +389,7 @@ export default function App() {
               sorts={dealSorts}
               onSortField={setDealSort}
               onUploadProposal={handleUploadProposal}
+              onUploadContract={handleUploadContract}
               onViewContact={setViewingContact}
             />
           )}

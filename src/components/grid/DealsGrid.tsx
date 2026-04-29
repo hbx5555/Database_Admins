@@ -21,11 +21,12 @@ interface DealsGridProps {
   sorts: GenericSortSpec<Deal>[]
   onSortField: (field: keyof Deal) => void
   onUploadProposal: (id: string, file: File) => Promise<void>
+  onUploadContract: (id: string, file: File) => Promise<void>
   onViewContact: (contact: Contact) => void
 }
 
 export function DealsGrid({
-  rows, onRowChange, selectedIds, onToggleRow, onEditRow, sorts, onSortField, onUploadProposal, onViewContact,
+  rows, onRowChange, selectedIds, onToggleRow, onEditRow, sorts, onSortField, onUploadProposal, onUploadContract, onViewContact,
 }: DealsGridProps) {
   const { columnWidths, finalizeWidth } = useColumnResize(DEAL_COLUMN_LS_KEY, DEAL_DEFAULT_WIDTHS)
   const [resizeVersion, setResizeVersion] = useState(0)
@@ -149,6 +150,52 @@ export function DealsGrid({
       copyValue: ({ rowData }: { rowData: DealRow }) => rowData.last_call_datetime ?? '',
     },
     {
+      title: colTitle('contract_filename', DEAL_COLUMN_LABELS.contract_filename),
+      basis: columnWidths.contract_filename, grow: 0, shrink: 0,
+      disableKeys: true,
+      component: ({ rowData }: { rowData: DealRow }) => {
+        const isOptimistic = rowData.id.startsWith('optimistic-')
+        if (rowData.contract_filename && rowData.contract_url) {
+          return (
+            <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%', overflow: 'hidden', minWidth: 0 }}>
+              <a
+                href={rowData.contract_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={e => e.stopPropagation()}
+                style={{ display: 'block', fontSize: 12, color: 'var(--accent-primary)', textDecoration: 'underline', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}
+              >
+                {rowData.contract_filename}
+              </a>
+            </div>
+          )
+        }
+        return (
+          <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%' }}>
+            {isOptimistic ? (
+              <span style={{ fontSize: 11, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>Save first</span>
+            ) : (
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}
+                onMouseDown={e => e.nativeEvent.stopImmediatePropagation()}>
+                <span className="material-symbols-outlined" style={{ fontSize: 14, color: 'var(--foreground-secondary)' }}>upload_file</span>
+                <span style={{ fontSize: 12, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>Upload</span>
+                <input
+                  type="file"
+                  style={{ display: 'none' }}
+                  onChange={async e => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    await onUploadContract(rowData.id, file)
+                    e.target.value = ''
+                  }}
+                />
+              </label>
+            )}
+          </div>
+        )
+      },
+    },
+    {
       title: colTitle('status', DEAL_COLUMN_LABELS.status),
       basis: columnWidths.status ?? 130, grow: 0, shrink: 0,
       keepFocus: true,
@@ -229,7 +276,7 @@ export function DealsGrid({
         )
       },
     },
-  ], [columnWidths, colTitle, onToggleRow, onUploadProposal, onViewContact])
+  ], [columnWidths, colTitle, onToggleRow, onUploadProposal, onUploadContract, onViewContact])
 
   const handleChange = (newRows: DealRow[], operations: Operation[]) => {
     for (const op of operations) {

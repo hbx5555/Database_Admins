@@ -29,13 +29,14 @@ interface ProjectsGridProps {
   sorts: SortSpec[]
   onSortField: (field: keyof Project) => void
   onViewDeal: (deal: Deal) => void
+  onUploadSpec: (id: string, file: File) => Promise<void>
 }
 
 // DSG Column<T, C, PasteValue> — C is the internal column-data shape; we use
 // unknown here because keyColumn's ColumnData type is not publicly exported.
 type ProjectColumn = Partial<Column<ProjectRow, unknown, string>>
 
-export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEditRow, sorts, onSortField, onViewDeal }: ProjectsGridProps) {
+export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEditRow, sorts, onSortField, onViewDeal, onUploadSpec }: ProjectsGridProps) {
   const { columnWidths, finalizeWidth } = useColumnResize(PROJECT_COLUMN_LS_KEY, PROJECT_DEFAULT_WIDTHS)
   // Incrementing this forces DataSheetGrid to remount, which reinitialises
   // TanStack Virtual's measurement cache with the new column basis values.
@@ -324,7 +325,53 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
         project_status: STATUS_OPTIONS.includes(value as ProjectStatus) ? value as ProjectStatus : null,
       }),
     },
-  ], [columnWidths, colTitle, onToggleRow, onViewDeal])
+    {
+      title: colTitle('spec_filename', COLUMN_LABELS.spec_filename),
+      basis: columnWidths.spec_filename, grow: 0, shrink: 0,
+      disableKeys: true,
+      component: ({ rowData }: { rowData: ProjectRow }) => {
+        const isOptimistic = rowData.id.startsWith('optimistic-')
+        if (rowData.spec_filename && rowData.spec_url) {
+          return (
+            <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%', overflow: 'hidden', minWidth: 0 }}>
+              <a
+                href={rowData.spec_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={e => e.stopPropagation()}
+                style={{ display: 'block', fontSize: 12, color: 'var(--accent-primary)', textDecoration: 'underline', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}
+              >
+                {rowData.spec_filename}
+              </a>
+            </div>
+          )
+        }
+        return (
+          <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%' }}>
+            {isOptimistic ? (
+              <span style={{ fontSize: 11, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>Save first</span>
+            ) : (
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}
+                onMouseDown={e => e.nativeEvent.stopImmediatePropagation()}>
+                <span className="material-symbols-outlined" style={{ fontSize: 14, color: 'var(--foreground-secondary)' }}>upload_file</span>
+                <span style={{ fontSize: 12, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>Upload</span>
+                <input
+                  type="file"
+                  style={{ display: 'none' }}
+                  onChange={async e => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    await onUploadSpec(rowData.id, file)
+                    e.target.value = ''
+                  }}
+                />
+              </label>
+            )}
+          </div>
+        )
+      },
+    },
+  ], [columnWidths, colTitle, onToggleRow, onViewDeal, onUploadSpec])
 
   const handleChange = (newRows: ProjectRow[], operations: Operation[]) => {
     for (const op of operations) {

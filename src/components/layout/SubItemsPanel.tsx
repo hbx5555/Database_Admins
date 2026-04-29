@@ -39,6 +39,12 @@ const VIEW_LABELS: Record<AppView, string> = {
   contacts: 'Contacts',
 }
 
+const VIEW_ICONS: Record<AppView, string> = {
+  deals: 'label',
+  projects: 'task_alt',
+  contacts: 'person',
+}
+
 export function SubItemsPanel({
   activeView, totalCount, onAddItem,
   activeStatusFilter, onStatusChange,
@@ -51,13 +57,18 @@ export function SubItemsPanel({
 
   return (
     <div style={{ width: '100%', minHeight: '100vh', background: 'var(--surface-panel)', borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', padding: '16px 0' }}>
-      <div style={{ padding: '0 16px 8px' }}>
-        <div style={{ fontFamily: 'var(--font-headings)', fontSize: 16, fontWeight: 700, color: 'var(--foreground-primary)' }}>
-          {VIEW_LABELS[activeView]}
+      <div style={{ padding: '0 16px 8px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <div>
+          <div style={{ fontFamily: 'var(--font-headings)', fontSize: 16, fontWeight: 700, color: 'var(--foreground-primary)' }}>
+            {VIEW_LABELS[activeView]}
+          </div>
+          <div style={{ fontFamily: 'var(--font-captions)', fontSize: 12, color: 'var(--foreground-secondary)' }}>
+            {totalCount.toLocaleString()}
+          </div>
         </div>
-        <div style={{ fontFamily: 'var(--font-captions)', fontSize: 12, color: 'var(--foreground-secondary)' }}>
-          {totalCount.toLocaleString()}
-        </div>
+        <span className="material-symbols-outlined" style={{ fontSize: 24, color: 'var(--accent-primary)', flexShrink: 0 }}>
+          {VIEW_ICONS[activeView]}
+        </span>
       </div>
 
       <div style={{ padding: '4px 8px 8px' }}>

@@ -145,6 +145,21 @@ export function DealViewModal({ deal, onClose }: DealViewModalProps) {
             )}
           </FieldRow>
 
+          <FieldRow label={DEAL_COLUMN_LABELS.contract_filename}>
+            {deal.contract_url && deal.contract_filename ? (
+              <a
+                href={deal.contract_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ display: 'block', fontSize: 13, color: 'var(--accent-primary)', fontFamily: 'var(--font-body)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}
+              >
+                {deal.contract_filename}
+              </a>
+            ) : (
+              renderField(null)
+            )}
+          </FieldRow>
+
           <FieldRow label={DEAL_COLUMN_LABELS.status}>
             {renderStatus(deal.status)}
           </FieldRow>

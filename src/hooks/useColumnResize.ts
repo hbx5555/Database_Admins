@@ -13,6 +13,7 @@ export const PROJECT_DEFAULT_WIDTHS: Record<string, number> = {
   project_start_date: 120,
   project_delivery_date: 130,
   project_budget: 110,
+  spec_filename: 160,
 }
 
 export const CONTACT_DEFAULT_WIDTHS: Record<string, number> = {
@@ -31,6 +32,7 @@ export const DEAL_DEFAULT_WIDTHS: Record<string, number> = {
   deal_description: 220,
   last_call_datetime: 160,
   proposal_filename: 160,
+  contract_filename: 160,
   status: 130,
 }
 

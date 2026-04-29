@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import type { Project, ProjectInsert, ProjectUpdate, ProjectStatus } from '../../types/project'
 import { COLUMN_LABELS } from '../../types/project'
 import type { Deal } from '../../types/deal'
+import { uploadDocument, deleteDocument } from '../../lib/storageApi'
 
 const STATUS_OPTIONS: ProjectStatus[] = ['New', 'Started', 'Done']
 const LABEL_W = 180
@@ -50,6 +51,8 @@ const EMPTY_DRAFT: ProjectInsert = {
   project_start_date: null,
   project_delivery_date: null,
   project_budget: null,
+  spec_url: null,
+  spec_filename: null,
   deal_id: null,
 }
 
@@ -70,17 +73,29 @@ export function RecordEditorModal({ row, onSave, onAdd, onClose, onViewDeal }: R
     project_start_date: row.project_start_date,
     project_delivery_date: row.project_delivery_date,
     project_budget: row.project_budget,
+    spec_url: row.spec_url,
+    spec_filename: row.spec_filename,
     deal_id: row.deal_id,
   })
   const [focused, setFocused] = useState<string | null>(null)
+  const [uploadingSpec, setUploadingSpec] = useState(false)
+  const [uploadErrorSpec, setUploadErrorSpec] = useState<string | null>(null)
+  const specFileInputRef = useRef<HTMLInputElement>(null)
 
   const set = <K extends keyof ProjectInsert>(key: K, val: ProjectInsert[K]) =>
     setDraft(d => ({ ...d, [key]: val }))
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (isNew) {
       onAdd({ ...draft })
     } else {
+      if (row.spec_filename && !draft.spec_filename) {
+        try {
+          await deleteDocument('projects', row.id, row.spec_filename)
+        } catch {
+          // Non-fatal
+        }
+      }
       const changes: ProjectUpdate = {}
       if (draft.project_name !== row.project_name) changes.project_name = draft.project_name
       if (draft.project_topic !== row.project_topic) changes.project_topic = draft.project_topic
@@ -88,6 +103,8 @@ export function RecordEditorModal({ row, onSave, onAdd, onClose, onViewDeal }: R
       if (draft.project_start_date !== row.project_start_date) changes.project_start_date = draft.project_start_date
       if (draft.project_delivery_date !== row.project_delivery_date) changes.project_delivery_date = draft.project_delivery_date
       if (draft.project_budget !== row.project_budget) changes.project_budget = draft.project_budget
+      if (draft.spec_url !== row.spec_url) changes.spec_url = draft.spec_url
+      if (draft.spec_filename !== row.spec_filename) changes.spec_filename = draft.spec_filename
       if (draft.deal_id !== row.deal_id) changes.deal_id = draft.deal_id
       if (Object.keys(changes).length > 0) onSave(row.id, changes)
     }
@@ -206,6 +223,66 @@ export function RecordEditorModal({ row, onSave, onAdd, onClose, onViewDeal }: R
             </select>
           </FieldRow>
 
+          <FieldRow label={COLUMN_LABELS.spec_filename} fieldKey="spec_filename" focused={focused}>
+            {isNew ? (
+              <span style={{ fontSize: 12, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>
+                Save the project first to attach a spec
+              </span>
+            ) : uploadingSpec ? (
+              <span style={{ fontSize: 13, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>
+                Uploading…
+              </span>
+            ) : draft.spec_filename ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%' }}>
+                <span style={{ fontSize: 13, fontFamily: 'var(--font-body)', color: 'var(--accent-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {draft.spec_filename}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => { set('spec_url', null); set('spec_filename', null) }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground-secondary)', fontSize: 12, fontFamily: 'var(--font-body)', flexShrink: 0 }}
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <button
+                  type="button"
+                  onClick={() => specFileInputRef.current?.click()}
+                  style={{ padding: '6px 14px', borderRadius: 'var(--radius-md)', background: 'transparent', border: '1.5px solid var(--border-color)', cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-body)', color: 'var(--foreground-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 14 }}>upload_file</span>
+                  Choose file
+                </button>
+                <input
+                  ref={specFileInputRef}
+                  type="file"
+                  style={{ display: 'none' }}
+                  onChange={async e => {
+                    const file = e.target.files?.[0]
+                    if (!file || !row) return
+                    setUploadingSpec(true)
+                    setUploadErrorSpec(null)
+                    try {
+                      const { url, filename } = await uploadDocument('projects', row.id, file)
+                      set('spec_url', url)
+                      set('spec_filename', filename)
+                    } catch (err) {
+                      setUploadErrorSpec(err instanceof Error ? err.message : 'Upload failed')
+                    } finally {
+                      setUploadingSpec(false)
+                      if (specFileInputRef.current) specFileInputRef.current.value = ''
+                    }
+                  }}
+                />
+                {uploadErrorSpec && (
+                  <span style={{ fontSize: 12, color: '#C0392B', fontFamily: 'var(--font-body)' }}>{uploadErrorSpec}</span>
+                )}
+              </div>
+            )}
+          </FieldRow>
+
           <FieldRow label={COLUMN_LABELS.project_start_date} fieldKey="project_start_date" focused={focused}>
             <input
               type="date"
@@ -247,15 +324,17 @@ export function RecordEditorModal({ row, onSave, onAdd, onClose, onViewDeal }: R
             <div style={{ flex: 1, padding: '16px 28px', display: 'flex', gap: 10, alignItems: 'center' }}>
               <button
                 onClick={handleSave}
+                disabled={uploadingSpec}
                 style={{
                   padding: '8px 20px',
                   borderRadius: 'var(--radius-md)',
                   background: 'var(--accent-primary)',
                   border: 'none',
-                  cursor: 'pointer',
+                  cursor: uploadingSpec ? 'default' : 'pointer',
                   fontSize: 13, fontWeight: 600,
                   fontFamily: 'var(--font-body)',
                   color: 'var(--foreground-inverse)',
+                  opacity: uploadingSpec ? 0.6 : 1,
                 }}
               >
                 {isNew ? 'Add Record' : 'Save Changes'}

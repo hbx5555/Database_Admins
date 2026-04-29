@@ -10,6 +10,8 @@ const makeProject = (overrides: Partial<Project>): Project => ({
   project_start_date: null,
   project_delivery_date: null,
   project_budget: null,
+  spec_url: null,
+  spec_filename: null,
   deal_id: null,
   deals: null,
   created_at: '2024-01-01T00:00:00Z',

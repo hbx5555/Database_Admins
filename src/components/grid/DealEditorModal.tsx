@@ -52,6 +52,8 @@ const EMPTY_DRAFT: DealInsert = {
   last_call_datetime: null,
   proposal_url: null,
   proposal_filename: null,
+  contract_url: null,
+  contract_filename: null,
   status: null,
   contact_id: null,
 }
@@ -73,6 +75,8 @@ export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact }: 
     last_call_datetime: row.last_call_datetime,
     proposal_url: row.proposal_url,
     proposal_filename: row.proposal_filename,
+    contract_url: row.contract_url,
+    contract_filename: row.contract_filename,
     status: row.status,
     contact_id: row.contact_id,
   })
@@ -80,6 +84,9 @@ export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact }: 
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [uploadingContract, setUploadingContract] = useState(false)
+  const [uploadErrorContract, setUploadErrorContract] = useState<string | null>(null)
+  const contractFileInputRef = useRef<HTMLInputElement>(null)
 
   const set = <K extends keyof DealInsert>(key: K, val: DealInsert[K]) =>
     setDraft(d => ({ ...d, [key]: val }))
@@ -97,12 +104,18 @@ export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact }: 
     if (isNew) {
       onAdd({ ...draft })
     } else {
-      // If proposal was removed, delete from storage first
       if (row.proposal_filename && !draft.proposal_filename) {
         try {
           await deleteDocument('deals', row.id, row.proposal_filename)
         } catch {
           // Non-fatal — proceed with save even if storage delete fails
+        }
+      }
+      if (row.contract_filename && !draft.contract_filename) {
+        try {
+          await deleteDocument('deals', row.id, row.contract_filename)
+        } catch {
+          // Non-fatal
         }
       }
       const changes: DealUpdate = {}
@@ -112,6 +125,8 @@ export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact }: 
       if (draft.last_call_datetime !== row.last_call_datetime) changes.last_call_datetime = draft.last_call_datetime
       if (draft.proposal_url !== row.proposal_url) changes.proposal_url = draft.proposal_url
       if (draft.proposal_filename !== row.proposal_filename) changes.proposal_filename = draft.proposal_filename
+      if (draft.contract_url !== row.contract_url) changes.contract_url = draft.contract_url
+      if (draft.contract_filename !== row.contract_filename) changes.contract_filename = draft.contract_filename
       if (draft.status !== row.status) changes.status = draft.status
       if (draft.contact_id !== row.contact_id) changes.contact_id = draft.contact_id
       if (Object.keys(changes).length > 0) onSave(row.id, changes)
@@ -273,6 +288,66 @@ export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact }: 
             )}
           </FieldRow>
 
+          <FieldRow label={DEAL_COLUMN_LABELS.contract_filename} fieldKey="contract_filename" focused={focused}>
+            {isNew ? (
+              <span style={{ fontSize: 12, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>
+                Save the deal first to attach a contract
+              </span>
+            ) : uploadingContract ? (
+              <span style={{ fontSize: 13, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>
+                Uploading…
+              </span>
+            ) : draft.contract_filename ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%' }}>
+                <span style={{ fontSize: 13, fontFamily: 'var(--font-body)', color: 'var(--accent-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {draft.contract_filename}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => { set('contract_url', null); set('contract_filename', null) }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground-secondary)', fontSize: 12, fontFamily: 'var(--font-body)', flexShrink: 0 }}
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <button
+                  type="button"
+                  onClick={() => contractFileInputRef.current?.click()}
+                  style={{ padding: '6px 14px', borderRadius: 'var(--radius-md)', background: 'transparent', border: '1.5px solid var(--border-color)', cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-body)', color: 'var(--foreground-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 14 }}>upload_file</span>
+                  Choose file
+                </button>
+                <input
+                  ref={contractFileInputRef}
+                  type="file"
+                  style={{ display: 'none' }}
+                  onChange={async e => {
+                    const file = e.target.files?.[0]
+                    if (!file || !row) return
+                    setUploadingContract(true)
+                    setUploadErrorContract(null)
+                    try {
+                      const { url, filename } = await uploadDocument('deals', row.id, file)
+                      set('contract_url', url)
+                      set('contract_filename', filename)
+                    } catch (err) {
+                      setUploadErrorContract(err instanceof Error ? err.message : 'Upload failed')
+                    } finally {
+                      setUploadingContract(false)
+                      if (contractFileInputRef.current) contractFileInputRef.current.value = ''
+                    }
+                  }}
+                />
+                {uploadErrorContract && (
+                  <span style={{ fontSize: 12, color: '#C0392B', fontFamily: 'var(--font-body)' }}>{uploadErrorContract}</span>
+                )}
+              </div>
+            )}
+          </FieldRow>
+
           <FieldRow label={DEAL_COLUMN_LABELS.status} fieldKey="status" focused={focused}>
             <select
               value={draft.status ?? ''}
@@ -294,8 +369,8 @@ export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact }: 
             <div style={{ flex: 1, padding: '16px 28px', display: 'flex', gap: 10, alignItems: 'center' }}>
               <button
                 onClick={handleSave}
-                disabled={uploading}
-                style={{ padding: '8px 20px', borderRadius: 'var(--radius-md)', background: 'var(--accent-primary)', border: 'none', cursor: uploading ? 'default' : 'pointer', fontSize: 13, fontWeight: 600, fontFamily: 'var(--font-body)', color: 'var(--foreground-inverse)', opacity: uploading ? 0.6 : 1 }}
+                disabled={uploading || uploadingContract}
+                style={{ padding: '8px 20px', borderRadius: 'var(--radius-md)', background: 'var(--accent-primary)', border: 'none', cursor: (uploading || uploadingContract) ? 'default' : 'pointer', fontSize: 13, fontWeight: 600, fontFamily: 'var(--font-body)', color: 'var(--foreground-inverse)', opacity: (uploading || uploadingContract) ? 0.6 : 1 }}
               >
                 {isNew ? 'Add Deal' : 'Save Changes'}
               </button>
