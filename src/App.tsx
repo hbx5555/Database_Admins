@@ -86,6 +86,7 @@ export default function App() {
 
   const [projectSelectedIds, setProjectSelectedIds] = useState<Set<string>>(new Set())
   const [editingProject, setEditingProject] = useState<Project | 'new' | null>(null)
+  const [viewingDeal, setViewingDeal] = useState<Deal | null>(null)
 
   const toggleProjectRow = useCallback((id: string) => setProjectSelectedIds(prev => {
     const next = new Set(prev)
@@ -142,7 +143,6 @@ export default function App() {
   const [contactSelectedIds, setContactSelectedIds] = useState<Set<string>>(new Set())
   const [editingContact, setEditingContact] = useState<Contact | 'new' | null>(null)
   const [viewingContact, setViewingContact] = useState<Contact | null>(null)
-  const [viewingDeal, setViewingDeal] = useState<Deal | null>(null)
 
   const toggleContactRow = useCallback((id: string) => setContactSelectedIds(prev => {
     const next = new Set(prev)
