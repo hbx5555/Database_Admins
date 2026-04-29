@@ -15,6 +15,7 @@ import { RecordEditorModal } from './components/grid/RecordEditorModal'
 import { ContactEditorModal } from './components/grid/ContactEditorModal'
 import { ContactViewModal } from './components/grid/ContactViewModal'
 import { DealEditorModal } from './components/grid/DealEditorModal'
+import { DealViewModal } from './components/grid/DealViewModal'
 import { PROJECTS_CONFIG, CONTACTS_CONFIG, DEALS_CONFIG } from './config/tables'
 import { uploadDocument } from './lib/storageApi'
 import { LoadingState } from './components/shared/LoadingState'
@@ -141,6 +142,7 @@ export default function App() {
   const [contactSelectedIds, setContactSelectedIds] = useState<Set<string>>(new Set())
   const [editingContact, setEditingContact] = useState<Contact | 'new' | null>(null)
   const [viewingContact, setViewingContact] = useState<Contact | null>(null)
+  const [viewingDeal, setViewingDeal] = useState<Deal | null>(null)
 
   const toggleContactRow = useCallback((id: string) => setContactSelectedIds(prev => {
     const next = new Set(prev)
@@ -314,6 +316,7 @@ export default function App() {
               onEditRow={handleEditProject}
               sorts={projectSorts}
               onSortField={setProjectSort}
+              onViewDeal={setViewingDeal}
             />
           )}
 
@@ -397,6 +400,7 @@ export default function App() {
           onSave={editProject}
           onAdd={data => { addProject(data).catch(() => {}) }}
           onClose={() => setEditingProject(null)}
+          onViewDeal={setViewingDeal}
         />
       )}
 
@@ -423,6 +427,13 @@ export default function App() {
         <ContactViewModal
           contact={viewingContact}
           onClose={() => setViewingContact(null)}
+        />
+      )}
+
+      {viewingDeal !== null && (
+        <DealViewModal
+          deal={viewingDeal}
+          onClose={() => setViewingDeal(null)}
         />
       )}
     </div>
