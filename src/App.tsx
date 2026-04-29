@@ -15,6 +15,7 @@ import { RecordEditorModal } from './components/grid/RecordEditorModal'
 import { ContactEditorModal } from './components/grid/ContactEditorModal'
 import { ContactViewModal } from './components/grid/ContactViewModal'
 import { DealEditorModal } from './components/grid/DealEditorModal'
+import { DealViewModal } from './components/grid/DealViewModal'
 import { PROJECTS_CONFIG, CONTACTS_CONFIG, DEALS_CONFIG } from './config/tables'
 import { uploadDocument } from './lib/storageApi'
 import { LoadingState } from './components/shared/LoadingState'
@@ -31,6 +32,7 @@ const NEW_PROJECT_DEFAULTS: ProjectInsert = {
   project_start_date: null,
   project_delivery_date: null,
   project_budget: null,
+  deal_id: null,
 }
 
 const NEW_CONTACT_DEFAULTS: ContactInsert = {
@@ -84,6 +86,7 @@ export default function App() {
 
   const [projectSelectedIds, setProjectSelectedIds] = useState<Set<string>>(new Set())
   const [editingProject, setEditingProject] = useState<Project | 'new' | null>(null)
+  const [viewingDeal, setViewingDeal] = useState<Deal | null>(null)
 
   const toggleProjectRow = useCallback((id: string) => setProjectSelectedIds(prev => {
     const next = new Set(prev)
@@ -313,6 +316,7 @@ export default function App() {
               onEditRow={handleEditProject}
               sorts={projectSorts}
               onSortField={setProjectSort}
+              onViewDeal={setViewingDeal}
             />
           )}
 
@@ -396,6 +400,7 @@ export default function App() {
           onSave={editProject}
           onAdd={data => { addProject(data).catch(() => {}) }}
           onClose={() => setEditingProject(null)}
+          onViewDeal={setViewingDeal}
         />
       )}
 
@@ -422,6 +427,13 @@ export default function App() {
         <ContactViewModal
           contact={viewingContact}
           onClose={() => setViewingContact(null)}
+        />
+      )}
+
+      {viewingDeal !== null && (
+        <DealViewModal
+          deal={viewingDeal}
+          onClose={() => setViewingDeal(null)}
         />
       )}
     </div>

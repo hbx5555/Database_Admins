@@ -4,7 +4,7 @@ import type { Project, ProjectInsert, ProjectUpdate } from '../types/project'
 export async function fetchProjects(): Promise<Project[]> {
   const { data, error } = await supabase
     .from('projects')
-    .select('*')
+    .select('*, deals(*)')
     .order('created_at', { ascending: false })
 
   if (error) throw new Error(error.message)
@@ -15,7 +15,7 @@ export async function createProject(row: ProjectInsert): Promise<Project> {
   const { data, error } = await supabase
     .from('projects')
     .insert(row)
-    .select()
+    .select('*, deals(*)')
     .single()
 
   if (error) throw new Error(error.message)
@@ -27,7 +27,7 @@ export async function updateProject(id: string, changes: ProjectUpdate): Promise
     .from('projects')
     .update(changes)
     .eq('id', id)
-    .select()
+    .select('*, deals(*)')
     .single()
 
   if (error) throw new Error(error.message)

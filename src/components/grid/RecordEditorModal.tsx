@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Project, ProjectInsert, ProjectUpdate, ProjectStatus } from '../../types/project'
 import { COLUMN_LABELS } from '../../types/project'
+import type { Deal } from '../../types/deal'
 
 const STATUS_OPTIONS: ProjectStatus[] = ['New', 'Started', 'Done']
 const LABEL_W = 180
@@ -49,6 +50,7 @@ const EMPTY_DRAFT: ProjectInsert = {
   project_start_date: null,
   project_delivery_date: null,
   project_budget: null,
+  deal_id: null,
 }
 
 interface RecordEditorModalProps {
@@ -56,9 +58,10 @@ interface RecordEditorModalProps {
   onSave: (id: string, changes: ProjectUpdate) => void
   onAdd: (data: ProjectInsert) => void
   onClose: () => void
+  onViewDeal?: (deal: Deal) => void
 }
 
-export function RecordEditorModal({ row, onSave, onAdd, onClose }: RecordEditorModalProps) {
+export function RecordEditorModal({ row, onSave, onAdd, onClose, onViewDeal }: RecordEditorModalProps) {
   const isNew = !row
   const [draft, setDraft] = useState<ProjectInsert>(isNew ? { ...EMPTY_DRAFT } : {
     project_name: row.project_name,
@@ -67,6 +70,7 @@ export function RecordEditorModal({ row, onSave, onAdd, onClose }: RecordEditorM
     project_start_date: row.project_start_date,
     project_delivery_date: row.project_delivery_date,
     project_budget: row.project_budget,
+    deal_id: row.deal_id,
   })
   const [focused, setFocused] = useState<string | null>(null)
 
@@ -84,6 +88,7 @@ export function RecordEditorModal({ row, onSave, onAdd, onClose }: RecordEditorM
       if (draft.project_start_date !== row.project_start_date) changes.project_start_date = draft.project_start_date
       if (draft.project_delivery_date !== row.project_delivery_date) changes.project_delivery_date = draft.project_delivery_date
       if (draft.project_budget !== row.project_budget) changes.project_budget = draft.project_budget
+      if (draft.deal_id !== row.deal_id) changes.deal_id = draft.deal_id
       if (Object.keys(changes).length > 0) onSave(row.id, changes)
     }
     onClose()
@@ -154,6 +159,24 @@ export function RecordEditorModal({ row, onSave, onAdd, onClose }: RecordEditorM
               onBlur={() => setFocused(null)}
               style={inp('project_name')}
             />
+          </FieldRow>
+
+          <FieldRow label={COLUMN_LABELS.deal_id} fieldKey="deal" focused={focused}>
+            {(() => {
+              const deal = !isNew ? row?.deals ?? null : null
+              if (deal) {
+                return (
+                  <button
+                    type="button"
+                    onClick={() => onViewDeal?.(deal)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 13, fontFamily: 'var(--font-body)', color: 'var(--accent-primary)', textDecoration: 'underline' }}
+                  >
+                    {deal.deal_name}
+                  </button>
+                )
+              }
+              return <span style={{ fontSize: 13, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>—</span>
+            })()}
           </FieldRow>
 
           <FieldRow label={COLUMN_LABELS.project_topic} fieldKey="project_topic" focused={focused}>

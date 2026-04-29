@@ -11,6 +11,7 @@ function filterByStatus(rows: Project[], status: ProjectStatus | null): Project[
 function buildOptimisticRow(data: ProjectInsert): Project {
   return {
     ...data,
+    deals: null,
     id: `optimistic-${Date.now()}`,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
