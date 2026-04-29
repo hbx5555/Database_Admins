@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Project, ProjectInsert, ProjectUpdate, ProjectStatus } from '../../types/project'
 import { COLUMN_LABELS } from '../../types/project'
+import type { Deal } from '../../types/deal'
 
 const STATUS_OPTIONS: ProjectStatus[] = ['New', 'Started', 'Done']
 const LABEL_W = 180
@@ -57,9 +58,10 @@ interface RecordEditorModalProps {
   onSave: (id: string, changes: ProjectUpdate) => void
   onAdd: (data: ProjectInsert) => void
   onClose: () => void
+  onViewDeal?: (deal: Deal) => void
 }
 
-export function RecordEditorModal({ row, onSave, onAdd, onClose }: RecordEditorModalProps) {
+export function RecordEditorModal({ row, onSave, onAdd, onClose, onViewDeal }: RecordEditorModalProps) {
   const isNew = !row
   const [draft, setDraft] = useState<ProjectInsert>(isNew ? { ...EMPTY_DRAFT } : {
     project_name: row.project_name,
@@ -157,6 +159,24 @@ export function RecordEditorModal({ row, onSave, onAdd, onClose }: RecordEditorM
               onBlur={() => setFocused(null)}
               style={inp('project_name')}
             />
+          </FieldRow>
+
+          <FieldRow label={COLUMN_LABELS.deal_id} fieldKey="deal" focused={focused}>
+            {(() => {
+              const deal = !isNew ? row?.deals ?? null : null
+              if (deal) {
+                return (
+                  <button
+                    type="button"
+                    onClick={() => onViewDeal?.(deal)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 13, fontFamily: 'var(--font-body)', color: 'var(--accent-primary)', textDecoration: 'underline' }}
+                  >
+                    {deal.deal_name}
+                  </button>
+                )
+              }
+              return <span style={{ fontSize: 13, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>—</span>
+            })()}
           </FieldRow>
 
           <FieldRow label={COLUMN_LABELS.project_topic} fieldKey="project_topic" focused={focused}>
