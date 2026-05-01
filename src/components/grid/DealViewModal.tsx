@@ -104,7 +104,7 @@ export function DealViewModal({ deal, onClose }: DealViewModalProps) {
         <div style={{ width: 8, background: 'var(--foreground-secondary)', flexShrink: 0 }} />
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', background: 'var(--white)' }}>
-          <div style={{ height: 26, background: `linear-gradient(to right, var(--surface-primary) ${LABEL_W}px, #ffffff ${LABEL_W}px)` }} />
+          <div style={{ height: 26 }} />
 
           <FieldRow label={DEAL_COLUMN_LABELS.deal_name} bold>
             {renderField(deal.deal_name)}
