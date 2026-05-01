@@ -103,7 +103,7 @@ export function ContactViewModal({ contact, onClose }: ContactViewModalProps) {
         <div style={{ width: 8, background: 'var(--foreground-secondary)', flexShrink: 0 }} />
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--white)', minHeight: 0 }}>
-          <div style={{ height: 26, flexShrink: 0 }} />
+          <div style={{ height: 26, flexShrink: 0, background: `linear-gradient(to right, var(--surface-primary) ${LABEL_W}px, var(--white) ${LABEL_W}px)` }} />
 
           <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
 
