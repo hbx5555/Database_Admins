@@ -103,7 +103,7 @@ export function ContactViewModal({ contact, onClose }: ContactViewModalProps) {
         <div style={{ width: 8, background: 'var(--foreground-secondary)', flexShrink: 0 }} />
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', background: 'var(--white)' }}>
-          <div style={{ height: 26, background: `linear-gradient(to right, var(--surface-primary) ${LABEL_W}px, transparent ${LABEL_W}px)` }} />
+          <div style={{ height: 26, background: `linear-gradient(to right, var(--surface-primary) ${LABEL_W}px, #ffffff ${LABEL_W}px)` }} />
 
           <FieldRow label={CONTACT_COLUMN_LABELS.first_name} bold>
             {renderField(contact.first_name)}

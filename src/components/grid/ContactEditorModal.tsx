@@ -153,7 +153,7 @@ export function ContactEditorModal({ row, onSave, onAdd, onClose }: ContactEdito
         <div style={{ width: 8, background: 'var(--accent-primary)', flexShrink: 0 }} />
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', background: 'var(--white)' }}>
-          <div style={{ height: 26, background: `linear-gradient(to right, var(--surface-primary) ${LABEL_W}px, transparent ${LABEL_W}px)` }} />
+          <div style={{ height: 26, background: `linear-gradient(to right, var(--surface-primary) ${LABEL_W}px, #ffffff ${LABEL_W}px)` }} />
 
           {textField('first_name', true)}
           {textField('last_name')}
