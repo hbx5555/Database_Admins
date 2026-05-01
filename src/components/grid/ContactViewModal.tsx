@@ -103,7 +103,9 @@ export function ContactViewModal({ contact, onClose }: ContactViewModalProps) {
         <div style={{ width: 8, background: 'var(--foreground-secondary)', flexShrink: 0 }} />
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', background: 'var(--white)' }}>
-          <div style={{ height: 26 }} />
+          <div style={{ display: 'flex', height: 26 }}>
+            <div style={{ width: LABEL_W, flexShrink: 0, background: 'var(--surface-primary)' }} />
+          </div>
 
           <FieldRow label={CONTACT_COLUMN_LABELS.first_name} bold>
             {renderField(contact.first_name)}

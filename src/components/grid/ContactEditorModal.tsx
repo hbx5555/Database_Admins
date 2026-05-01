@@ -153,7 +153,9 @@ export function ContactEditorModal({ row, onSave, onAdd, onClose }: ContactEdito
         <div style={{ width: 8, background: 'var(--accent-primary)', flexShrink: 0 }} />
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', background: 'var(--white)' }}>
-          <div style={{ height: 26 }} />
+          <div style={{ display: 'flex', height: 26 }}>
+            <div style={{ width: LABEL_W, flexShrink: 0, background: 'var(--surface-primary)' }} />
+          </div>
 
           {textField('first_name', true)}
           {textField('last_name')}
