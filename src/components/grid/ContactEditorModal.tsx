@@ -152,8 +152,10 @@ export function ContactEditorModal({ row, onSave, onAdd, onClose }: ContactEdito
 
         <div style={{ width: 8, background: 'var(--accent-primary)', flexShrink: 0 }} />
 
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', background: 'var(--white)' }}>
-          <div style={{ height: 26 }} />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--white)', minHeight: 0 }}>
+          <div style={{ height: 26, flexShrink: 0 }} />
+
+          <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
 
           {textField('first_name', true)}
           {textField('last_name')}
@@ -178,7 +180,9 @@ export function ContactEditorModal({ row, onSave, onAdd, onClose }: ContactEdito
             </select>
           </FieldRow>
 
-          <div style={{ display: 'flex', borderTop: '1px solid var(--border-color)' }}>
+          </div>
+
+          <div style={{ display: 'flex', borderTop: '1px solid var(--border-color)', flexShrink: 0 }}>
             <div style={{ width: LABEL_W, flexShrink: 0, background: 'var(--surface-primary)' }} />
             <div style={{ flex: 1, padding: '16px 28px', display: 'flex', gap: 10, alignItems: 'center' }}>
               <button
