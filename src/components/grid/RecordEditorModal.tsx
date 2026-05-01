@@ -164,9 +164,7 @@ export function RecordEditorModal({ row, onSave, onAdd, onClose, onViewDeal }: R
         {/* Form */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', background: 'var(--white)' }}>
 
-          <div style={{ display: 'flex', height: 26 }}>
-            <div style={{ width: LABEL_W, flexShrink: 0, background: 'var(--surface-primary)' }} />
-          </div>
+          <div style={{ height: 26, background: `linear-gradient(to right, var(--surface-primary) ${LABEL_W}px, transparent ${LABEL_W}px)` }} />
 
           {/* Field rows */}
           <FieldRow label={COLUMN_LABELS.project_name} fieldKey="project_name" focused={focused} bold>
