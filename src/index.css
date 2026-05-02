@@ -1,7 +1,8 @@
 :root {
-  --surface-primary: #F5F3EE;
+  --surface-primary: #F3F1EC;
   --surface-secondary: #C8DBBC;
-  --surface-panel: #FFFBF1;
+  --surface-panel: #FFFAF0;
+  --page-background: #F2EFE7;
   --white: #FFFFFF;
   --row-hover: #EBE9E3;
 
@@ -9,8 +10,8 @@
   --foreground-secondary: #4A6B52;
   --foreground-inverse: #FFFFFF;
 
-  --accent-primary: #2D5E3A;
-  --accent-secondary: #4A8C5E;
+  --accent-primary: #305236;
+  --accent-secondary: #4C7E57;
 
   --border-color: #D4D2CC;
 
@@ -37,7 +38,7 @@
 body {
   font-family: var(--font-body);
   color: var(--foreground-primary);
-  background: var(--surface-primary);
+  background: var(--page-background);
   min-width: 1044px;
   -webkit-font-smoothing: antialiased;
 }
