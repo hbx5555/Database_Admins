@@ -1,0 +1,23 @@
+// Edit hex color values here to retheme the app.
+// Save this file and reload the page — no rebuild needed.
+{
+  "colors": {
+    // Left icon sidebar background
+    "sidebarBackground": "#305236",
+
+    // Active icon highlight in the sidebar
+    "sidebarIconActive": "#4c7e57",
+
+    // Sub-items panel background (maps to --surface-panel)
+    "panelBackground": "#fffaf0",
+
+    // Active/selected item highlight in the sub-items panel (maps to --surface-secondary)
+    "panelItemActive": "#c4d4b6",
+
+    // Main grid card surface (maps to --surface-primary)
+    "surfacePrimary": "#f3f1ec",
+
+    // Page background behind the grid card
+    "pageBackground": "#f2efe7"
+  }
+}

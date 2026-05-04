@@ -1,3 +1,5 @@
+import { parse } from 'jsonc-parser'
+
 const CSS_VAR_MAP: Record<string, string> = {
   sidebarBackground: '--accent-primary',
   sidebarIconActive: '--accent-secondary',
@@ -9,9 +11,10 @@ const CSS_VAR_MAP: Record<string, string> = {
 
 export async function loadTheme(): Promise<void> {
   try {
-    const res = await fetch('/theme.json', { cache: 'no-cache' })
+    const res = await fetch('/theme.jsonc', { cache: 'no-cache' })
     if (!res.ok) return
-    const { colors } = await res.json() as { colors: Record<string, string> }
+    const text = await res.text()
+    const { colors } = parse(text) as { colors: Record<string, string> }
     const root = document.documentElement
     for (const [key, cssVar] of Object.entries(CSS_VAR_MAP)) {
       if (colors[key]) root.style.setProperty(cssVar, colors[key])
