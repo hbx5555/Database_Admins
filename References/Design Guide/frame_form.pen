@@ -1,0 +1,231 @@
+{
+  "version": "2.11",
+  "children": [
+    {
+      "type": "rectangle",
+      "cornerRadius": 12,
+      "id": "d3g2t",
+      "x": 333,
+      "y": 1011,
+      "fill": "#CCCCCC",
+      "width": 673,
+      "height": 579
+    },
+    {
+      "type": "rectangle",
+      "cornerRadius": [
+        12,
+        0,
+        0,
+        12
+      ],
+      "id": "l1E7Q",
+      "x": 333,
+      "y": 1011,
+      "fill": "#fffbf1ff",
+      "width": 183,
+      "height": 579
+    },
+    {
+      "type": "rectangle",
+      "cornerRadius": [
+        12,
+        0,
+        0,
+        12
+      ],
+      "id": "FI365",
+      "x": 333,
+      "y": 1011,
+      "fill": "#2e5e3aff",
+      "width": 22,
+      "height": 579
+    },
+    {
+      "type": "rectangle",
+      "cornerRadius": [
+        0,
+        12,
+        12,
+        0
+      ],
+      "id": "7gqYx",
+      "x": 516,
+      "y": 1011,
+      "fill": "#ffffffff",
+      "width": 502,
+      "height": 579
+    },
+    {
+      "type": "rectangle",
+      "cornerRadius": 8,
+      "id": "bbYxm",
+      "x": 557,
+      "y": 1119,
+      "fill": "#ffffffff",
+      "width": 307,
+      "height": 43,
+      "stroke": {
+        "align": "inside",
+        "thickness": 1,
+        "fill": "#000000ff"
+      }
+    },
+    {
+      "type": "rectangle",
+      "cornerRadius": 8,
+      "id": "EOXRD",
+      "x": 557,
+      "y": 1187,
+      "fill": "#ffffffff",
+      "width": 274,
+      "height": 43,
+      "stroke": {
+        "align": "inside",
+        "thickness": 1,
+        "fill": "#000000ff"
+      }
+    },
+    {
+      "type": "rectangle",
+      "cornerRadius": 8,
+      "id": "1lQ2m",
+      "x": 557,
+      "y": 1248,
+      "fill": "#ffffffff",
+      "width": 220,
+      "height": 43,
+      "stroke": {
+        "align": "inside",
+        "thickness": 1,
+        "fill": "#000000ff"
+      }
+    },
+    {
+      "type": "text",
+      "id": "jA7UB",
+      "x": 373,
+      "y": 1131,
+      "fill": "#000000",
+      "content": "2nd Field Name",
+      "textAlign": "right",
+      "fontFamily": "Inter",
+      "fontSize": 16,
+      "fontWeight": "normal"
+    },
+    {
+      "type": "text",
+      "id": "Kfreh",
+      "x": 373,
+      "y": 1199,
+      "fill": "#000000",
+      "content": "3 rd Field Name",
+      "textAlign": "right",
+      "fontFamily": "Inter",
+      "fontSize": 16,
+      "fontWeight": "normal"
+    },
+    {
+      "type": "text",
+      "id": "rPyGG",
+      "x": 377,
+      "y": 1257,
+      "fill": "#000000",
+      "content": "4th Field Name",
+      "textAlign": "right",
+      "fontFamily": "Inter",
+      "fontSize": 16,
+      "fontWeight": "normal"
+    },
+    {
+      "type": "text",
+      "id": "5F6Dt",
+      "x": 573,
+      "y": 1131,
+      "fill": "#000000",
+      "content": "Field Value",
+      "fontFamily": "Inter",
+      "fontSize": 16,
+      "fontWeight": "600"
+    },
+    {
+      "type": "text",
+      "id": "wTvQF",
+      "x": 573,
+      "y": 1199,
+      "fill": "#000000",
+      "content": "Field Value",
+      "fontFamily": "Inter",
+      "fontSize": 16,
+      "fontWeight": "600"
+    },
+    {
+      "type": "text",
+      "id": "FsKzo",
+      "x": 573,
+      "y": 1257,
+      "fill": "#000000",
+      "content": "Field Value",
+      "fontFamily": "Inter",
+      "fontSize": 16,
+      "fontWeight": "600"
+    },
+    {
+      "type": "text",
+      "id": "n5c88",
+      "x": 565,
+      "y": 1056,
+      "fill": "#292929ff",
+      "content": "Field First Value",
+      "fontFamily": "Inter",
+      "fontSize": 24,
+      "fontWeight": "600"
+    }
+  ],
+  "variables": {
+    "accent-primary": {
+      "type": "color",
+      "value": "#2D5E3AFF"
+    },
+    "accent-secondary": {
+      "type": "color",
+      "value": "#4A8C5EFF"
+    },
+    "border-color": {
+      "type": "color",
+      "value": "#D4D2CCFF"
+    },
+    "foreground-inverse": {
+      "type": "color",
+      "value": "#FFFFFFFF"
+    },
+    "foreground-primary": {
+      "type": "color",
+      "value": "#1B3A28FF"
+    },
+    "foreground-secondary": {
+      "type": "color",
+      "value": "#4A6B52FF"
+    },
+    "row-hover": {
+      "type": "color",
+      "value": "#EBE9E3FF"
+    },
+    "surface-primary": {
+      "type": "color",
+      "value": "#F5F3EEFF"
+    },
+    "surface-secondary": {
+      "type": "color",
+      "value": "#C8DBBCFF"
+    },
+    "surface-tertiary": {
+      "type": "color",
+      "value": "#D6E4E8FF"
+    },
+    "white": {
+      "type": "color",
+      "value": "#FFFFFFFF"
+    }
+  }
+}

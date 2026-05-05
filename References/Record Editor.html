@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Record Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #e8e4dc; font-family: 'DM Sans', sans-serif; }
+  body { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 32px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accentColor": "#2f5c38",
+  "sidebarBg": "#f5f0e4",
+  "fontSize": 15,
+  "roundness": 10
+} /*EDITMODE-END*/;
+
+// Tweaks
+let tweaks = { ...TWEAK_DEFAULTS };
+try {
+  const saved = JSON.parse(localStorage.getItem('record-editor-tweaks') || '{}');
+  tweaks = { ...TWEAK_DEFAULTS, ...saved };
+} catch (e) {}
+
+// Initial record data
+const INITIAL = {
+  name: 'Meridian Supplies Co.',
+  email: 'contact@meridiansupplies.com',
+  phone: '+1 (415) 882-4401',
+  company: 'Meridian Supplies Co.',
+  status: 'active',
+  region: 'North America',
+  notes: 'Long-standing account. Prefers quarterly billing. Primary contact is Dana Reyes.'
+};
+
+const FIELDS = [
+{ key: 'email', label: 'Email', type: 'email' },
+{ key: 'phone', label: 'Phone', type: 'tel' },
+{ key: 'company', label: 'Company', type: 'text' },
+{ key: 'status', label: 'Status', type: 'select', options: ['active', 'inactive', 'prospect', 'churned'] },
+{ key: 'region', label: 'Region', type: 'text' },
+{ key: 'notes', label: 'Notes', type: 'textarea' }];
+
+
+function statusColor(s) {
+  return { active: '#2f5c38', inactive: '#888', prospect: '#7c5c20', churned: '#8b2c2c' }[s] || '#444';
+}
+
+function RecordEditor() {
+  const [record, setRecord] = React.useState(INITIAL);
+  const [draft, setDraft] = React.useState(INITIAL);
+  const [dirty, setDirty] = React.useState(false);
+  const [saved, setSaved] = React.useState(false);
+  const [errors, setErrors] = React.useState({});
+  const [focused, setFocused] = React.useState(null);
+  const [showTweaks, setShowTweaks] = React.useState(false);
+  const [cfg, setCfg] = React.useState(tweaks);
+
+  React.useEffect(() => {
+    window.addEventListener('message', (e) => {
+      if (e.data?.type === '__activate_edit_mode') setShowTweaks(true);
+      if (e.data?.type === '__deactivate_edit_mode') setShowTweaks(false);
+    });
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+  }, []);
+
+  const setTweak = (key, val) => {
+    const next = { ...cfg, [key]: val };
+    setCfg(next);
+    localStorage.setItem('record-editor-tweaks', JSON.stringify(next));
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { [key]: val } }, '*');
+  };
+
+  const isDirty = JSON.stringify(draft) !== JSON.stringify(record);
+
+  const validate = () => {
+    const e = {};
+    if (!draft.name.trim()) e.name = 'Required';
+    if (draft.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email)) e.email = 'Invalid email';
+    return e;
+  };
+
+  const handleChange = (key, val) => {
+    setDraft((d) => ({ ...d, [key]: val }));
+    setErrors((err) => {const n = { ...err };delete n[key];return n;});
+    setSaved(false);
+  };
+
+  const handleSave = () => {
+    const e = validate();
+    if (Object.keys(e).length) {setErrors(e);return;}
+    setRecord(draft);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
+  };
+
+  const handleDiscard = () => {
+    setDraft(record);
+    setErrors({});
+    setSaved(false);
+  };
+
+  const ac = cfg.accentColor;
+  const sb = cfg.sidebarBg;
+  const fs = cfg.fontSize;
+  const rnd = cfg.roundness;
+
+  const inputStyle = (key) => ({
+    width: '100%',
+    padding: '11px 14px',
+    fontSize: fs,
+    fontFamily: 'DM Sans, sans-serif',
+    fontWeight: 500,
+    border: `1.5px solid ${errors[key] ? '#c0392b' : focused === key ? ac : '#1a1a1a'}`,
+    borderRadius: rnd,
+    background: '#fff',
+    color: '#111',
+    outline: 'none',
+    transition: 'border-color 0.15s',
+    resize: 'none',
+    lineHeight: 1.5
+  });
+
+  return (
+    <div style={{
+      width: '100%', maxWidth: 860,
+      borderRadius: 16,
+      overflow: 'hidden',
+      boxShadow: '0 8px 48px rgba(0,0,0,0.13)',
+      display: 'flex',
+      background: '#fff',
+      minHeight: 580
+    }}>
+
+      {/* Green accent bar */}
+      <div style={{ width: 8, background: ac, flexShrink: 0 }} />
+
+      {/* Unified form layout */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+
+        {/* Title row — two-cell layout so cream extends top */}
+        <div style={{ display: 'flex', borderBottom: '1px solid #eee' }}>
+          <div style={{ width: 220, flexShrink: 0, background: sb }} />
+          <div style={{ flex: 1, background: '#fff', padding: '36px 48px 28px' }}>
+            <input
+              value={draft.name}
+              onChange={(e) => handleChange('name', e.target.value)}
+              onFocus={() => setFocused('name')}
+              onBlur={() => setFocused(null)}
+              style={{
+                fontSize: 26,
+                fontFamily: 'DM Serif Display, serif',
+                fontWeight: 400,
+                color: '#111',
+                border: 'none',
+                borderBottom: `2px solid ${focused === 'name' ? ac : errors.name ? '#c0392b' : 'transparent'}`,
+                outline: 'none',
+                background: 'transparent',
+                width: '100%',
+                paddingBottom: 4,
+                transition: 'border-color 0.15s'
+              }} />
+            {errors.name && <div style={{ color: '#c0392b', fontSize: 11, marginTop: 4 }}>{errors.name}</div>}
+          </div>
+        </div>
+
+        {/* Field rows — label left (cream), input right (white) */}
+        <div style={{ flex: 1 }}>
+          {FIELDS.map((f) => {
+            const isTextarea = f.type === 'textarea';
+            const rowPadV = isTextarea ? 16 : 0;
+            return (
+              <div key={f.key} style={{ display: 'flex', borderBottom: '1px solid #eee' }}>
+                {/* Label cell */}
+                <div style={{
+                  width: 220, flexShrink: 0,
+                  background: sb,
+                  padding: `${rowPadV || 0}px 24px`,
+                  display: 'flex',
+                  alignItems: isTextarea ? 'flex-start' : 'center',
+                  minHeight: isTextarea ? 'auto' : 52,
+                  paddingTop: isTextarea ? 18 : 0, justifyContent: "flex-end"
+                }}>
+                  <span style={{
+                    fontSize: fs - 1,
+                    color: focused === f.key ? ac : errors[f.key] ? '#c0392b' : '#555',
+                    fontWeight: focused === f.key ? 600 : 400,
+                    transition: 'color 0.15s',
+                    display: 'flex', alignItems: 'center', gap: 5
+                  }}>
+                    {errors[f.key] && <span style={{ color: '#c0392b', fontSize: 12, lineHeight: 1 }}>!</span>}
+                    {f.label}
+                  </span>
+                </div>
+
+                {/* Input cell */}
+                <div style={{
+                  flex: 1, background: '#fff',
+                  padding: isTextarea ? '12px 48px' : '8px 48px',
+                  display: 'flex', alignItems: 'center'
+                }}>
+                  <div style={{ width: '100%' }}>
+                    {f.type === 'select' ?
+                    <select
+                      value={draft[f.key]}
+                      onChange={(e) => handleChange(f.key, e.target.value)}
+                      onFocus={() => setFocused(f.key)}
+                      onBlur={() => setFocused(null)}
+                      style={{
+                        ...inputStyle(f.key),
+                        appearance: 'none',
+                        cursor: 'pointer',
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")`,
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'right 14px center',
+                        paddingRight: 36,
+                        color: statusColor(draft[f.key]),
+                        fontWeight: 600
+                      }}>
+                      
+                        {f.options.map((o) =>
+                      <option key={o} value={o} style={{ color: statusColor(o) }}>
+                            {o.charAt(0).toUpperCase() + o.slice(1)}
+                          </option>
+                      )}
+                      </select> :
+                    f.type === 'textarea' ?
+                    <textarea
+                      rows={3}
+                      value={draft[f.key]}
+                      onChange={(e) => handleChange(f.key, e.target.value)}
+                      onFocus={() => setFocused(f.key)}
+                      onBlur={() => setFocused(null)}
+                      style={inputStyle(f.key)} /> :
+
+
+                    <input
+                      type={f.type}
+                      value={draft[f.key]}
+                      onChange={(e) => handleChange(f.key, e.target.value)}
+                      onFocus={() => setFocused(f.key)}
+                      onBlur={() => setFocused(null)}
+                      style={inputStyle(f.key)} />
+
+                    }
+                    {errors[f.key] && <div style={{ color: '#c0392b', fontSize: 11, marginTop: 3 }}>{errors[f.key]}</div>}
+                  </div>
+                </div>
+              </div>);
+
+          })}
+        </div>
+
+        {/* Action bar — two-cell layout, button sits under input column */}
+        <div style={{ display: 'flex', borderTop: '1px solid #eee' }}>
+          <div style={{ width: 220, flexShrink: 0, background: sb }} />
+          <div style={{
+            flex: 1, background: '#fff',
+            padding: '20px 48px',
+            display: 'flex', gap: 10, alignItems: 'center'
+          }}>
+          <button
+              onClick={handleSave}
+              style={{
+                padding: '9px 22px', borderRadius: rnd,
+                background: isDirty ? 'rgb(46, 92, 56)' : 'rgb(94, 94, 94)',
+                border: 'none', cursor: isDirty ? 'pointer' : 'default',
+                fontSize: fs - 1, fontWeight: 600, fontFamily: 'DM Sans, sans-serif',
+                transition: 'background 0.2s, transform 0.1s', textAlign: "justify", color: "rgb(252, 252, 252)"
+              }}
+              onMouseDown={(e) => isDirty && (e.currentTarget.style.transform = 'scale(0.97)')}
+              onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}>Save Changes
+
+
+          </button>
+
+          {isDirty &&
+            <button
+              onClick={handleDiscard}
+              style={{
+                padding: '9px 18px', borderRadius: rnd,
+                background: 'transparent', color: '#666',
+                border: '1.5px solid #ddd', cursor: 'pointer',
+                fontSize: fs - 1, fontWeight: 500, fontFamily: 'DM Sans, sans-serif'
+              }}>
+            
+              Discard
+            </button>
+            }
+
+          {saved &&
+            <div style={{
+              marginLeft: 8, display: 'flex', alignItems: 'center', gap: 6,
+              color: ac, fontSize: fs - 1, fontWeight: 500,
+              animation: 'fadeIn 0.2s ease'
+            }}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M2 7l3.5 3.5L12 4" stroke={ac} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Saved
+            </div>
+            }
+
+          <div style={{ flex: 1 }} />
+
+          {isDirty &&
+            <div style={{ fontSize: 12, color: '#aaa', fontStyle: 'italic' }}>Unsaved changes</div>
+            }
+          </div>
+        </div>
+      </div>
+
+      {/* Tweaks panel */}
+      {showTweaks &&
+      <div style={{
+        position: 'fixed', bottom: 24, right: 24,
+        background: '#fff', borderRadius: 12, padding: 20,
+        boxShadow: '0 4px 32px rgba(0,0,0,0.15)',
+        width: 240, zIndex: 999,
+        fontFamily: 'DM Sans, sans-serif', fontSize: 13
+      }}>
+          <div style={{ fontWeight: 700, marginBottom: 16, color: '#111' }}>Tweaks</div>
+          <label style={{ display: 'block', marginBottom: 12 }}>
+            <span style={{ color: '#555', display: 'block', marginBottom: 4 }}>Accent color</span>
+            <input type="color" value={cfg.accentColor}
+          onChange={(e) => setTweak('accentColor', e.target.value)}
+          style={{ width: '100%', height: 32, borderRadius: 6, border: '1px solid #ddd', cursor: 'pointer' }} />
+          
+          </label>
+          <label style={{ display: 'block', marginBottom: 12 }}>
+            <span style={{ color: '#555', display: 'block', marginBottom: 4 }}>Sidebar background</span>
+            <input type="color" value={cfg.sidebarBg}
+          onChange={(e) => setTweak('sidebarBg', e.target.value)}
+          style={{ width: '100%', height: 32, borderRadius: 6, border: '1px solid #ddd', cursor: 'pointer' }} />
+          
+          </label>
+          <label style={{ display: 'block', marginBottom: 12 }}>
+            <span style={{ color: '#555', display: 'block', marginBottom: 4 }}>Font size: {cfg.fontSize}px</span>
+            <input type="range" min="12" max="18" step="1" value={cfg.fontSize}
+          onChange={(e) => setTweak('fontSize', +e.target.value)}
+          style={{ width: '100%' }} />
+          
+          </label>
+          <label style={{ display: 'block' }}>
+            <span style={{ color: '#555', display: 'block', marginBottom: 4 }}>Input roundness: {cfg.roundness}px</span>
+            <input type="range" min="4" max="20" step="2" value={cfg.roundness}
+          onChange={(e) => setTweak('roundness', +e.target.value)}
+          style={{ width: '100%' }} />
+          
+          </label>
+        </div>
+      }
+
+      <style>{`
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
+        select option { font-weight: 500; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+      `}</style>
+    </div>);
+
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<RecordEditor />);
+</script>
+</body>
+</html>

@@ -9,6 +9,15 @@
 # Build output
 dist/
 node_modules/
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+
+# Claude Code local settings
+.claude/
+
+# Parcel cache
+.parcel-cache/
 
 # macOS system files
 .DS_Store

@@ -2,8 +2,8 @@
 // Save this file and reload the page — no rebuild needed.
 {
   "colors": {
-    // Left icon sidebar background
-    "sidebarBackground": "#305236",
+    // Left icon sidebar background. (Green: #305236. Black: )
+    "sidebarBackground": "#6638f0",
 
     // Active icon highlight in the sidebar
     "sidebarIconActive": "#4c7e57",
@@ -17,7 +17,7 @@
     // Main grid card surface (maps to --surface-primary)
     "surfacePrimary": "#f3f1ec",
 
-    // Page background behind the grid card
+    // Page background behind the grid card - default: #f2efe7
     "pageBackground": "#f2efe7"
   }
 }
