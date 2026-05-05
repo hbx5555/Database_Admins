@@ -367,7 +367,7 @@ export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact, on
             </select>
           </FieldRow>
 
-          {!isNew && row.status === 'Signed' && (
+          {!isNew && draft.status === 'Signed' && (
             <FieldRow label="Project" fieldKey="project" focused={focused}>
               <button
                 type="button"
