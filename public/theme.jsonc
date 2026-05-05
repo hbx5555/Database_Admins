@@ -6,13 +6,13 @@
     "sidebarBackground": "#6638f0",
 
     // Active icon highlight in the sidebar
-    "sidebarIconActive": "#4c7e57",
+    "sidebarIconActive": "#967DFE",
 
     // Sub-items panel background (maps to --surface-panel)
     "panelBackground": "#fffaf0",
 
     // Active/selected item highlight in the sub-items panel (maps to --surface-secondary)
-    "panelItemActive": "#c4d4b6",
+    "panelItemActive": "#CDC2FD",
 
     // Main grid card surface (maps to --surface-primary)
     "surfacePrimary": "#f3f1ec",
