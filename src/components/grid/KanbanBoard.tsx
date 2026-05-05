@@ -61,7 +61,7 @@ function CardContent<T extends { id: string }>({
         </div>
         {visibleFields.map(field => (
           <div key={String(field)} style={{
-            fontFamily: 'var(--font-body)', fontSize: 11,
+            fontFamily: 'var(--font-body)', fontSize: 13,
             color: 'var(--foreground-secondary)', lineHeight: 1.5, marginTop: 7,
           }}>
             <span style={{ fontWeight: 500 }}>{columnLabels[String(field)] ?? String(field)}: </span>
@@ -181,12 +181,12 @@ function KanbanLane<T extends { id: string }, TStatus extends string>({
           display: 'inline-block', padding: '2px 10px',
           borderRadius: 'var(--radius-pill)',
           background: colors.bg, color: colors.text,
-          fontSize: 12, fontFamily: 'var(--font-captions)', fontWeight: 600,
+          fontSize: 13, fontFamily: 'var(--font-captions)', fontWeight: 600,
           lineHeight: '20px', whiteSpace: 'nowrap',
         }}>
           {status}
         </span>
-        <span style={{ fontFamily: 'var(--font-captions)', fontSize: 12, color: 'var(--foreground-secondary)' }}>
+        <span style={{ fontFamily: 'var(--font-captions)', fontSize: 13, color: 'var(--foreground-secondary)' }}>
           {cards.length}
         </span>
       </div>
@@ -220,7 +220,7 @@ function KanbanLane<T extends { id: string }, TStatus extends string>({
             height: 56, border: '2px dashed var(--border-color)',
             borderRadius: CARD_RADIUS,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)', fontSize: 12,
+            color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)', fontSize: 13,
           }}>
             Drop here
           </div>
@@ -288,7 +288,7 @@ export function KanbanBoard<T extends { id: string }, TStatus extends string>({
           <div style={{
             padding: '6px 16px', background: '#FFF8E7',
             borderBottom: '1px solid var(--border-color)',
-            fontFamily: 'var(--font-body)', fontSize: 12, color: '#856404', flexShrink: 0,
+            fontFamily: 'var(--font-body)', fontSize: 13, color: '#856404', flexShrink: 0,
           }}>
             {unassignedCount} record{unassignedCount > 1 ? 's' : ''} without a status are not shown — set a status in grid view to include them.
           </div>

@@ -29,7 +29,7 @@ const btnBase: CSSProperties = {
   color: 'var(--foreground-primary)',
   cursor: 'pointer',
   fontFamily: 'var(--font-captions)',
-  fontSize: 12,
+  fontSize: 13,
 }
 
 export function GridStatusBar({ pagination, onPageChange }: GridStatusBarProps) {
@@ -49,7 +49,7 @@ export function GridStatusBar({ pagination, onPageChange }: GridStatusBarProps) 
       borderTop: '1px solid var(--border-color)',
       borderRadius: '0 0 var(--radius-lg) var(--radius-lg)',
     }}>
-      <span style={{ fontFamily: 'var(--font-captions)', fontSize: 12, color: 'var(--foreground-secondary)' }}>
+      <span style={{ fontFamily: 'var(--font-captions)', fontSize: 13, color: 'var(--foreground-secondary)' }}>
         {total === 0 ? 'No records' : `Showing ${start}–${end} of ${total} records`}
       </span>
 
@@ -64,7 +64,7 @@ export function GridStatusBar({ pagination, onPageChange }: GridStatusBarProps) 
 
         {getPageWindow(page, totalPages).map((p, i) =>
           p === null ? (
-            <span key={`ellipsis-${i}`} style={{ padding: '0 4px', color: 'var(--foreground-secondary)', fontSize: 12 }}>…</span>
+            <span key={`ellipsis-${i}`} style={{ padding: '0 4px', color: 'var(--foreground-secondary)', fontSize: 13 }}>…</span>
           ) : (
             <button
               key={p}

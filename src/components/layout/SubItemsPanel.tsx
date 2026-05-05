@@ -62,7 +62,7 @@ export function SubItemsPanel({
           <div style={{ fontFamily: 'var(--font-headings)', fontSize: 16, fontWeight: 700, color: 'var(--foreground-primary)' }}>
             {VIEW_LABELS[activeView]}
           </div>
-          <div style={{ fontFamily: 'var(--font-captions)', fontSize: 12, color: 'var(--foreground-secondary)' }}>
+          <div style={{ fontFamily: 'var(--font-captions)', fontSize: 13, color: 'var(--foreground-secondary)' }}>
             {totalCount.toLocaleString()}
           </div>
         </div>

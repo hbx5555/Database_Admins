@@ -15,7 +15,7 @@ export function RolePill({ status }: RolePillProps) {
       borderRadius: 'var(--radius-pill)',
       backgroundColor: bg,
       color: text,
-      fontSize: 12,
+      fontSize: 13,
       fontFamily: 'var(--font-captions)',
       fontWeight: 500,
       lineHeight: '20px',

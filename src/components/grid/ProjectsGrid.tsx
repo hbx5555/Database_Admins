@@ -339,7 +339,7 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={e => e.stopPropagation()}
-                style={{ display: 'block', fontSize: 12, color: 'var(--accent-primary)', textDecoration: 'underline', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}
+                style={{ display: 'block', fontSize: 13, color: 'var(--accent-primary)', textDecoration: 'underline', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}
               >
                 {rowData.spec_filename}
               </a>
@@ -349,12 +349,12 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
         return (
           <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%' }}>
             {isOptimistic ? (
-              <span style={{ fontSize: 11, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>Save first</span>
+              <span style={{ fontSize: 13, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>Save first</span>
             ) : (
               <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}
                 onMouseDown={e => e.nativeEvent.stopImmediatePropagation()}>
                 <span className="material-symbols-outlined" style={{ fontSize: 14, color: 'var(--foreground-secondary)' }}>upload_file</span>
-                <span style={{ fontSize: 12, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>Upload</span>
+                <span style={{ fontSize: 13, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>Upload</span>
                 <input
                   type="file"
                   style={{ display: 'none' }}
@@ -408,7 +408,7 @@ export function ProjectsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
     <div ref={wrapperRef} onDoubleClick={handleDoubleClick} style={{ flex: 1, overflow: 'auto' }}>
       <style>{`
         .dsg-container { font-family: var(--font-body); font-size: 13px; border: none !important; }
-        .dsg-cell-header { background: var(--surface-primary) !important; font-size: 12px; font-weight: 600; color: var(--foreground-primary); font-family: var(--font-body); }
+        .dsg-cell-header { background: var(--surface-primary) !important; font-size: 13px; font-weight: 600; color: var(--foreground-primary); font-family: var(--font-body); }
         .dsg-cell-header-container { width: 100%; height: 100%; padding: 0; display: flex; align-items: center; line-height: normal; overflow: visible; }
         .dsg-row:hover .dsg-cell { background: var(--row-hover) !important; }
         .checkbox-cell { padding: 0 !important; }

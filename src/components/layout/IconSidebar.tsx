@@ -53,7 +53,7 @@ export function IconSidebar({ activeView, onSelectView, onTogglePanel }: IconSid
         </button>
         <button
           aria-label="User profile"
-          style={{ width: 32, height: 32, borderRadius: 'var(--radius-round)', background: 'var(--accent-secondary)', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontFamily: 'var(--font-captions)', fontWeight: 600, cursor: 'pointer' }}
+          style={{ width: 32, height: 32, borderRadius: 'var(--radius-round)', background: 'var(--accent-secondary)', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontFamily: 'var(--font-captions)', fontWeight: 600, cursor: 'pointer' }}
         >
           HD
         </button>

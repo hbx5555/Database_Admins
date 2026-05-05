@@ -22,7 +22,7 @@ function FieldRow({ label, fieldKey, focused, bold, children }: FieldRowProps) {
         padding: '0 20px', minHeight: 52,
       }}>
         <span style={{
-          fontSize: 12, fontFamily: 'var(--font-body)',
+          fontSize: 13, fontFamily: 'var(--font-body)',
           color: focused === fieldKey ? 'var(--accent-primary)' : 'var(--foreground-secondary)',
           fontWeight: bold || focused === fieldKey ? 700 : 400,
           transition: 'color 0.15s',

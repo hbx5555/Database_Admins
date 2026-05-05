@@ -26,7 +26,7 @@ function FieldRow({ label, fieldKey, focused, bold, align = 'center', children }
         padding: align === 'start' ? '14px 20px 0' : '0 20px', minHeight: 52,
       }}>
         <span style={{
-          fontSize: 12, fontFamily: 'var(--font-body)',
+          fontSize: 13, fontFamily: 'var(--font-body)',
           color: focused === fieldKey ? 'var(--accent-primary)' : 'var(--foreground-secondary)',
           fontWeight: bold || focused === fieldKey ? 700 : 400,
           transition: 'color 0.15s',
@@ -233,7 +233,7 @@ export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact, on
 
           <FieldRow label={DEAL_COLUMN_LABELS.proposal_filename} fieldKey="proposal_filename" focused={focused}>
             {isNew ? (
-              <span style={{ fontSize: 12, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>
+              <span style={{ fontSize: 13, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>
                 Save the deal first to attach a proposal
               </span>
             ) : uploading ? (
@@ -248,7 +248,7 @@ export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact, on
                 <button
                   type="button"
                   onClick={() => { set('proposal_url', null); set('proposal_filename', null) }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground-secondary)', fontSize: 12, fontFamily: 'var(--font-body)', flexShrink: 0 }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground-secondary)', fontSize: 13, fontFamily: 'var(--font-body)', flexShrink: 0 }}
                 >
                   Remove
                 </button>
@@ -258,7 +258,7 @@ export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact, on
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  style={{ padding: '6px 14px', borderRadius: 'var(--radius-md)', background: 'transparent', border: '1.5px solid var(--border-color)', cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-body)', color: 'var(--foreground-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}
+                  style={{ padding: '6px 14px', borderRadius: 'var(--radius-md)', background: 'transparent', border: '1.5px solid var(--border-color)', cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font-body)', color: 'var(--foreground-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: 14 }}>upload_file</span>
                   Choose file
@@ -285,7 +285,7 @@ export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact, on
                   }}
                 />
                 {uploadError && (
-                  <span style={{ fontSize: 12, color: '#C0392B', fontFamily: 'var(--font-body)' }}>{uploadError}</span>
+                  <span style={{ fontSize: 13, color: '#C0392B', fontFamily: 'var(--font-body)' }}>{uploadError}</span>
                 )}
               </div>
             )}
@@ -293,7 +293,7 @@ export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact, on
 
           <FieldRow label={DEAL_COLUMN_LABELS.contract_filename} fieldKey="contract_filename" focused={focused}>
             {isNew ? (
-              <span style={{ fontSize: 12, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>
+              <span style={{ fontSize: 13, color: 'var(--foreground-secondary)', fontFamily: 'var(--font-body)' }}>
                 Save the deal first to attach a contract
               </span>
             ) : uploadingContract ? (
@@ -308,7 +308,7 @@ export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact, on
                 <button
                   type="button"
                   onClick={() => { set('contract_url', null); set('contract_filename', null) }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground-secondary)', fontSize: 12, fontFamily: 'var(--font-body)', flexShrink: 0 }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--foreground-secondary)', fontSize: 13, fontFamily: 'var(--font-body)', flexShrink: 0 }}
                 >
                   Remove
                 </button>
@@ -318,7 +318,7 @@ export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact, on
                 <button
                   type="button"
                   onClick={() => contractFileInputRef.current?.click()}
-                  style={{ padding: '6px 14px', borderRadius: 'var(--radius-md)', background: 'transparent', border: '1.5px solid var(--border-color)', cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-body)', color: 'var(--foreground-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}
+                  style={{ padding: '6px 14px', borderRadius: 'var(--radius-md)', background: 'transparent', border: '1.5px solid var(--border-color)', cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font-body)', color: 'var(--foreground-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: 14 }}>upload_file</span>
                   Choose file
@@ -345,7 +345,7 @@ export function DealEditorModal({ row, onSave, onAdd, onClose, onViewContact, on
                   }}
                 />
                 {uploadErrorContract && (
-                  <span style={{ fontSize: 12, color: '#C0392B', fontFamily: 'var(--font-body)' }}>{uploadErrorContract}</span>
+                  <span style={{ fontSize: 13, color: '#C0392B', fontFamily: 'var(--font-body)' }}>{uploadErrorContract}</span>
                 )}
               </div>
             )}

@@ -20,7 +20,7 @@ function FieldRow({ label, bold, children }: FieldRowProps) {
         padding: '0 20px', minHeight: 52,
       }}>
         <span style={{
-          fontSize: 12, fontFamily: 'var(--font-body)',
+          fontSize: 13, fontFamily: 'var(--font-body)',
           color: 'var(--foreground-secondary)',
           fontWeight: bold ? 700 : 400,
         }}>
@@ -50,7 +50,7 @@ function renderStatus(status: DealStatus | null) {
     <span style={{
       padding: '2px 10px',
       borderRadius: 'var(--radius-pill)',
-      fontSize: 12, fontFamily: 'var(--font-captions)', fontWeight: 500,
+      fontSize: 13, fontFamily: 'var(--font-captions)', fontWeight: 500,
       background: colors.bg, color: colors.text,
     }}>
       {status}

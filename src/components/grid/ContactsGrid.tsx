@@ -152,7 +152,7 @@ export function ContactsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
         return (
           <div style={{ padding: '0 8px', display: 'flex', alignItems: 'center', height: '100%' }}>
             {rowData.status
-              ? <span style={{ display: 'inline-block', padding: '2px 10px', borderRadius: 'var(--radius-pill)', backgroundColor: CONTACT_STATUS_COLORS[rowData.status].bg, color: CONTACT_STATUS_COLORS[rowData.status].text, fontSize: 12, fontFamily: 'var(--font-captions)', fontWeight: 500, lineHeight: '20px', whiteSpace: 'nowrap' }}>{rowData.status}</span>
+              ? <span style={{ display: 'inline-block', padding: '2px 10px', borderRadius: 'var(--radius-pill)', backgroundColor: CONTACT_STATUS_COLORS[rowData.status].bg, color: CONTACT_STATUS_COLORS[rowData.status].text, fontSize: 13, fontFamily: 'var(--font-captions)', fontWeight: 500, lineHeight: '20px', whiteSpace: 'nowrap' }}>{rowData.status}</span>
               : <span style={{ color: 'var(--foreground-secondary)' }}>—</span>
             }
           </div>
@@ -198,7 +198,7 @@ export function ContactsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
     <div ref={wrapperRef} onDoubleClick={handleDoubleClick} style={{ flex: 1, overflow: 'auto' }}>
       <style>{`
         .dsg-container { font-family: var(--font-body); font-size: 13px; border: none !important; }
-        .dsg-cell-header { background: var(--surface-primary) !important; font-size: 12px; font-weight: 600; color: var(--foreground-primary); font-family: var(--font-body); }
+        .dsg-cell-header { background: var(--surface-primary) !important; font-size: 13px; font-weight: 600; color: var(--foreground-primary); font-family: var(--font-body); }
         .dsg-cell-header-container { width: 100%; height: 100%; padding: 0; display: flex; align-items: center; line-height: normal; overflow: visible; }
         .dsg-row:hover .dsg-cell { background: var(--row-hover) !important; }
         .checkbox-cell { padding: 0 !important; }
