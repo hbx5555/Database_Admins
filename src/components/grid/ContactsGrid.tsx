@@ -198,6 +198,7 @@ export function ContactsGrid({ rows, onRowChange, selectedIds, onToggleRow, onEd
     <div ref={wrapperRef} onDoubleClick={handleDoubleClick} style={{ flex: 1, overflow: 'auto' }}>
       <style>{`
         .dsg-container { font-family: var(--font-body); font-size: 13px; border: none !important; }
+        .dsg-input { font-size: 13px !important; font-family: var(--font-body) !important; }
         .dsg-cell-header { background: var(--surface-primary) !important; font-size: 13px; font-weight: 600; color: var(--foreground-primary); font-family: var(--font-body); }
         .dsg-cell-header-container { width: 100%; height: 100%; padding: 0; display: flex; align-items: center; line-height: normal; overflow: visible; }
         .dsg-row:hover .dsg-cell { background: var(--row-hover) !important; }
